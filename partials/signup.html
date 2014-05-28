@@ -1,0 +1,18 @@
+<div class="spinner" ng-show="loading"></div>
+<p ng-hide="loading">
+  <form ng-submit="signUpSubmit()" name="signup">
+    <label for="login">Login: </label>
+    <input name="login" type="text" ng-model="login" required/>
+    <br/>
+    <label for="password">Password: </label>
+    <input name="password" type="password" ng-model="password" required/>
+    <br/>
+    <label for="password2">Confirm password: </label>
+    <input name="password2" type="password" ng-model="password2" required/>
+    <br/>
+    <label for="publicName">Public name (optional): </label>
+    <input name="publicName" type="text" ng-model="publicName"/>
+    <br/>
+    <button type="submit">Submit</button>
+  </form>
+</p>
