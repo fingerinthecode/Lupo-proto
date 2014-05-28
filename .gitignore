@@ -1,2 +1,9 @@
-packages/**
+/node_modules/
+/packages/
+*.*~
 .kansorc
+Thumb.db
+.DS_Store
+/static/vendor/*
+/static/compress/*
+/static/js/main.js

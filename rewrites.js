@@ -1,0 +1,16 @@
+module.exports = [
+  {from: '/js/*',              to: 'static/compress/js/*'},
+  {from: '/images/*',          to: 'static/compress/images/*'},
+  {from: '/css/*',             to: 'static/compress/css/*'},
+  {from: '/font/*',            to: 'static/font/*'},
+  {from: '/partials/*',        to: 'partials/*'},
+  {from: '/vendor/*',          to: 'static/compress/vendor/*'},
+  {from: '/favicon.ico',       to: 'static/compress/images/favicon.ico'},
+  {from: '/',                  to: 'partials/index.html'},
+  {from: '/index.html',        to: 'partials/index.html'},
+  {from: '/:db/:id',           to: '../../../:db/:id'},
+  {from: '/:id',               to: '../../:id'},
+  {from: '/:db/_design/:dd/*', to: '../../../:db/_design/:dd/*'},
+  {from: '/_design/:dd/*',     to: '../../_design/:dd/*'},
+  {from: '/:db/:doc/:att',     to: '../../../:db/:doc/:att'},
+]

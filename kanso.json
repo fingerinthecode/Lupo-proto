@@ -2,7 +2,7 @@
   "name": "proto",
   "version": "0.0.1",
   "description": "prototype of Lupo",
-  "load": "src/proto/app",
+  "load": "app",
   "modules": ["src"],
   "attachments": ["static", "partials"],
   "shell": [
