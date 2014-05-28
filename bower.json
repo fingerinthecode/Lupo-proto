@@ -1,0 +1,30 @@
+{
+  "name": "proto",
+  "version": "0.0.1",
+  "homepage": "https://github.com/LupoLibero/Lupo-proto",
+  "authors": [
+    "Sylvain Duchesne",
+    "Da Silva Jonathan"
+  ],
+  "description": "Prototype of Lupo",
+  "moduleType": [
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "Lupo",
+    "Libero",
+    "LupoLibero",
+    "Cloud",
+    "Privacy"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "packages",
+    "static/vendor",
+    "test",
+    "tests"
+  ]
+}

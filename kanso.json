@@ -1,0 +1,20 @@
+{
+  "name": "proto",
+  "version": "0.0.1",
+  "description": "prototype of Lupo",
+  "load": "src/proto/app",
+  "modules": ["src"],
+  "attachments": ["static", "partials"],
+  "shell": [
+    "grunt compile"
+  ],
+  "dependencies": {
+    "properties": null,
+    "modules": null,
+    "attachments": null,
+    "base64": null,
+    "couchtypes": null,
+    "blocking-multi-shell": null,
+    "md5": null
+  }
+}
