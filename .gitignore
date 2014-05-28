@@ -1,9 +1,8 @@
-/node_modules/
-/packages/
-*.*~
+.sass-cache/**
+packages/**
+node_modules/**
 .kansorc
-Thumb.db
-.DS_Store
-/static/vendor/*
-/static/compress/*
-/static/js/main.js
+static/js/**
+static/css/**
+*.*~
+static/vendor/**

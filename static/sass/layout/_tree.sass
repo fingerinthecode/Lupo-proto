@@ -1,0 +1,31 @@
+.tree
+  height: 100%
+  width: $tree-width
+  padding: $tree-padding
+
+  border-right: $tree-border-size outset $tree-border-color
+
+.tree-element
+  margin-left: $tree-indent
+  margin-top:  $tree-element-spacing
+
+.tree-element-directory-close:before
+  content: ''
+  float: left
+
+  font-family: 'icon'
+  font-style: normal
+  font-size: 14px
+
+.tree-element-directory-open:before
+  content: ''
+  float: left
+
+  font-family: 'icon'
+  font-size: 14px
+  font-style: normal
+
+  +rotate(90deg)
+
+.tree>.tree-element
+  margin-top: $tree-padding

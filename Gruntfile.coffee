@@ -5,6 +5,15 @@ module.exports = (grunt) ->
     watch: {
       options:
         livereload: true
+      sass: {
+        files: [
+          './static/sass/{,*/}*.sass'
+          './partials/{,*/}*.html'
+        ]
+        tasks: [
+          'compass'
+        ]
+      }
       all: {
         files: [
           './partials/{,*/}*.html'
@@ -13,6 +22,19 @@ module.exports = (grunt) ->
         tasks: [
           'shell:kansoPush'
         ]
+      }
+    }
+    compass: {
+      dist: {
+        options:
+          sassDir:   './static/sass/'
+          cssDir:    './static/css/'
+          imagesDir: './static/img/'
+          javascriptsDir: './static/js/'
+          fontsDir: 'static/fonts/'
+          outputStyle: 'expanded'
+          relativeAssets: true
+          watch: false
       }
     }
     concat: {
@@ -111,4 +133,4 @@ module.exports = (grunt) ->
     'shell:kansoCreate'
     'shell:kansoInit'
     'shell:kansoPush'
-  ]
+  ])
