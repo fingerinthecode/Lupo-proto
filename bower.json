@@ -26,5 +26,9 @@
     "static/vendor",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "sjcl": "bitwiseshiftleft/sjcl",
+    "jsencrypt": "travist/jsencrypt"
+  }
 }
