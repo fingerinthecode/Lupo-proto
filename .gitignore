@@ -1,2 +1,6 @@
+.sass-cache/**
 packages/**
+node_modules/**
 .kansorc
+static/js/**
+static/css/**
