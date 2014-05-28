@@ -29,6 +29,7 @@
   ],
   "dependencies": {
     "sjcl": "bitwiseshiftleft/sjcl",
+    "sjcl": "bitwiseshiftleft/sjcl",
     "jsencrypt": "travist/jsencrypt"
   }
 }
