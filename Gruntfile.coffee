@@ -122,6 +122,7 @@ module.exports = (grunt) ->
   ])
 
   grunt.registerTask('compile', [
+    'compass'
     'copy'
     'coffee'
     'concat'

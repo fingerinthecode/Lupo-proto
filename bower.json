@@ -28,8 +28,14 @@
     "tests"
   ],
   "dependencies": {
+    "angular": "1.2.16",
+    "angular-couchdb": "LupoLibero/ngCouch",
+    "angular-ui-router": "~0.2.10",
+    "angular-resource": "~1.2.14",
     "sjcl": "bitwiseshiftleft/sjcl",
-    "sjcl": "bitwiseshiftleft/sjcl",
-    "jsencrypt": "travist/jsencrypt"
+    "jsencrypt": "travist/jsencrypt",
+    "angular-pouchdb": "~0.1.5",
+    "assert": "Jxck/assert",
+    "angular-spinner": "~0.4.0"
   }
 }
