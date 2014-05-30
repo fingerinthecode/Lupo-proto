@@ -1,6 +1,6 @@
 angular.module('fileManager').
 controller('FileManagerCtrl', ($scope, $stateParams, $state, session, fileManager, account) ->
-  account.signIn("i", "i").then =>
+  account.signIn("user", "user").then =>
     assert(session.isConnected(), "must be connected")
     console.log session.getRootFolder(), session
     fileManager.getContent(session.getRootFolder()).then (content) =>
