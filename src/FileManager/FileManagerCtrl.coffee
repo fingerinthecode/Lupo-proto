@@ -1,5 +1,8 @@
 angular.module('fileManager').
-controller('FileManagerCtrl', ($scope, session) ->
+controller('FileManagerCtrl', ($scope, session, fileManager) ->
+
+  $scope.root = fileManager.getContent(session.getRootFolder)
+
   $scope.fileTree = [
     {
       name: "Music",

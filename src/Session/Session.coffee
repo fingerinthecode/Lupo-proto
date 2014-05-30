@@ -1,79 +1,41 @@
 angular.module('session')
-.factory 'session', (crypto, LocalOrRemoteDoc) ->
+.factory 'session', () ->
   {
-    getMainDocId: (login, password) ->
-      sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(login + password))[0..32]
+    user: {
+      public: {}
+      private: {}
+    }
 
     getMainPublicKey: ->
-      this.mainPublicKey
+      this.user.private.publicKey
 
     getMainPrivateKey: ->
-      this.mainPrivateKey
+      this.user.private.privateKey
 
     getMasterKey: ->
-      this.masterKey
+      this.user.private.masterKey
+
+    getRootFolder: ->
+      this.user.private.rootFolder
 
     isConnected: ->
-      this.login?
-    registerSession: (login, username, masterKey, privateKey, publicKey) ->
-      this.login = login
-      this.username = username
-      this.masterKey = masterKey
-      this.mainPrivateKey = privateKey
-      this.mainPublicKey = publicKey
+      this.user.private.login?
 
-    signUp: (login, password, publicName) ->
-      username = if publicName? then publicName else login
-      privateUserDoc = {}
+    registerSession: (login, username, masterKey, privateKey, publicKey, rootFolder) ->
+      this.user.public.username    = username
+      this.user.private.login      = login
+      this.user.private.masterKey  = masterKey
+      this.user.private.privateKey = privateKey
+      this.user.private.publicKey  = publicKey
+      this.user.private.rootFolder = rootFolder
 
-      privateUserDoc.salt = crypto.newSalt(2)
-      masterKey = crypto.getMasterKey(password, privateUserDoc.salt)
-      assert(masterKey?, "error in masterKey generation (Session)")
-      console.log "masterkey", masterKey
+    deleteSession: () ->
+      delete this.user.public.username
+      delete this.user.private.login
+      delete this.user.private.masterKey
+      delete this.user.private.privateKey
+      delete this.user.private.publicKey
+      delete this.user.private.rootFolder
 
-      privateUserDoc._id = this.getMainDocId(login, password)
-      assert(privateUserDoc._id?)
-      console.log "privDocId", privateUserDoc._id
 
-      crypto.createRSAKeys(1024).then (keys) =>
-        this.registerSession(login, username, masterKey, keys.private, keys.public)
-        console.log "session registered"
-        # public doc
-        LocalOrRemoteDoc.put({
-          name: username
-          publicKey: this.getMainPublicKey()
-        }).then(
-          (publicDoc) =>
-            console.log "pubDoc", publicDoc
-            to_encrypt = JSON.stringify({
-              "privateKey": this.getMainPrivateKey(),
-              "root": [],
-              "publicDocId": publicDoc.id
-            })
-            privateUserDoc.data = crypto.symEncrypt(masterKey, to_encrypt)
-            assert(privateUserDoc.data?)
-            return LocalOrRemoteDoc.put(privateUserDoc)
-        )
-
-    signIn: (login, password) ->
-      _id = this.getMainDocId(login, password)
-      LocalOrRemoteDoc.get(_id).then(
-        (privateDoc) =>
-          masterKey = crypto.getMasterKey(password, privateDoc.salt)
-          try
-            privateData = JSON.parse(crypto.symDecrypt(masterKey, privateDoc.data))
-            console.log "private data", privateData
-            LocalOrRemoteDoc.get(privateData.publicDocId).then(
-              (publicDoc) =>
-                this.registerSession(login, publicDoc.name, masterKey, privateData.privateKey, publicDoc.publicKey)
-              (err) =>
-                return 'no public doc'
-            )
-          catch SyntaxError
-            return 'wrong password'
-        (err) =>
-          #deferred.reject('no corresponding private doc')
-          return 'no corresponding private doc'
-      )
-      #return deferred
   }

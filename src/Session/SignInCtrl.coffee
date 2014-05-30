@@ -1,8 +1,8 @@
 angular.module('session').
-controller('SignInCtrl', ($scope, session, usSpinnerService) ->
+controller('SignInCtrl', ($scope, account, usSpinnerService) ->
   $scope.signInSubmit = ->
     usSpinnerService.spin('main')
-    session.signIn($scope.login, $scope.password).then(
+    account.signIn($scope.login, $scope.password).then(
       (data) =>
         usSpinnerService.stop('main')
         alert(data)
