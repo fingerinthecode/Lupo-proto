@@ -22,20 +22,22 @@ angular.module('session')
         # public doc
         storage.save({
           name: username
-          publicKey: session.getMainPublicKey()
+          publicKey: keys.public
           _id: crypto.hash(keys.public)
         }).then (publicDoc) =>
           console.log "pubDoc", publicDoc
           fileManager.createRootFolder(masterKey).then (rootId) =>
             console.log "root", rootId, "created"
             privateUserDoc.data = {
-              "privateKey": session.getMainPrivateKey(),
+              "privateKey": keys.private,
               "rootId": rootId,
               "publicDocId": publicDoc.id
             }
             crypto.encryptDataField(masterKey, privateUserDoc)
             storage.save(privateUserDoc).then =>
-              session.registerSession(login, username, masterKey, keys.private, keys.public, rootId)
+              session.registerSession(
+                login, username, masterKey
+                keys.private, keys.public, rootId)
 
     signIn: (login, password) ->
       _id = this.getMainDocId(login, password)
@@ -44,14 +46,14 @@ angular.module('session')
         (privateDoc) =>
           masterKey = crypto.getMasterKey(password, privateDoc.salt)
           try
-            privateData = JSON.parse(crypto.symDecrypt(masterKey, privateDoc.data))
             crypto.decryptDataField(masterKey, privateDoc)
             console.log "private data", privateDoc.data
             storage.get(privateDoc.data.publicDocId).then(
               (publicDoc) =>
                 session.registerSession(
                   login, publicDoc.name, masterKey
-                  privateDoc.data.privateKey, privateDoc.data.publicKey)
+                  privateDoc.data.privateKey, privateDoc.data.publicKey,
+                  privateDoc.data.rootId)
               (err) =>
                 return 'no public doc'
             )

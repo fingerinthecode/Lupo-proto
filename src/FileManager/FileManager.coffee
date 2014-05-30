@@ -7,6 +7,7 @@ factory('fileManager', (crypto, session, storage)->
       assert(key?, "key is undefined")
       storage.get(id).then (doc) =>
         crypto.decryptDataField(key, doc)
+        console.log "get", id, ":", doc
         return doc
 
     _saveFileOrFolder: (doc, key) ->
