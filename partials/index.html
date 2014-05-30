@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="utf-8">
     <title>Prototype of Lupo</title>
     <link rel="stylesheet" href="css/style.css">
   </head>
   <body ng-app="lupo-proto" ng-controller="ContainerCtrl">
     <!-- App Menu -->
-    <div class="appmenu">
-      <ul>
-        <li><a href="#/files">F</a></li>
-        <li><a href="#/devices">D</a></li>
-      </ul>
-    </div>
+    <ul class="appmenu">
+      <li><a href="#/files">F</a></li>
+      <li><a href="#/devices">D</a></li>
+    </ul>
 
     <!-- Header -->
     <div class="header">
@@ -20,16 +19,13 @@
       <h5 ng-show="user.username">Welcome {{ user.username }}</h5>
     </div>
 
-
     <span us-spinner spinner-key="main"></span>
     <div class="view" ui-view></div>
-
-
 
     <script src="vendor/assert/assert.js"                               ></script>
     <script src="vendor/sjcl/sjcl.js"                                   ></script>
     <script src="vendor/jsencrypt/bin/jsencrypt.js"                     ></script>
-    <script src="vendor/pouchdb-2.2.2.min.js"                           ></script>
+    <script src="vendor/pouchdb/dist/pouchdb-nightly.js"                ></script>
     <script src="vendor/spin.js/spin.js"                                ></script>
 
     <!-- Angular -->

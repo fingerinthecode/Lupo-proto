@@ -1,30 +1,34 @@
 angular.module('fileManager')
-.directive('breadcrumb', ($location)->
+.directive('breadcrumb', ($stateParams)->
   return {
     restrict: 'E'
-    scope: true
-    template: '<ol class="breadcrumb">' +
-                '<li ng-repeat="piece in breadcrumb" class="breadcrumb-part" ng-class="{active: $last}">' +
-                  '<a ng-if="!$last" ng-href="#{{piece.link}}">{{piece.value}}</a>' +
-                  '<span ng-if="$last">{{piece.value}}</span>' +
-                '</li>' +
-              '</ol>'
-    link: (scope, element, attrs) ->
-        #scope.$on('$routeChangeSuccess', ->
-        path = $location.path()
+    template: """
+              <div class="breadcrumb">
+                  <div class="breadcrumb-separator"><i class="icon icon-arrow-right"></i></div>
+                <span ng-repeat="piece in breadcrumb">
+                  <div class="breadcrumb-part" ng-class="{'is-active': $last}" ui-sref=".(piece)">{{ piece.value }}</div>
+                  <div class="breadcrumb-separator"><i class="icon icon-arrow-right"></i></div>
+                </span>
+              </div>
+              """
 
-        breadcrumb = path.split('/').splice(2)
+    link: (scope, element, attrs) ->
+      scope.$watch($stateParams, ->
+        path = "/#{$stateParams.path}"
+        path = path.split('/')
 
         result = []
         link   = ''
-        for piece in breadcrumb
-          link += '/' + piece
-          add=
-            link: link.replace('#', '%23')
-            value: piece
-          result.push(add)
+        for piece in path
+          if piece isnt ''
+            link += '/' + piece
+            add=
+              path: link.replace('#', '%23')
+              value: piece
+            result.push(add)
 
         scope.breadcrumb = result
-        #)
+      )
+
   }
 )

@@ -1,8 +1,8 @@
 <!-- Nav Bar -->
 <nav class="navbar">
-  <div class="navbar-button"><i class="icon icon-back"></i></div>
-  <div class="navbar-button"><i class="icon icon-forward"></i></div>
-  <div class="navbar-button"><i class="icon icon-parent"></i></div>
+  <button class="btn-link navbar-button" ng-click="goBack()"    ng-disabled="false"    ><i class="icon icon-back"></i></button>
+  <button class="btn-link navbar-button" ng-click="goForward()" ng-disabled="false"    ><i class="icon icon-forward"></i></button>
+  <button class="btn-link navbar-button" ng-click="goParent()"  ng-disabled="isRoot()"><i class="icon icon-parent"></i></button>
 
   <breadcrumb></breadcrumb>
 </nav>
@@ -12,47 +12,10 @@
 
   <!-- Three -->
   <filetree tree="fileTree"></filetree>
-  <!--<div class="tree">
-    <div class="tree-element tree-element-directory-close">
-      <div class="tree-element-title">Music</div>
-    </div>
-    <div class="tree-element tree-element-directory-open">
-      <div class="tree-element-title">Document</div>
-      <div class="tree-element-content">
-        <div class="tree-element tree-element-directory-open is-active">
-          <div class="tree-element-title">Test</div>
-          <div class="tree-element-content">
-            <div class="tree-element">
-              <div class="tree-element-title">test</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>-->
 
   <!-- Content -->
   <div class="content">
-    <div class="file file-list">
-      <div class="file-icon">test</div>
-      <div class="file-title">Coucou</div>
-    </div>
-    <div class="file file-list">
-      <div class="file-icon">test</div>
-      <div class="file-title">Coucou</div>
-    </div>
-    <div class="file file-list">
-      <div class="file-icon">test</div>
-      <div class="file-title">Coucou</div>
-    </div>
-    <div class="file file-list">
-      <div class="file-icon">test</div>
-      <div class="file-title">Coucou</div>
-    </div>
-    <div class="file file-list">
-      <div class="file-icon">test</div>
-      <div class="file-title">Coucou</div>
-    </div>
+    <file ng-repeat="file in files" file="file"></file>
   </div>
 </div>
 
