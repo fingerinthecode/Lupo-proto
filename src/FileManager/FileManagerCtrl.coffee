@@ -1,48 +1,15 @@
 angular.module('fileManager').
 controller('FileManagerCtrl', ($scope, $stateParams, $state, session, fileManager, account) ->
-  account.signIn("user", "user").then =>
-    assert(session.isConnected(), "must be connected")
-    console.log session.getRootFolder(), session
-    fileManager.getContent(session.getRootFolder()).then (content) =>
-      $scope.root = content
-      console.log("root", $scope.root)
+  #$scope.listFolderContent = (folder) ->
+  #  fileManager.listFolderContent(folder).then (content) =>
 
-  $scope.fileTree = [
-    {
-      name: 'Music'
-      type: 'dir'
-      path: '/Music'
-      content: [
-        {
-          name: "test"
-        }
-      ]
-    }
-    {
-      name: 'Documents'
-      type: 'dir'
-      path: '/Documents'
-      content: [
-        {
-          name: 'Test'
-          type: 'dir'
-          path: '/Documents/Test'
-          content: [
-            {
-              name: "test"
-            }
-          ]
-        }
-      ]
-    }
-  ]
-
-  $scope.$watch($stateParams, ->
+  updatedPath = ->
+    console.log "updatePath", $scope.fileTree
     path = "/#{$stateParams.path}"
     path = path.split('/')
 
     save   = ''
-    parent = $scope.fileTree
+    parent = $scope.explorer.fileTree
     for part in path
       if part isnt ''
         for child in parent ? []
@@ -58,6 +25,10 @@ controller('FileManagerCtrl', ($scope, $stateParams, $state, session, fileManage
       })
 
     $scope.files = parent
+
+
+  $scope.$watch($stateParams, ->
+    #updatedPath()
   )
 
   $scope.isRoot = ->
@@ -79,4 +50,49 @@ controller('FileManagerCtrl', ($scope, $stateParams, $state, session, fileManage
     }, {
       location: true
     })
+
+  unless session.isConnected()
+    #TMP autologin
+    account.signIn("user5", "user5").then =>
+      assert(session.isConnected(), "must be connected")
+      explorer = fileManager.getInstance($stateParams.path, $scope, "explorer", updatedPath)
+
+      $scope.actions = explorer
+  else
+    explorer = fileManager.getInstance($stateParams.path, $scope, "explorer", updatedPath)
+
+    $scope.actions = explorer
+
+
 )
+###
+$scope.fileTree = [
+  {
+    name: 'Music'
+    type: 'dir'
+    path: '/Music'
+    content: [
+      {
+        name: "test"
+      }
+    ]
+  }
+  {
+    name: 'Documents'
+    type: 'dir'
+    path: '/Documents'
+    content: [
+      {
+        name: 'Test'
+        type: 'dir'
+        path: '/Documents/Test'
+        content: [
+          {
+            name: "test"
+          }
+        ]
+      }
+    ]
+  }
+]
+###
