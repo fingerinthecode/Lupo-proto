@@ -5,4 +5,5 @@ angular.module('lupo-proto', [
   'crypto'
   'pouchdb'
   'fileManager'
+  'ng-context-menu'
 ])
