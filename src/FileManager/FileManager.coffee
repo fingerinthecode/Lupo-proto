@@ -258,8 +258,11 @@ factory('fileManager', ($q, crypto, session, storage) ->
             }
             this._saveFileOrFolder(newFileDoc, key)
             .then (result) =>
-              assertDefined result, "result.id", _funcName
-              this._addFileToFolder(result.id, parentId, key)
+              assertDefined result.id, "result.id", _funcName
+              this._addFileToFolder(result.id, parentId, key).then =>
+                newFileDoc._id = result.id
+                newFileDoc._rev = result.rev
+                return new File(newFileDoc)
 
         (err) =>
           return "parent does not exist"
@@ -358,19 +361,8 @@ factory('fileManager', ($q, crypto, session, storage) ->
           i += 1
           name = basename + " " + i
         fm.createFile(name, "", this.currentId())
-        .then =>
-          #TMP
-          element = new File({
-            name: name
-            size: 0
-            type: TYPE_FILE
-            metadata: {
-              name: name
-              size: 0
-              type: TYPE_FILE
-            }
-          })
-          this.fileTree.push element
+        .then (file) =>
+          this.fileTree.push file
 
       createFolder: ->
         console.log "createFolder"
@@ -383,19 +375,8 @@ factory('fileManager', ($q, crypto, session, storage) ->
           i += 1
           name = basename + " " + i
         fm.createFolder(name, this.currentId())
-        .then =>
-          #TMP
-          element = new File({
-            name: name
-            type: TYPE_FOLDER
-            content: []
-            metadata: {
-              name: name
-              type: TYPE_FOLDER
-            }
-          })
-          console.log element
-          this.fileTree.push element
+        .then (folder) =>
+          this.fileTree.push folder
     }
 
     getInstance: (path, scope, scopeVar, watcher) ->

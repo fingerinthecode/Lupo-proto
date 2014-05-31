@@ -7,7 +7,7 @@ directive('file', ($state, $stateParams)->
       file: '='
     }
     template: """
-              <div class="file file-list" ng-dblclick="go()">
+              <div class="file file-list" ng-dblclick="go()" nb-click="selected = !selected" ng-class="{selected: selected}">
                 <div class="file-icon" context-menu data-target="fileMenu" data-target="fileMenu">
                   <img ng-src="images/icon_{{ fileType }}_24.svg" alt="icon" />
                 </div>
@@ -16,6 +16,8 @@ directive('file', ($state, $stateParams)->
               </div>
               """
     link: (scope, element, attrs)->
+      scope.selected = false
+
       if scope.file.isFolder()
         scope.fileType = 'folder'
       else
@@ -30,5 +32,6 @@ directive('file', ($state, $stateParams)->
           }, {
             location: true
           })
+
   }
 )
