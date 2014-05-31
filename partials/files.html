@@ -1,3 +1,30 @@
+<!-- FileMenu -->
+<div class="dropdown position-absolute" id="fileMenu">
+  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+    <li role="presentation">
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="explorer.open()">Open</a>
+    </li>
+    <li role="presentation">
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="explorer.share()">Share</a>
+    </li>
+  </ul>
+</div>
+
+<!-- BackgroundMenu -->
+<div class="dropdown" id="backgroundMenu">
+  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+    <li role="presentation">
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="explorer.createFile()">New File</a>
+    </li>
+    <li role="presentation">
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="explorer.createFolder()">New Folder</a>
+    </li>
+    <li role="presentation">
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="normalRightClick = true">Normal right click</a>
+    </li>
+  </ul>
+</div>
+
 <!-- Nav Bar -->
 <nav class="navbar">
   <button class="btn-link navbar-button" ng-click="goBack()"    ng-disabled="false"    ><i class="icon icon-back"></i></button>
@@ -10,32 +37,6 @@
   <button class="btn-link navbar-button" ng-click="explorer.createFolder()"><img src="images/icon_folder_new_16.svg"></button>
 </nav>
 
-<!-- FileMenu -->
-<!--<div class="dropdown position-absolute" id="fileMenu">
-  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-    <li role="presentation">
-      <a class="pointer" role="menuitem" tabindex="-1" ng-click="actions.open()">Open</a>
-    </li>
-    <li role="presentation">
-      <a class="pointer" role="menuitem" tabindex="-1" ng-click="actions.share()">Share</a>
-    </li>
-  </ul>
-</div>-->
-
-<!-- BackgroundMenu -->
-<!--<div class="dropdown position-absolute" id="backgroundMenu">
-  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
-    <li role="presentation">
-      <a class="pointer" role="menuitem" tabindex="-1" ng-click="actions.createFile()">New File</a>
-    </li>
-    <li role="presentation">
-      <a class="pointer" role="menuitem" tabindex="-1" ng-click="actions.createFolder()">New Folder</a>
-    </li>
-    <li role="presentation">
-      <a class="pointer" role="menuitem" tabindex="-1" ng-click="normalRightClick = true">Normal right click</a>
-    </li>
-  </ul>
-</div>
 
 <!-- Container -->
 <div class="container">
