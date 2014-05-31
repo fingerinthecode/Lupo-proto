@@ -22,6 +22,7 @@ angular.module('session')
       this.user.private.login?
 
     registerSession: (login, username, masterKey, privateKey, publicKey, rootFolder) ->
+      console.log "registerSession", login, username
       this.user.public.username    = username
       this.user.private.login      = login
       this.user.private.masterKey  = masterKey
@@ -30,6 +31,7 @@ angular.module('session')
       this.user.private.rootFolder = rootFolder
 
     deleteSession: () ->
+      console.log "deleteSession"
       delete this.user.public.username
       delete this.user.private.login
       delete this.user.private.masterKey

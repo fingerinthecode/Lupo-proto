@@ -18,9 +18,11 @@ factory('storage', ($q, pouchdb) ->
       console.log method, doc
       localDb[method](doc)
       .then((result) =>
+        console.log method, result
         assert(result?, "no reply from db")
         deferred.resolve(result)
       ).catch (err) =>
+        console.error(err)
         deferred.reject(err)
       return deferred.promise
   }
