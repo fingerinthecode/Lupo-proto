@@ -2,26 +2,56 @@
 <nav class="navbar">
   <button class="btn-link navbar-button" ng-click="goBack()"    ng-disabled="false"    ><i class="icon icon-back"></i></button>
   <button class="btn-link navbar-button" ng-click="goForward()" ng-disabled="false"    ><i class="icon icon-forward"></i></button>
-  <button class="btn-link navbar-button" ng-click="goParent()"  ng-disabled="isRoot()"><i class="icon icon-parent"></i></button>
+  <button class="btn-link navbar-button" ng-click="goParent()"  ng-disabled="isRoot()" ><i class="icon icon-parent"></i></button>
 
   <breadcrumb></breadcrumb>
+
+  <button class="btn-link navbar-button" ng-click="explorer.createFile()"><img src="images/icon_document_new_16.svg"></button>
+  <button class="btn-link navbar-button" ng-click="explorer.createFolder()"><img src="images/icon_folder_new_16.svg"></button>
 </nav>
+
+<!-- FileMenu -->
+<!--<div class="dropdown position-absolute" id="fileMenu">
+  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+    <li role="presentation">
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="actions.open()">Open</a>
+    </li>
+    <li role="presentation">
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="actions.share()">Share</a>
+    </li>
+  </ul>
+</div>-->
+
+<!-- BackgroundMenu -->
+<!--<div class="dropdown position-absolute" id="backgroundMenu">
+  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+    <li role="presentation">
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="actions.createFile()">New File</a>
+    </li>
+    <li role="presentation">
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="actions.createFolder()">New Folder</a>
+    </li>
+    <li role="presentation">
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="normalRightClick = true">Normal right click</a>
+    </li>
+  </ul>
+</div>
 
 <!-- Container -->
 <div class="container">
 
   <!-- Three -->
-  <filetree tree="fileTree"></filetree>
+  <filetree tree="explorer.fileTree"></filetree>
 
   <!-- Content -->
-  <div class="content">
-    <file ng-repeat="file in files" file="file"></file>
+  <div class="content" context-menu data-target="backgroundMenu">
+    <file ng-repeat="file in explorer.fileTree" file="file"></file>
   </div>
 </div>
 
 <!-- Status Bar -->
 <div class="statusbar">
-  <div class="statusbar-elements">5 elements</div>
+  <div class="statusbar-elements">{{ explorer.fileTree.length }} elements</div>
   <div class="statusbar-separator"></div>
   <div class="statusbar-information">File 17ko</div>
   <div class="statusbar-display">
