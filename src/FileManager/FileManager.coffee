@@ -27,12 +27,137 @@ factory('fileManager', ($q, crypto, session, storage) ->
       content:   pObj.content
       metadata:  pObj.metadata
       contentId: pObj.contentId
+      key:       pObj.key
 
       isFolder: () ->
         if this.content?
           return isAnArray(this.content)
         if this.metadata?
           return this.metadata.type == TYPE_FOLDER
+
+      rename: (newName) ->
+        _funcName = 'rename'
+        console.log _funcName, newName
+        assertDefined newName, "newName", _funcName
+        fm.getLastRev(this._id).then (_rev) =>
+          this._rev = _rev
+          this.metadata.name = newName
+          this.saveMetadata()
+
+      move: (newParentId, key) ->
+        _funcName = 'move'
+        console.log _funcName, this.metadata.parentId, newParentId
+        assertDefined newParentId,   "newParentId",   _funcName
+        assertDefined this.metadata.parentId, "this.parentId", _funcName
+        fm.getFile(this.metadata.parentId, key).then (currentParent) =>
+          assertIsArray currentParent.content, "currentParent.content", _funcName
+        this.removeFromFolder(key).then =>
+          this.addToFolder(newParentId, key). then(
+            =>
+              this.metadata.parentId = newParentId
+              this.saveMetadata()
+            (err) =>
+              # roll back
+              console.error("move roll back")
+              this.addToFolder(this.metadata.parentId, key)
+          )
+
+      addToFolder: (folderId, key) ->
+        _funcName = "addToFolder"
+        console.log _funcName, folderId
+        assertDefined this._id, "this._id", _funcName
+        assertDefined folderId, "folderId", _funcName
+        fm.getFile(folderId, key).then (folder) =>
+          assertIsArray folder.content, "folder.content", _funcName
+          folder.content.push(this._id)
+          folder.saveContent(key).then =>
+            this.metadata.parentId = folderId
+            #TODO: change this to a triggered update via changes watcher
+            fm._cache.expire(folder._id, "content")
+            fm.listFolderContent(folder._id, key)
+            this.saveMetadata(key)
+
+      removeFromFolder: (key) ->
+        _funcName = "removeFromFolder"
+        console.log _funcName
+        assertDefined this._id, "this._id", _funcName
+        assertDefined this.metadata.parentId, "this.metadata.parentId", _funcName
+        fm.getFile(this.metadata.parentId, key).then (folder) =>
+          assertIsArray folder.content, "folder.content", _funcName
+          folder.content.splice(
+            folder.content.indexOf(this._id)
+            1
+          )
+          folder.saveContent(key).then =>
+            #TODO: change this to a triggered update via changes watcher
+            fm._cache.expire(folder._id, "content")
+            fm.listFolderContent(folder._id, key)
+            return this
+
+      _saveHelper: (doc) ->
+        _funcName = "_saveHelper"
+        console.log _funcName
+        #TODO: replace this by a conflict handler
+
+
+      _preventConflict: (doc) ->
+        deferred = $q.defer()
+        if doc._id?
+          fm.getLastRev(doc._id).then (_rev) =>
+            doc._rev = _rev
+            deferred.resolve(doc)
+        else
+          deferred.resolve(doc)
+        return deferred.promise
+
+      save: (key) ->
+        _funcName = "save"
+        console.log _funcName
+        if this.content?
+          this.saveContent(key).then =>
+            return this
+        else
+          if this.metadata?
+            this.saveMetadata(key).then =>
+              return this
+
+
+      saveMetadata: (key) ->
+        _funcName = "saveMetadata"
+        console.log _funcName
+        metadataDoc = {
+          _id: this._id
+          _rev: this._rev
+          data: this.metadata
+        }
+        this._preventConflict(metadataDoc).then (metadataDoc) =>
+        fm.saveMetadata(metadataDoc, key).then (result) =>
+          this._id = result.id
+          this._rev = result.rev
+          return this
+
+      saveContent: (key) ->
+        _funcName = "saveContent"
+        console.log _funcName
+        content = {
+          data: this.content
+        }
+        if this.metadata?
+          content._id = if this.metadata.contentId? then this.metadata.contentId
+        else
+          content._id = if doc._id then doc._id
+          content._rev = if doc._rev then doc._rev
+        this._preventConflict(content).then (content) =>
+          fm.saveContent(content, key).then (contentResult) =>
+            unless this.metadata?
+              this._id = contentResult._id
+              this._rev = contentResult._rev
+              return this
+            assertUnchanged(contentResult.id, this.metadata.contentId,
+              "contentResult.id", "this.metadata.contentId", _funcName)
+            this.metadata.contentId = contentResult.id
+            this.saveMetadata(key)
+
 
       toDoc: () ->
         {
@@ -86,57 +211,52 @@ factory('fileManager', ($q, crypto, session, storage) ->
       assertDefined(id, "id", "_getFileMetadata")
       this._getFileContent(id, key)
 
-    _saveFileOrFolderContent: (doc, key) ->
-      console.debug "_saveFileOrFolderContent", doc
-      assertDefined(doc, "doc", "_saveFileOrFolderContent")
+    saveContent: (doc, key) ->
+      console.debug "saveContent", doc
+      assertDefined(doc, "doc", "saveContent")
       unless key?
         key = session.getMasterKey()
       assert(key?, "key is undefined")
       crypto.encryptDataField(key, doc)
       storage.save(doc)
 
-    _saveFileOrFolderMetadata: (doc, key) ->
-      console.debug "_saveFileOrFolderMetadata", doc
-      assertDefined(doc, "doc", "_saveFileOrFolderMetadata")
-      this._saveFileOrFolderContent(doc, key)
+    saveMetadata: (doc, key) ->
+      console.debug "saveMetadata", doc
+      assertDefined(doc, "doc", "saveMetadata")
+      this.saveContent(doc, key)
 
-    _saveFileOrFolder: (doc, key) ->
-      _funcName = "_saveFileOrFolder"
-      console.log _funcName, doc
-      assertDefined doc,         "doc",         _funcName
-      assertDefined doc.content, "doc.content", _funcName
-      content = {
-        data: doc.content
-      }
-      if doc.metadata?
-        content._id = if doc.metadata.contentId then doc.metadata.contentId
-        metadataDoc = {
-          _id: doc._id
-          _rev: doc._rev
-          data: doc.metadata
-        }
-      else
-        content._id = if doc._id then doc._id
-        content._rev = if doc._rev then doc._rev
-      subFunc = (content) =>
-        this._saveFileOrFolderContent(content, key)
-        .then (contentResult) =>
-          assertDefined contentResult.id, "contentResult.id", _funcName
-          unless metadataDoc?
-            return contentResult
-          assertUnchanged(contentResult.id, metadataDoc.data.contentId,
-            "contentResult.id", "metadataDoc.data.contentId", _funcName)
-          metadataDoc.data.contentId = contentResult.id
-          this._saveFileOrFolderMetadata(metadataDoc, key).then (metadataResult) =>
-            console.log "saved", metadataResult.id, "(contentId:", metadataResult.id, ")"
-            assertDefined metadataResult.id, "metadataResult.id", _funcName
-            return metadataResult
-      if content._id
-        this._getFileContent(content._id, key).then (oldContent) =>
-          content._rev = oldContent._rev
-          subFunc(content)
-      else
-        subFunc(content)
+    _createFile: (name, content, type, parentId, key) ->
+      _funcName = "_createFile"
+      console.log _funcName, name, content, parentId
+      assertDefined name,     "name",     _funcName
+      assertDefined content,  "content",  _funcName
+      assertDefined type,     "type",     _funcName
+      assertDefined parentId, "parentId", _funcName
+      this.listFolderContent(parentId, key).then(
+        (list) =>
+          console.log "list", list
+          assertDefined list, "list", _funcName
+          unless name in [f.metadata.name for f in list]
+            content = if content? then content else ""
+            newFile = new File {
+              content: content
+              metadata: {
+                type: type
+                name: name
+                size: if type != TYPE_FOLDER then content.length
+              }
+            }
+            newFile.save(key)
+            .then (result) =>
+              newFile.addToFolder(parentId, key)
+
+        (err) =>
+          return "parent does not exist"
+      )
+
+    getLastRev: (id, key) ->
+      this._getFileMetadata(id, key).then (content) =>
+        return content._rev
 
     getFile: (id, key) ->
       console.log "getFile", id
@@ -222,52 +342,6 @@ factory('fileManager', ($q, crypto, session, storage) ->
             deferred.resolve([])
       return deferred.promise
 
-    _addFileToFolder: (fileId, folderId, key) ->
-      console.log "_addFileToFolder", fileId, folderId
-      assertDefined fileId,   "fileId",   "_addFileToFolder"
-      assertDefined folderId, "folderId", "_addFileToFolder"
-      this.getFile(folderId, key).then (folder) =>
-        assertIsArray folder.content, "folder.content", "_addFileToFolder"
-        folder.content.push(fileId)
-        this._saveFileOrFolder(folder, key).then =>
-          #TODO: change this to a triggered update via changes watcher
-          this._cache.expire(folderId, "content")
-          this.listFolderContent(folderId, key)
-          return
-
-    _createFile: (name, content, type, parentId, key) ->
-      _funcName = "_createFile"
-      console.log _funcName, name, content, parentId
-      assertDefined name,     "name",     _funcName
-      assertDefined content,  "content",  _funcName
-      assertDefined type,     "type",     _funcName
-      assertDefined parentId, "parentId", _funcName
-      this.listFolderContent(parentId, key).then(
-        (list) =>
-          console.log "list", list
-          assertDefined list, "list", _funcName
-          unless name in [f.metadata.name for f in list]
-            content = if content? then content else ""
-            newFileDoc = {
-              content: content
-              metadata: {
-                type: type
-                name: name
-                size: if type != TYPE_FOLDER then content.length
-              }
-            }
-            this._saveFileOrFolder(newFileDoc, key)
-            .then (result) =>
-              assertDefined result.id, "result.id", _funcName
-              this._addFileToFolder(result.id, parentId, key).then =>
-                newFileDoc._id = result.id
-                newFileDoc._rev = result.rev
-                return new File(newFileDoc)
-
-        (err) =>
-          return "parent does not exist"
-      )
-
     createFile: (name, content, parentId, key) ->
       _funcName = "createFile"
       console.log _funcName, name, content, parentId
@@ -286,13 +360,11 @@ factory('fileManager', ($q, crypto, session, storage) ->
     createRootFolder: (masterKey) ->
       console.log "createRootFolder"
       assertDefined masterKey, "masterKey", "createRootFolder"
-      this._saveFileOrFolder({content: []}, masterKey)
+      root = new File({content: []}).save(masterKey)
       .then (result) =>
-        assertDefined result,    "result",    "createRootFolder"
-        assertDefined result.id, "result.id", "createRootFolder"
-        this.createFile("README", "Welcome", result.id, masterKey)
-        .then =>
-          return result.id
+        this.createFile("README", "Welcome", root._id, masterKey)
+        this.createFolder("Shares", root._id, masterKey)
+        return root._id
 
     instance: {
       history:  []
@@ -350,6 +422,15 @@ factory('fileManager', ($q, crypto, session, storage) ->
         for watcher in this.watchers
           watcher.call()
 
+      addFile: (metadata, content) ->
+        _funcName = 'addFile'
+        console.log _funcName, metadata
+        assertDefined metadata.name, "metadata.name", _funcName
+        assertDefined content, "content", _funcName
+        fm.createFile(metadata.name, content, this.currentId())
+        .then (file) =>
+          this.fileTree.push file
+
       createFile: ->
         console.log "createFile", this
         basename = "new document"
@@ -377,6 +458,7 @@ factory('fileManager', ($q, crypto, session, storage) ->
         fm.createFolder(name, this.currentId())
         .then (folder) =>
           this.fileTree.push folder
+
     }
 
     getInstance: (path, scope, scopeVar, watcher) ->

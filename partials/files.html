@@ -7,6 +7,9 @@
     <li role="presentation">
       <a class="pointer" role="menuitem" tabindex="-1" ng-click="explorer.share()">Share</a>
     </li>
+    <li role="presentation">
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="rename = true">Rename</a>
+    </li>
   </ul>
 </div>
 
@@ -46,7 +49,10 @@
 
   <!-- Content -->
   <div class="content" context-menu data-target="backgroundMenu">
-    <file ng-repeat="file in explorer.fileTree" file="file"></file>
+    <!-- temporary hack -->
+    <div drop-zone="explorer" style="width: 100%; height:100%">
+      <file ng-repeat="file in explorer.fileTree" file="file"></file>
+    </div>
   </div>
 </div>
 
