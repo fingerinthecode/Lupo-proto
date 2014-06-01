@@ -1,5 +1,5 @@
 angular.module('session')
-.factory 'account', (session, crypto, fileManager, storage) ->
+.factory 'account', (session, User, crypto, fileManager, storage) ->
   {
     getMainDocId: (login, password) ->
       crypto.hash(login + password, 32)
@@ -31,7 +31,7 @@ angular.module('session')
             }
             crypto.encryptDataField(masterKey, privateUserDoc)
             storage.save(privateUserDoc).then =>
-              session.registerSession(
+              session.user = new User(
                 login, username, masterKey
                 keys.private, keys.public, rootId)
 
@@ -46,7 +46,7 @@ angular.module('session')
             storage.get(privateDoc.data.publicDocId).then(
               (publicDoc) =>
                 console.log "publicDoc", publicDoc
-                session.registerSession(
+                session.user = new User(
                   login, publicDoc.name, masterKey
                   privateDoc.data.privateKey, privateDoc.data.publicKey,
                   privateDoc.data.rootId)
@@ -60,5 +60,5 @@ angular.module('session')
       )
 
     signOut: ->
-      session.deleteSession()
+      delete session.user
   }

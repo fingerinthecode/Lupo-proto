@@ -1,43 +1,23 @@
 angular.module('session')
-.factory 'session', () ->
+.factory 'session', ->
   {
-    user: {
-      public: {}
-      private: {}
-    }
+    user: {}
 
     getMainPublicKey: ->
-      this.user.private.publicKey
+      @user.private.publicKey
 
     getMainPrivateKey: ->
-      this.user.private.privateKey
+      @user.private.privateKey
 
     getMasterKey: ->
-      this.user.private.masterKey
+      @user.private.masterKey
 
     getRootFolder: ->
-      this.user.private.rootFolder
+      @user.private.rootFolder
 
     isConnected: ->
-      this.user.private.login?
+      @user.private.login?
 
-    registerSession: (login, username, masterKey, privateKey, publicKey, rootFolder) ->
-      console.log "registerSession", login, username
-      this.user.public.username    = username
-      this.user.private.login      = login
-      this.user.private.masterKey  = masterKey
-      this.user.private.privateKey = privateKey
-      this.user.private.publicKey  = publicKey
-      this.user.private.rootFolder = rootFolder
-
-    deleteSession: () ->
-      console.log "deleteSession"
-      delete this.user.public.username
-      delete this.user.private.login
-      delete this.user.private.masterKey
-      delete this.user.private.privateKey
-      delete this.user.private.publicKey
-      delete this.user.private.rootFolder
-
-
+    isConnected: ->
+      @user? and @user.private and @user.private.login?
   }

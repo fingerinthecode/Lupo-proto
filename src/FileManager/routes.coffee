@@ -6,3 +6,8 @@ angular.module('fileManager')
       templateUrl: 'partials/files.html'
       controller:  'FileManagerCtrl'
     })
+    .state('download', {
+      url:         '/files{path:.*}'
+      templateUrl: 'partials/download.html'
+      controller:  'FileDownloadCtrl'
+    })

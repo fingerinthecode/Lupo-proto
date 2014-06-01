@@ -7,7 +7,7 @@ directive('file', ($state, $stateParams)->
       file: '='
     }
     template: """
-              <div class="file file-list" ng-dblclick="go()" nb-click="selected = !selected" ng-class="{selected: selected}">
+              <a ng-href="{{ downloadUrl }}" class="file file-list" ng-dblclick="go()" nb-click="toggleSelected()" ng-class="{selected: selected}">
                 <div class="file-icon" context-menu data-target="fileMenu">
                   <img ng-src="images/icon_{{ fileType }}_24.svg" alt="icon" />
                 </div>
@@ -15,10 +15,14 @@ directive('file', ($state, $stateParams)->
                 <span class="file-size">{{ size }}</span>
                 <button ng-click="file.rename('toto.pdf')">RenameToToto</button>
                 <button ng-click="file.move('8DB8676E-71D0-4E3D-8663-87C21CB566C6')">MoveToParent</button>
-              </div>
+                <button ng-click="file.share('Bob')">Share with Bob</button>
+              </a>
               """
     link: (scope, element, attrs)->
       scope.selected = false
+
+      scope.toggleSelected = () ->
+        scope.selected = !scope.selected
 
       if scope.file.isFolder()
         scope.fileType = 'folder'
@@ -46,5 +50,6 @@ directive('file', ($state, $stateParams)->
             location: true
           })
 
+      #scope.downloadUrl = 'data:' + scope.file.mime + ';charset=utf-8,' + encodeURIComponent(scope.file.getContent())
   }
 )
