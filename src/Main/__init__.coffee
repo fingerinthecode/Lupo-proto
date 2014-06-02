@@ -1,6 +1,7 @@
 angular.module('lupo-proto', [
   'ui.router'
   'gettext'
+  'notification'
   'translation'
   'angularSpinner'
   'session'
