@@ -1,7 +1,7 @@
 angular.module('fileManager').
 controller('FileManagerCtrl', ($scope, $stateParams, $state, session, fileManager, account) ->
-  #$scope.listFolderContent = (folder) ->
-  #  fileManager.listFolderContent(folder).then (content) =>
+
+  $scope.selectedFile = null
 
   updatedPath = ->
     console.log "updatePath", $scope.fileTree
@@ -53,7 +53,7 @@ controller('FileManagerCtrl', ($scope, $stateParams, $state, session, fileManage
 
   unless session.isConnected()
     #TMP autologin
-    account.signIn("user6", "user6").then =>
+    account.signIn("azerty", "azerty").then =>
       #assert(session.isConnected(), "must be connected")
       explorer = fileManager.getInstance($stateParams.path, $scope, "explorer", updatedPath)
 
