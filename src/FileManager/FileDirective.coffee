@@ -1,5 +1,5 @@
 angular.module('fileManager').
-directive('file', ($state, $stateParams)->
+directive('file', ()->
   return {
     restrict: 'E'
     replace: true
@@ -13,9 +13,9 @@ directive('file', ($state, $stateParams)->
                   <img ng-src="images/icon_{{ fileIcon() }}_24.svg" alt="icon" />
                 </div>
                 <div class="file-title" context-menu="selectFile()"
-                    data-target="fileMenu" ng-hide="file.nameEditable">{{ file.metadata.name }}</div>
+                    data-target="fileMenu" ng-hide="isEditMode()">{{ file.metadata.name }}</div>
                 <form name="changeName" ng-submit="changeName()">
-                  <input type="text" ng-model="newName" ng-show="file.nameEditable" />
+                  <input type="text" ng-model="newName" ng-show="isEditMode()" select="isEditMode()"/>
                 </form>
                 <span class="file-size">{{ fileSize() }}</span>
                 <button ng-click="file.rename('toto.pdf')">RenameToToto</button>
@@ -31,7 +31,12 @@ directive('file', ($state, $stateParams)->
       scope.selectFile = () ->
         scope.selected = scope.file
 
+      scope.isEditMode = () ->
+        unless scope.isSelected()
+          scope.file.nameEditable = false
+        scope.isSelected() && scope.file.nameEditable
       scope.newName = scope.file.metadata.name
+
       scope.changeName = () ->
         scope.file.rename(scope.newName)
         scope.file.nameEditable = false

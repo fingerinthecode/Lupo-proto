@@ -1,1 +1,1 @@
-angular.module('fileManager', ['pouchdb', 'session'])
+angular.module('fileManager', ['pouchdb', 'session', 'directive'])
