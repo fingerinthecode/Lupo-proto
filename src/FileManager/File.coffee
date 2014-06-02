@@ -281,4 +281,5 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
       _funcName = "share"
       console.log _funcName, username
       assert.defined username, "username", _funcName
-      User.getByName(username)
+      User.getByName(username).then (user) =>
+        console.log "user", user.rows[0]

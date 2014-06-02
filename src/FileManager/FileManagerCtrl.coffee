@@ -53,7 +53,7 @@ controller('FileManagerCtrl', ($scope, $stateParams, $state, session, fileManage
 
   unless session.isConnected()
     #TMP autologin
-    account.signIn("azerty", "azerty").then =>
+    account.signIn("user", "user").then =>
       #assert(session.isConnected(), "must be connected")
       explorer = fileManager.getInstance($stateParams.path, $scope, "explorer", updatedPath)
 
