@@ -2,13 +2,13 @@
 <div class="dropdown position-absolute" id="fileMenu">
   <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
     <li role="presentation">
-      <a class="pointer" role="menuitem" tabindex="-1" ng-click="explorer.open()">Open</a>
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="explorer.selectedFile">Open</a>
     </li>
     <li role="presentation">
-      <a class="pointer" role="menuitem" tabindex="-1" ng-click="explorer.share()">Share</a>
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="explorer.selectedFile.share('Bob')">Share</a>
     </li>
     <li role="presentation">
-      <a class="pointer" role="menuitem" tabindex="-1" ng-click="rename = true">Rename</a>
+      <a class="pointer" role="menuitem" tabindex="-1" ng-click="explorer.selectedFile.nameEditable = true">Rename</a>
     </li>
   </ul>
 </div>
@@ -51,7 +51,7 @@
   <div class="content" context-menu data-target="backgroundMenu">
     <!-- temporary hack -->
     <div drop-zone="explorer" style="width: 100%; height:100%">
-      <file ng-repeat="file in explorer.fileTree" file="file"></file>
+      <file ng-repeat="file in explorer.fileTree" file="file" selected-file="explorer.selectedFile"></file>
     </div>
   </div>
 </div>
