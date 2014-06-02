@@ -5,6 +5,7 @@ angular.module('fileManager')
       url:         '/files{path:.*}'
       templateUrl: 'partials/files.html'
       controller:  'FileManagerCtrl'
+      loginRequired: true
     })
     .state('download', {
       url:         '/files{path:.*}'
