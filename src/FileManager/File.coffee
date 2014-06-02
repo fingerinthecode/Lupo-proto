@@ -26,6 +26,10 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
           if assert.tests.isAnObject(pObj.data) and not(@metadata?)
             @metadata = pObj.data
 
+    #
+    # Class methods
+    #
+
     @_getDoc: (id, key) ->
       _funcName = "_getDoc"
       console.debug _funcName, id
@@ -58,6 +62,28 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
           console.log "no metadata but content", file
           return file
 
+    @getContent: (id, key) ->
+      console.log "getContent", id
+      assert.defined id, "id", "getContent"
+      File.getFile(id, key).then (file) =>
+        assert.defined file,         "file",         "getContent"
+        assert.defined file.content, "file.content", "getContent"
+        return file.content
+
+    @getMetadata: (id, key) ->
+      console.log "getMetadata", id
+      assert.defined id, "id",  "getMetadata"
+      File._getDoc(id, key).then(
+        (doc) =>
+          assert.defined doc,      "doc",      "getMetadata"
+          assert.defined doc.data, "doc.data", "getMetadata"
+          return new File(doc)
+      )
+
+    #
+    # Private methods
+    #
+
     _preventConflict: (doc) ->
       #TODO: replace @ by a conflict handler
       _funcName = "_preventConflict"
@@ -81,6 +107,9 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
       crypto.encryptDataField(key, doc)
       storage.save(doc)
 
+    #
+    # Public methods
+    #
 
     isFolder: () ->
       if @content?
@@ -124,26 +153,8 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
       _funcName = "getLastRev"
       console.log _funcName, @_id
       assert.defined @_id, "@_id", _funcName
-      @getMetadata(@_id, key).then (content) =>
+      File.getMetadata(@_id, key).then (content) =>
         content._rev
-
-    getContent: (id, key) ->
-      console.log "getContent", id
-      assert.defined id, "id", "getContent"
-      File.getFile(id, key).then (file) =>
-        assert.defined file,         "file",         "getContent"
-        assert.defined file.content, "file.content", "getContent"
-        return file.content
-
-    getMetadata: (id, key) ->
-      console.log "getMetadata", id
-      assert.defined id, "id",  "getMetadata"
-      File._getDoc(id, key).then(
-        (doc) =>
-          assert.defined doc,      "doc",      "getMetadata"
-          assert.defined doc.data, "doc.data", "getMetadata"
-          return new File(doc)
-      )
 
     save: (key) ->
       _funcName = "save"
@@ -192,15 +203,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
           @metadata.contentId = contentResult.id
           @saveMetadata(key)
 
-    rename: (newName) ->
-      _funcName = 'rename'
-      console.log _funcName, newName
-      assert.defined newName, "newName", _funcName
-      @getLastRev().then (_rev) =>
-        @_rev = _rev
-        @metadata.name = newName
-        @saveMetadata()
-
     listContent: (key) ->
       _funcName = "listContent"
       console.log _funcName, @_id
@@ -211,7 +213,7 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
       if list?
         deferred.resolve(list)
       else
-        @getContent(@_id, key).then (content) =>
+        File.getContent(@_id, key).then (content) =>
           assert.array content, "content", _funcName
           list = []
           atLeastOne = false
@@ -219,20 +221,20 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
             if element?
               atLeastOne = true
               inProgess.push(null)
-              @getMetadata(element, key).then(
+              File.getMetadata(element, key).then(
                 (file) =>
                   assert.defined file,               "file",              _funcName
                   assert.defined file.metadata,      "file.metadata",      _funcName
                   assert.defined file.metadata.name, "file.metadata.name", _funcName
                   assert.defined file.metadata.type, "file.metadata.type", _funcName
-                  file.name = file.metadata.name
-                  file.type = file.metadata.type
+                  #file.name = file.metadata.name
+                  #file.type = file.metadata.type
 
                   if file.isFolder()
                     file.content = []
                   else
                     assert.defined file.metadata.size, "file.metadata.size", _funcName
-                    file.size = file.metadata.size
+                    #file.size = file.metadata.size
                   list.push(file)
                   inProgess.pop()
                 (err) =>
@@ -248,6 +250,14 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
             deferred.resolve([])
       return deferred.promise
 
+    rename: (newName) ->
+      _funcName = 'rename'
+      console.log _funcName, newName
+      assert.defined newName, "newName", _funcName
+      @getLastRev().then (_rev) =>
+        @_rev = _rev
+        @metadata.name = newName
+        @saveMetadata()
 
     move: (newParentId, key) ->
       _funcName = 'move'
