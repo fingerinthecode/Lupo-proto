@@ -19,6 +19,8 @@
       <h5 ng-show="user.username">Welcome {{ user.username }}</h5>
     </div>
 
+    <notification-overlay></notification-overlay>
+
     <span us-spinner spinner-key="main"></span>
     <div class="view" ui-view></div>
 
@@ -31,6 +33,7 @@
     <!-- Angular -->
     <script src="vendor/angular/angular.js"                             ></script>
     <script src="vendor/angular-resource/angular-resource.js"           ></script>
+    <script src="vendor/angular-animate/angular-animate.js"             ></script>
 
     <!-- Angular Modules -->
     <script src="vendor/ngCouch/couch.js"                               ></script>
