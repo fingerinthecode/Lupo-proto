@@ -17,7 +17,7 @@ directive('file', ($state, session)->
                 <form name="changeName" ng-submit="changeName()">
                   <input type="text" ng-model="newName" ng-show="isEditMode()" select="isEditMode()"/>
                 </form>
-                <span class="file-size">{{ fileSize() }}</span>
+                <span class="file-size" ng-if="!file.isFolder()">{{ file.metadata.size |size }}</span>
                 <button ng-click="file.move('8DB8676E-71D0-4E3D-8663-87C21CB566C6')">MoveToParent</button>
               </div>
               """
@@ -48,19 +48,6 @@ directive('file', ($state, session)->
           switch scope.file.metadata.name.split('.')[-1..][0]
             when "pdf" then scope.fileType = "pdf"
             else scope.fileType = "text"
-
-      scope.fileSize = () ->
-        unless scope.file.isFolder()
-          unity = 'B'
-          size = scope.file.metadata.size
-          if size > 1000
-            size /= 1000
-            unity = 'KB'
-            if size > 1000
-              size /= 1000
-              unity = 'MB'
-
-          return Math.round(size*10)/10 + unity
 
       scope.go = ->
         if scope.file.isFolder()
