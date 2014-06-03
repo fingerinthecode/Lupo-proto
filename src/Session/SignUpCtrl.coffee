@@ -1,5 +1,5 @@
 angular.module('session').
-controller('SignUpCtrl', ($scope, account, usSpinnerService) ->
+controller('SignUpCtrl', ($scope, account, usSpinnerService, $state) ->
   $scope.signUpSubmit = ->
     console.log $scope
     if $scope.password == $scope.password2
@@ -7,6 +7,7 @@ controller('SignUpCtrl', ($scope, account, usSpinnerService) ->
       account.signUp($scope.login, $scope.password, $scope.publicName).then(
         (data) =>
           usSpinnerService.stop('main')
+          $state.go('files')
           alert(data)
         (err) =>
           alert(err)

@@ -1,5 +1,5 @@
 angular.module('fileManager').
-directive('file', ()->
+directive('file', ($state, session)->
   return {
     restrict: 'E'
     replace: true
@@ -8,7 +8,7 @@ directive('file', ()->
       selected: '=selectedFile'
     }
     template: """
-              <a ng-href="{{ downloadUrl }}" class="file file-list" ng-dblclick="go()" ng-click="selectFile()" ng-class="{selected: isSelected()}">
+              <div class="file" ng-dblclick="go()" ng-click="selectFile()" ng-class="{selected: isSelected(), 'file-list': !user.displayThumb, 'file-thumb': user.displayThumb}" draggable="true">
                 <div class="file-icon" context-menu="selectFile()" data-target="fileMenu" >
                   <img ng-src="images/icon_{{ fileIcon() }}_24.svg" alt="icon" />
                 </div>
@@ -19,9 +19,11 @@ directive('file', ()->
                 </form>
                 <span class="file-size">{{ fileSize() }}</span>
                 <button ng-click="file.move('8DB8676E-71D0-4E3D-8663-87C21CB566C6')">MoveToParent</button>
-              </a>
+              </div>
               """
     link: (scope, element, attrs)->
+      scope.user = session.user
+
 
       scope.isSelected = () ->
         scope.selected == scope.file

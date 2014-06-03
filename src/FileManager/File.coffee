@@ -4,13 +4,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
   TYPE_FOLDER = 0
   TYPE_FILE = 1
   class File
-    display: true
-    setThumb: =>
-      @display = true
-
-    setList: =>
-      @display = false
-
     constructor: (pObj) ->
       console.log "File", pObj
       @_id =       pObj._id
