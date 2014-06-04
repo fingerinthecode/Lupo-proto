@@ -26,6 +26,31 @@ directive('file', ($state, session)->
     link: (scope, element, attrs)->
       scope.user    = session.user
       scope.newName = scope.file.metadata.name
+
+      # ------------------DragAndDrop----------------------------
+      element.on('dragstart', ($event)->
+        $img = element.find('img')
+        $event.dataTransfer.effectAllowed = "move"
+        $event.dataTransfer.setData('unused data', 'unused data')
+        $event.dataTransfer.setDragImage($img[0], 10, 10)
+        scope.selectFile() if not scope.isSelected()
+      )
+      element.on('dragover', ($event)->
+        if scope.file.isFolder() and scope.file._id != $event.dataTransfer.getData('id')
+          element.attr('droppable', true)
+          $event.dataTransfer.dropEffect = 'move'
+        else
+          element.attr('droppable', false)
+          $event.dataTransfer.dropEffect = 'none'
+        $event.stopPropagation()
+        $event.preventDefault()
+      )
+      element.on('drop', ($event)->
+        for file in scope.selected
+          file.move(scope.file._id)
+        scope.selected = {}
+      )
+
       # ----------------------Selection-------------------------
       ###
       # selectFile
