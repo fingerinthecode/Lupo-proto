@@ -23,7 +23,27 @@ directive('file', ($state, session)->
               """
     link: (scope, element, attrs)->
       scope.user = session.user
+      # ----------------------Selection-------------------------
+      ###
+      # selectFile
+      # $event (optional): javascript click event
+      # ifnoselection (optional): keep the selection if not empty
+      ###
+      scope.selectFile = ($event = {}, ifnoselection = false) ->
+        if ifnoselection and Object.keys?(scope.selected).length > 0
+          console.log 'disable selection'
+          return true
 
+        if not $event.ctrlKey ? false
+          scope.selected = {}
+
+        if not scope.selected.hasOwnProperty(scope.file._id)
+          scope.selected[scope.file._id] = scope.file
+        else
+          delete scope.selected[scope.file._id]
+
+        $event.preventDefault?()
+        $event.stopPropagation?()
 
       scope.isSelected = () ->
         return scope.selected.hasOwnProperty(scope.file._id)
@@ -31,14 +51,6 @@ directive('file', ($state, session)->
       scope.isCut = () ->
         cut = scope.clipboard.cut ? {}
         return cut.hasOwnProperty(scope.file._id)
-
-      scope.selectFile = ($event = {}) ->
-        if not $event.ctrlKey ? false
-          scope.selected = {}
-        scope.selected[scope.file._id] = scope.file
-        if $event.preventDefault?
-          $event.preventDefault()
-          $event.stopPropagation()
 
       scope.isEditMode = () ->
         unless scope.isSelected()
