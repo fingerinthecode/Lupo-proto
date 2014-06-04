@@ -12,7 +12,7 @@ angular.module('session')
       @private.publicKey  = publicKey
       @private.rootFolder = rootFolder
 
-    @getByName: (username) ->
+    @getByName: (username = '') ->
       _funcName = "getByName"
       console.log _funcName, username
       assert.defined username, "username", _funcName

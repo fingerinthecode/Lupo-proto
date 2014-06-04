@@ -185,7 +185,7 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File) ->
     getInstance: (path, scope, scopeVar, user) ->
       _funcName = "getInstance"
       console.log _funcName, path
-      if path is "" or path is "/"
+      if path? or path is "" or path is "/"
         folderId = session.getRootFolder()
       else
         folderId = path[1..]

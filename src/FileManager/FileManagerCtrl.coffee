@@ -9,13 +9,13 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
 
   # -------------Shortcut-----------
   $document.on('keypress', ($event)->
-    console.log $event
     if $event.ctrlKey or $event.metaKey
       switch $event.charCode
-        when 120 then $scope.cutFiles()    # Ctrl + X
-        when 99  then $scope.copyFiles()   # Ctrl + C
-        when 120 then $scope.pasteFiles()  # Ctrl + V
+        when 120 then $scope.cutFiles()    # + X
+        when 99  then $scope.copyFiles()   # + C
+        when 120 then $scope.pasteFiles()  # + V
   )
+
 
   # ----------Navigation Button------
   $scope.isRoot = ->
