@@ -28,4 +28,19 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
   $scope.toThumb = ->
     session.user.displayThumb = true
 
+  # ---------Context-Menu------------
+  $scope.openFile = ->
+
+  $scope.shareFiles = ->
+    for key, file of $scope.selected.files
+      file.share('Bob')
+
+  $scope.renameFile = ->
+    for key, file of $scope.selected.files
+      file.nameEditable = true
+      break
+
+  $scope.deleteFiles = ->
+    for key, file of $scope.selected.files
+      file.delete()
 )
