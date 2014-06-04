@@ -40,7 +40,8 @@
     "ng-context-menu": "ianwalter/ng-context-menu#~0.1.3",
     "angular-gettext": "~0.2.9",
     "ngCouch": "LupoLibero/ngCouch",
-    "angular-animate": "~1.2.16"
+    "angular-animate": "~1.2.16",
+    "pouchdb": "~2.2.3"
   },
   "resolutions": {
     "angular": "1.3.*"

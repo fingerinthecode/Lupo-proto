@@ -1,6 +1,6 @@
 angular.module('lupo-proto').
 controller('ContainerCtrl', ($scope, $rootScope, session, notification, $state)->
-  $scope.user = session.user.public
+  $scope.user = session.user
 
   $rootScope.$on('$stateChangeSuccess', ($event, toState, toParams, fromState, fromParams)->
     if toState.loginRequired? and
