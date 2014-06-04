@@ -48,10 +48,10 @@
   <filetree tree="explorer.fileTree"></filetree>
 
   <!-- Content -->
-  <div class="content" context-menu data-target="backgroundMenu" ng-click="explorer.selectedFile=null">
+  <div class="content" context-menu data-target="backgroundMenu" ng-click="selected.files={}">
     <!-- temporary hack -->
     <div drop-zone="explorer" style="width: 100%; height:100%">
-      <file ng-repeat="file in explorer.fileTree" file="file" selected-file="explorer.selectedFile"></file>
+      <file ng-repeat="file in explorer.fileTree" file="file" selected-files="selected.files" clipboard-files="selected.clipboard"></file>
     </div>
   </div>
 </div>

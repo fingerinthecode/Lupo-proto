@@ -1,6 +1,9 @@
 angular.module('fileManager').
 controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager) ->
-  $scope.selectedFile = null
+  $scope.selected = {
+    files: {}
+    clipboard: {}
+  }
 
   $scope.isRoot = ->
     path = $stateParams.path

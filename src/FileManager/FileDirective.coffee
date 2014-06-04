@@ -5,10 +5,10 @@ directive('file', ($state, session)->
     replace: true
     scope: {
       file: '='
-      selected: '=selectedFile'
+      selected: '=selectedFiles'
     }
     template: """
-              <div class="file" ng-dblclick="go()" ng-click="selectFile()" ng-class="{selected: isSelected(), 'file-list': !user.displayThumb, 'file-thumb': user.displayThumb}" draggable="true">
+              <div class="file" ng-dblclick="go()" ng-click="selectFile($event)" ng-class="{'is-selected': isSelected(), 'file-list': !user.displayThumb, 'file-thumb': user.displayThumb}" draggable="true">
                 <div class="file-icon" context-menu="selectFile()" data-target="fileMenu" >
                   <img ng-src="images/icon_{{ fileIcon() }}_24.svg" alt="icon" />
                 </div>
@@ -26,10 +26,19 @@ directive('file', ($state, session)->
 
 
       scope.isSelected = () ->
-        scope.selected == scope.file
+        return scope.selected.hasOwnProperty(scope.file._id)
 
-      scope.selectFile = () ->
-        scope.selected = scope.file
+      scope.isCut = () ->
+        cut = scope.clipboard.cut ? {}
+        return cut.hasOwnProperty(scope.file._id)
+
+      scope.selectFile = ($event = {}) ->
+        if not $event.ctrlKey ? false
+          scope.selected = {}
+        scope.selected[scope.file._id] = scope.file
+        if $event.preventDefault?
+          $event.preventDefault()
+          $event.stopPropagation()
 
       scope.isEditMode = () ->
         unless scope.isSelected()
