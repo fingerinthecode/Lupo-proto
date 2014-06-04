@@ -1,14 +1,14 @@
 angular.module('fileManager').
-directive('file', ($state)->
+directive('file', ($state, session)->
   return {
     restrict: 'E'
     replace: true
     scope: {
       file: '='
-      selected: '=selectedFile'
+      selected: '=selectedFiles'
     }
     template: """
-              <a ng-href="{{ downloadUrl }}" class="file file-list" ng-dblclick="go()" ng-click="selectFile()" ng-class="{selected: isSelected()}">
+              <div class="file" ng-dblclick="go()" ng-click="selectFile($event)" ng-class="{'is-selected': isSelected(), 'file-list': !user.displayThumb, 'file-thumb': user.displayThumb}" draggable="true">
                 <div class="file-icon" context-menu="selectFile()" data-target="fileMenu" >
                   <img ng-src="images/icon_{{ fileIcon() }}_24.svg" alt="icon" />
                 </div>
@@ -17,17 +17,28 @@ directive('file', ($state)->
                 <form name="changeName" ng-submit="changeName()">
                   <input type="text" ng-model="newName" ng-show="isEditMode()" select="isEditMode()"/>
                 </form>
-                <span class="file-size">{{ fileSize() }}</span>
+                <span class="file-size" ng-if="!file.isFolder()">{{ file.metadata.size |size }}</span>
                 <button ng-click="file.move('8DB8676E-71D0-4E3D-8663-87C21CB566C6')">MoveToParent</button>
-              </a>
+              </div>
               """
     link: (scope, element, attrs)->
+      scope.user = session.user
+
 
       scope.isSelected = () ->
-        scope.selected == scope.file
+        return scope.selected.hasOwnProperty(scope.file._id)
 
-      scope.selectFile = () ->
-        scope.selected = scope.file
+      scope.isCut = () ->
+        cut = scope.clipboard.cut ? {}
+        return cut.hasOwnProperty(scope.file._id)
+
+      scope.selectFile = ($event = {}) ->
+        if not $event.ctrlKey ? false
+          scope.selected = {}
+        scope.selected[scope.file._id] = scope.file
+        if $event.preventDefault?
+          $event.preventDefault()
+          $event.stopPropagation()
 
       scope.isEditMode = () ->
         unless scope.isSelected()
@@ -46,19 +57,6 @@ directive('file', ($state)->
           switch scope.file.metadata.name.split('.')[-1..][0]
             when "pdf" then scope.fileType = "pdf"
             else scope.fileType = "text"
-
-      scope.fileSize = () ->
-        unless scope.file.isFolder()
-          unity = 'B'
-          size = scope.file.metadata.size
-          if size > 1000
-            size /= 1000
-            unity = 'KB'
-            if size > 1000
-              size /= 1000
-              unity = 'MB'
-
-          return Math.round(size*10)/10 + unity
 
       scope.go = ->
         if scope.file.isFolder()

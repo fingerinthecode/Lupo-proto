@@ -1,7 +1,10 @@
 angular.module('session')
 .factory 'session', ->
   {
-    user: {}
+    user: {
+      session: {}
+      displayThumb: true
+    }
     flash: {}
 
     getMainPublicKey: ->

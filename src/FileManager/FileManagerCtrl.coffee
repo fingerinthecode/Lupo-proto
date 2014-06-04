@@ -1,35 +1,9 @@
 angular.module('fileManager').
-controller('FileManagerCtrl', ($scope, $stateParams, $state, session, fileManager, account) ->
-
-  $scope.selectedFile = null
-
-  updatedPath = ->
-    console.log "updatePath", $scope.fileTree
-    path = "/#{$stateParams.path}"
-    path = path.split('/')
-
-    save   = ''
-    parent = $scope.explorer.fileTree
-    for part in path
-      if part isnt ''
-        for child in parent ? []
-          if child.name == part and
-          child.type == 'dir'
-            save  += "/#{part}"
-            parent = child.content ? []
-            break
-
-    if "/#{$stateParams.path}" isnt save
-      $state.go('.', {
-        path: save
-      })
-
-    $scope.files = parent
-
-
-  $scope.$watch($stateParams, ->
-    #updatedPath()
-  )
+controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager) ->
+  $scope.selected = {
+    files: {}
+    clipboard: {}
+  }
 
   $scope.isRoot = ->
     path = $stateParams.path
@@ -42,16 +16,14 @@ controller('FileManagerCtrl', ($scope, $stateParams, $state, session, fileManage
     window.history.go(+1)
 
   $scope.goParent = ->
-    path = $stateParams.path.split('/')
-    path.pop()
-    path = path.join('/')
-    $state.go('.', {
-      path: path
-    }, {
-      location: true
-    })
+
+  $scope.toList = ->
+    session.user.displayThumb = false
+    console.log "toList"
+
+  $scope.toThumb = ->
+    session.user.displayThumb = true
 
   if session.isConnected()
-    console.log "path", $stateParams.path
-    explorer = fileManager.getInstance($stateParams.path || '', $scope, "explorer", updatedPath)
+    explorer = fileManager.getInstance($stateParams.path || '', $scope, "explorer")
 )

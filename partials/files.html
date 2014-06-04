@@ -48,10 +48,10 @@
   <filetree tree="explorer.fileTree"></filetree>
 
   <!-- Content -->
-  <div class="content" context-menu data-target="backgroundMenu" ng-click="explorer.selectedFile=null">
+  <div class="content" context-menu data-target="backgroundMenu" ng-click="selected.files={}">
     <!-- temporary hack -->
     <div drop-zone="explorer" style="width: 100%; height:100%">
-      <file ng-repeat="file in explorer.fileTree" file="file" selected-file="explorer.selectedFile"></file>
+      <file ng-repeat="file in explorer.fileTree" file="file" selected-files="selected.files" clipboard-files="selected.clipboard"></file>
     </div>
   </div>
 </div>
@@ -62,7 +62,7 @@
   <div class="statusbar-separator"></div>
   <div class="statusbar-information">File 17ko</div>
   <div class="statusbar-display">
-    <i class="icon icon-list"></i>
-    <i class="icon icon-thumb"></i>
+    <a ng-click="toList()"  class="icon icon-list"></a>
+    <a ng-click="toThumb()" class="icon icon-thumb"></a>
   </div>
 </div>

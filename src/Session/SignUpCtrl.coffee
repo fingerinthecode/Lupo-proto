@@ -1,6 +1,6 @@
 angular.module('session').
-controller('SignUpCtrl', ($scope, $state, account, usSpinnerService) ->
-  $scope.signUpSubmit = () ->
+controller('SignUpCtrl', ($scope, account, usSpinnerService, $state) ->
+  $scope.signUpSubmit = ->
     console.log $scope
     if $scope.password == $scope.password2
       usSpinnerService.spin('main')
