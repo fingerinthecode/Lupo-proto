@@ -7,6 +7,30 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
   if session.isConnected()
     explorer = fileManager.getInstance($stateParams.path, $scope, "explorer")
 
+  # -------------Shortcut-----------
+  $document.on('keypress', ($event)->
+    if $event.ctrlKey
+      if $event.charCode == 120 # Ctrl + X
+        $scope.selected.clipboard = {}
+        $scope.selected.clipboard.cut = angular.copy($scope.selected.files)
+        $scope.selected.files = {}
+      else if $event.charCode == 99 # Ctrl + C
+        $scope.selected.clipboard = {}
+        $scope.selected.clipboard.copy = angular.copy($scope.selected.files)
+        $scope.selected.files = {}
+      else if $event.charCode == 118 # Ctrl + V
+        # Paste from Cut
+        if $scope.clipboard.cut?
+          for key, file of $scope.clipboard.cut
+            console.log file
+        # Paste from Copy
+        else if $scope.clipboard.copy?
+          for key, file of $scope.clipboard.cut
+            console.log file
+        # Clear Clipboard
+        $scope.clipboard = {}
+  )
+
   # ----------Navigation Button------
   $scope.isRoot = ->
     path = $stateParams.path

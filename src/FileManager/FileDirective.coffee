@@ -10,7 +10,7 @@ directive('file', ($state, session)->
     }
     template: """
               <div class="file" ng-dblclick="go()" ng-click="selectFile($event)"
-              ng-class="{'is-selected': isSelected(), 'file-list': !user.displayThumb, 'file-thumb': user.displayThumb}"
+              ng-class="{'is-selected': isSelected(), 'file-list': !user.displayThumb, 'file-thumb': user.displayThumb, 'is-cut': isCut()}"
               draggable="true">
                 <div context-menu="selectFile({}, true)" data-target="fileMenu">
                   <img class="file-icon" ng-src="images/icon_{{ fileIcon() }}_24.svg" alt="icon" draggable="false"/>
