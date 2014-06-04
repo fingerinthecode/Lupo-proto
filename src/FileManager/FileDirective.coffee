@@ -1,5 +1,5 @@
 angular.module('fileManager').
-directive('file', ()->
+directive('file', ($state)->
   return {
     restrict: 'E'
     replace: true

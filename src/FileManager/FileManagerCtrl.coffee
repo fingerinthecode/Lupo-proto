@@ -51,45 +51,7 @@ controller('FileManagerCtrl', ($scope, $stateParams, $state, session, fileManage
       location: true
     })
 
-  unless session.isConnected()
-    #TMP autologin
-    account.signIn("user", "user").then =>
-      #assert(session.isConnected(), "must be connected")
-      explorer = fileManager.getInstance($stateParams.path, $scope, "explorer", updatedPath)
-
-  else
-    explorer = fileManager.getInstance($stateParams.path, $scope, "explorer", updatedPath)
-
-
+  if session.isConnected()
+    console.log "path", $stateParams.path
+    explorer = fileManager.getInstance($stateParams.path || '', $scope, "explorer", updatedPath)
 )
-###
-$scope.fileTree = [
-  {
-    name: 'Music'
-    type: 'dir'
-    path: '/Music'
-    content: [
-      {
-        name: "test"
-      }
-    ]
-  }
-  {
-    name: 'Documents'
-    type: 'dir'
-    path: '/Documents'
-    content: [
-      {
-        name: 'Test'
-        type: 'dir'
-        path: '/Documents/Test'
-        content: [
-          {
-            name: "test"
-          }
-        ]
-      }
-    ]
-  }
-]
-###

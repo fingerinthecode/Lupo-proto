@@ -54,8 +54,8 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File) ->
       new File({content: []}).save(masterKey)
       .then (root) =>
         console.log "root", root
-        this.createFile("README", "Welcome", root._id, masterKey)
-        this.createFolder("Shares", root._id, masterKey)
+        this.createFile("README", "Welcome", root._id, masterKey).then =>
+          this.createFolder("Shares", root._id, masterKey)
         return root._id
 
     instance: {
@@ -63,26 +63,25 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File) ->
       current:  -1
       watchers: []
 
-      goForward: (toId) ->
-        console.log "goForward", toId
+      goForward: (to) ->
+        console.log "goForward", to
         assert.defined this.current, "this.current", "goForward"
         assert.defined this.history, "this.history", "goForward"
         assert.custom(
           this.current < this.history.length
           "<goForward> this.current >= this.history.length")
         if this.current + 1 >= this.history.length
-          unless toId?
+          unless to?
             return
 
-        folderId = if toId then toId else this.history[this.current + 1]
-        folder = new File({_id: folderId})
+        folder = if to? then to else new File({_id: this.history[this.current + 1]})
         folder.listContent().then (list) =>
           assert.defined list, "list", "goForward"
           this.fileTree = list
           this.current += 1
-          if toId?
+          if to?
             delete this.history[this.current..]
-            this.history[this.current] = toId
+            this.history[this.current] = to._id
           this.notifyWatchers()
 
       goBackward: ->
@@ -92,13 +91,13 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File) ->
           this.current -= 1
           this.notifyWatchers()
 
-      goToFolder: (file) ->
+      goToFolder: (folder) ->
         console.log "goToFolder", file
-        assert.defined file, "file", "goToFolder"
-        assert.defined file.isFolder, "file.isFolder", "goToFolder"
-        if file.isFolder()
-          assert.defined file.id, "file.id", "goToFolder"
-          this.goForward(file.id)
+        assert.defined folder, "file", "goToFolder"
+        assert.defined folder.isFolder, "folder.isFolder", "goToFolder"
+        if folder.isFolder()
+          assert.defined folder.id, "folder.id", "goToFolder"
+          this.goForward(folder)
 
       currentId: ->
         assert.defined this.current, "this.current", "currentId"
@@ -115,6 +114,34 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File) ->
         assert.defined this.watchers, "this.watchers", "addWatcher"
         for watcher in this.watchers
           watcher.call()
+
+      getShares: () ->
+        console.log "getShares", session
+        publicKeyId = crypto.publicKeyIdFromKey(session.getMainPublicKey())
+        console.log publicKeyId
+        @shares = []
+        storage.query 'proto/getShares', {key: publicKeyId}
+        .then (list) =>
+          @shares = new File(
+            _id: "shares"
+            metadata:
+              name: 'Partages'
+              type: 0
+            content: []
+          )
+          for share in list.rows
+            s = crypto.asymDecrypt(
+              session.getMainPrivateKey()
+              share.value
+            )
+            console.log s
+            @shares.content.push {
+              _id: s.docId
+              key: s.key
+            }
+            @fileTree.push @shares
+            console.log @fileTree[-1..][0]
+
 
       addFile: (metadata, content) ->
         _funcName = 'addFile'
@@ -155,7 +182,7 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File) ->
 
     }
 
-    getInstance: (path, scope, scopeVar, watcher) ->
+    getInstance: (path, scope, scopeVar, user) ->
       _funcName = "getInstance"
       console.log _funcName, path
       if path is "" or path is "/"
@@ -163,14 +190,15 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File) ->
       else
         folderId = path[1..]
       assert.defined folderId, "folderId", _funcName
-      this.instance.goForward(folderId).finally(
+      console.log "shares", this.instance.shares
+      folder = if folderId == "shares" then this.instance.shares else new File({_id: folderId})
+      this.instance.goForward(folder).finally(
         =>
-          console.log "moved to folderId"
+          console.log "moved to folderId", folderId
           unless scope[scopeVar]?
             scope[scopeVar] = this.instance
-          #this.instance.addWatcher(watcher)
-          #FIXME: why notify is needed by FileDirective and not Tree??
-          this.instance.notifyWatchers()
+          unless this.instance.shares
+            this.instance.getShares()
         (err) =>
           console.error(err)
       )

@@ -2,7 +2,7 @@ angular.module('session')
 .factory 'User', (assert, storage) ->
   class User
     constructor: (login, username, masterKey, privateKey, publicKey, rootFolder) ->
-      console.log "registerSession", login, username
+      console.log "User", login, username
       @public = {}
       @private = {}
       @public.username    = username
@@ -17,3 +17,9 @@ angular.module('session')
       console.log _funcName, username
       assert.defined username, "username", _funcName
       #storage.getView 'users',
+      storage.query(
+        "proto/getUserByName"
+        {
+          key: username
+        }
+      )

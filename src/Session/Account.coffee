@@ -2,6 +2,8 @@ angular.module('session')
 .factory 'account', (session, User, crypto, fileManager, storage) ->
   {
     getMainDocId: (login, password) ->
+      _funcName = "getMainDocId"
+      console.log _funcName, login
       crypto.hash(login + password, 32)
 
     signUp: (login, password, publicName) ->
@@ -16,12 +18,12 @@ angular.module('session')
       privateUserDoc._id = this.getMainDocId(login, password)
       assert(privateUserDoc._id?)
 
-      crypto.createRSAKeys(1024).then (keys) =>
+      crypto.createRSAKeys(2048).then (keys) =>
         # public doc
         storage.save({
-          name: username
-          publicKey: keys.public
-          _id: crypto.hash(keys.public)
+          "name": username
+          "publicKey": keys.public
+          "_id": crypto.publicKeyIdFromKey(keys.public)
         }).then (publicDoc) =>
           fileManager.createRootFolder(masterKey).then (rootId) =>
             privateUserDoc.data = {
@@ -36,10 +38,11 @@ angular.module('session')
                 keys.private, keys.public, rootId)
 
     signIn: (login, password) ->
-      console.log "signIn"
-      _id = this.getMainDocId(login, password)
+      console.log "signIn", login
+      _id = @getMainDocId(login, password)
       storage.get(_id).then(
         (privateDoc) =>
+          console.log privateDoc
           masterKey = crypto.getMasterKey(password, privateDoc.salt)
           try
             crypto.decryptDataField(masterKey, privateDoc)
@@ -48,15 +51,11 @@ angular.module('session')
                 console.log "publicDoc", publicDoc
                 session.user = new User(
                   login, publicDoc.name, masterKey
-                  privateDoc.data.privateKey, privateDoc.data.publicKey,
+                  privateDoc.data.privateKey, publicDoc.publicKey,
                   privateDoc.data.rootId)
-              (err) =>
-                return 'no public doc'
             )
           catch SyntaxError
             return 'wrong password'
-        (err) =>
-          return 'no corresponding private doc'
       )
 
     signOut: ->

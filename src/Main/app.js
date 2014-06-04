@@ -1,4 +1,5 @@
 module.exports = {
-  rewrites:             require('./rewrites'),
-  language:             "javascript"
+  rewrites: require('./rewrites'),
+  views: require('./views'),
+  language: "javascript"
 }
