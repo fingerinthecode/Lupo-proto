@@ -6,23 +6,26 @@ directive('file', ($state, session)->
     scope: {
       file: '='
       selected: '=selectedFiles'
+      clipboard: '=clipboardFiles'
     }
     template: """
-              <div class="file" ng-dblclick="go()" ng-click="selectFile($event)" ng-class="{'is-selected': isSelected(), 'file-list': !user.displayThumb, 'file-thumb': user.displayThumb}" draggable="true">
-                <div class="file-icon" context-menu="selectFile()" data-target="fileMenu" >
-                  <img ng-src="images/icon_{{ fileIcon() }}_24.svg" alt="icon" />
+              <div class="file" ng-dblclick="go()" ng-click="selectFile($event)"
+              ng-class="{'is-selected': isSelected(), 'file-list': !user.displayThumb, 'file-thumb': user.displayThumb}"
+              draggable="true">
+                <div context-menu="selectFile({}, true)" data-target="fileMenu">
+                  <img class="file-icon" ng-src="images/icon_{{ fileIcon() }}_24.svg" alt="icon" draggable="false"/>
+
+                  <div class="file-title" ng-hide="isEditMode()">{{ file.metadata.name }}</div>
+                  <input type="text" ng-model="newName" ng-show="isEditMode()" ng-blur="changeName(true)" ng-keypress="changeName($event)" select="isEditMode()"/>
+
+                  <span class="file-size" ng-if="!file.isFolder()">{{ file.metadata.size |size }}</span>
+                  <button ng-click="file.move('8DB8676E-71D0-4E3D-8663-87C21CB566C6')">MoveToParent</button>
                 </div>
-                <div class="file-title" context-menu="selectFile()"
-                    data-target="fileMenu" ng-hide="isEditMode()">{{ file.metadata.name }}</div>
-                <form name="changeName" ng-submit="changeName()">
-                  <input type="text" ng-model="newName" ng-show="isEditMode()" select="isEditMode()"/>
-                </form>
-                <span class="file-size" ng-if="!file.isFolder()">{{ file.metadata.size |size }}</span>
-                <button ng-click="file.move('8DB8676E-71D0-4E3D-8663-87C21CB566C6')">MoveToParent</button>
               </div>
               """
     link: (scope, element, attrs)->
-      scope.user = session.user
+      scope.user    = session.user
+      scope.newName = scope.file.metadata.name
       # ----------------------Selection-------------------------
       ###
       # selectFile
@@ -48,19 +51,22 @@ directive('file', ($state, session)->
       scope.isSelected = () ->
         return scope.selected.hasOwnProperty(scope.file._id)
 
+      # -------------------Mode-------------------------
+      # If the file is cut
       scope.isCut = () ->
         cut = scope.clipboard.cut ? {}
         return cut.hasOwnProperty(scope.file._id)
 
       scope.isEditMode = () ->
-        unless scope.isSelected()
-          scope.file.nameEditable = false
-        scope.isSelected() && scope.file.nameEditable
-      scope.newName = scope.file.metadata.name
+        return scope.file.nameEditable
 
-      scope.changeName = () ->
-        scope.file.rename(scope.newName)
-        scope.file.nameEditable = false
+      # -------------------Rename-----------------------
+      scope.changeName = ($event = {}) ->
+        if $event == true or $event.keyCode == 13
+          scope.file.rename(scope.newName)
+          scope.file.nameEditable = false
+          $event.preventDefault()
+          $event.stopPropagation()
 
       scope.fileIcon = () ->
         if scope.file.isFolder()

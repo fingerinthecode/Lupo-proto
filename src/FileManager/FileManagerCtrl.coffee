@@ -1,10 +1,13 @@
 angular.module('fileManager').
-controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager) ->
+controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $document) ->
   $scope.selected = {
     files: {}
     clipboard: {}
   }
+  if session.isConnected()
+    explorer = fileManager.getInstance($stateParams.path, $scope, "explorer")
 
+  # ----------Navigation Button------
   $scope.isRoot = ->
     path = $stateParams.path
     return path is '' or path is '/'
@@ -17,6 +20,7 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager) ->
 
   $scope.goParent = ->
 
+  # -------------Display Mode--------
   $scope.toList = ->
     session.user.displayThumb = false
     console.log "toList"
@@ -24,6 +28,4 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager) ->
   $scope.toThumb = ->
     session.user.displayThumb = true
 
-  if session.isConnected()
-    explorer = fileManager.getInstance($stateParams.path, $scope, "explorer")
 )
