@@ -8,7 +8,7 @@ angular.module('fileManager')
     replace: true
     template: """
               <div class="tree">
-                <tree-element ng-repeat="element in tree" element="element"></tree-element>
+                <div ng-repeat="element in tree" ng-include="'partials/treeElement.html'"></div>
               </div>
               """
   }
