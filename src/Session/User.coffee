@@ -5,7 +5,7 @@ angular.module('session')
       console.log "User", login, username
       @keyRing = {}
 
-    @getByName: (username) ->
+    @getByName: (username = '') ->
       _funcName = "getByName"
       console.log _funcName, username
       assert.defined username, "username", _funcName

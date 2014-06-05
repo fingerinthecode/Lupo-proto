@@ -1,16 +1,19 @@
 <!-- FileMenu -->
 <ul id="fileMenu" class="context-menu" role="context-menu">
-  <li class="context-menu-item"><a tabindex="-1" ng-click="openFile()"  >Open</a></li>
-  <li class="context-menu-item"><a tabindex="-1" ng-click="shareFiles()">Share</a></li>
-  <li class="context-menu-item"><a tabindex="-1" ng-click="renameFiles()">Rename</a></li>
-  <li class="context-menu-item"><a tabindex="-1" ng-click="deleteFiles()">Delete</a></li>
+  <li class="context-menu-item" ng-class="{'is-disable': singleSelect()}"     ><a tabindex="-1" ng-click="openFile()"   >Open</a></li>
+  <li class="context-menu-item" ng-class="{'is-disable': singleSelect()}"     ><a tabindex="-1" ng-click="renameFile()" >Rename</a></li>
+  <li class="context-menu-item"                                               ><a tabindex="-1" ng-click="shareFiles()" >Share</a></li>
+  <li class="context-menu-item"                                               ><a tabindex="-1" ng-click="cutFiles()"   >Cut</a></li>
+  <li class="context-menu-item"                                               ><a tabindex="-1" ng-click="copyFiles()"  >Copy</a></li>
+  <li class="context-menu-item" ng-class="{'is-disable': clipboardNotEmpty()}"><a tabindex="-1" ng-click="pasteFiles()" >Paste</a></li>
+  <li class="context-menu-item"                                               ><a tabindex="-1" ng-click="deleteFiles()">Delete</a></li>
 </ul>
 
 <!-- BackgroundMenu -->
 <ul id="backgroundMenu" class="context-menu" role="context-menu">
   <li class="context-menu-item"><a tabindex="-1" ng-click="explorer.createFile()"  >New File</a></li>
   <li class="context-menu-item"><a tabindex="-1" ng-click="explorer.createFolder()">New Folder</a></li>
-  <li class="context-menu-item"><a tabindex="-1" ng-click="normalRightClick = true">Normal right click</a></li>
+  <li class="context-menu-item"><a tabindex="-1" ng-click=""                       >Normal right click</a></li>
 </ul>
 
 <!-- Nav Bar -->

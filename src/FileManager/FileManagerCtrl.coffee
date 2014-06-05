@@ -9,27 +9,13 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
 
   # -------------Shortcut-----------
   $document.on('keypress', ($event)->
-    if $event.ctrlKey
-      if $event.charCode == 120 # Ctrl + X
-        $scope.selected.clipboard = {}
-        $scope.selected.clipboard.cut = angular.copy($scope.selected.files)
-        $scope.selected.files = {}
-      else if $event.charCode == 99 # Ctrl + C
-        $scope.selected.clipboard = {}
-        $scope.selected.clipboard.copy = angular.copy($scope.selected.files)
-        $scope.selected.files = {}
-      else if $event.charCode == 118 # Ctrl + V
-        # Paste from Cut
-        if $scope.clipboard.cut?
-          for key, file of $scope.clipboard.cut
-            console.log file
-        # Paste from Copy
-        else if $scope.clipboard.copy?
-          for key, file of $scope.clipboard.cut
-            console.log file
-        # Clear Clipboard
-        $scope.clipboard = {}
+    if $event.ctrlKey or $event.metaKey
+      switch $event.charCode
+        when 120 then $scope.cutFiles()    # + X
+        when 99  then $scope.copyFiles()   # + C
+        when 120 then $scope.pasteFiles()  # + V
   )
+
 
   # ----------Navigation Button------
   $scope.isRoot = ->
@@ -53,6 +39,12 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
     session.user.displayThumb = true
 
   # ---------Context-Menu------------
+  $scope.singleSelect = ->
+    return Object.keys($scope.selected.files).length > 1
+
+  $scope.clipboardNotEmpty = ->
+    return Object.keys($scope.selected.clipboard).length == 0
+
   $scope.openFile = ->
     for key, file of $scope.selected.files
       file.getContent().then (content) =>
@@ -60,14 +52,35 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
         url = URL.createObjectURL(blob)
         $window.open(url, file.metadata.name)
 
+  $scope.renameFile = ->
+    for key, file of $scope.selected.files
+      file.nameEditable = true
+
   $scope.shareFiles = ->
     for key, file of $scope.selected.files
       file.share('Bob')
 
-  $scope.renameFile = ->
-    for key, file of $scope.selected.files
-      file.nameEditable = true
-      break
+  $scope.cutFiles = ->
+    $scope.selected.clipboard = {}
+    $scope.selected.clipboard.cut = angular.copy($scope.selected.files)
+    $scope.selected.files = {}
+
+  $scope.copyFiles = ->
+    $scope.selected.clipboard = {}
+    $scope.selected.clipboard.copy = angular.copy($scope.selected.files)
+    $scope.selected.files = {}
+
+  $scope.pasteFiles = ->
+    # Paste from Cut
+    if $scope.clipboard.cut?
+      for key, file of $scope.clipboard.cut
+        console.log file
+    # Paste from Copy
+    else if $scope.clipboard.copy?
+      for key, file of $scope.clipboard.cut
+        console.log file
+    # Clear Clipboard
+    $scope.clipboard = {}
 
   $scope.deleteFiles = ->
     for key, file of $scope.selected.files
