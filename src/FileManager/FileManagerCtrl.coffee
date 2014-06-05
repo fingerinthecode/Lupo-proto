@@ -1,5 +1,5 @@
 angular.module('fileManager').
-controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $document) ->
+controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $document, $window) ->
   $scope.selected = {
     files: {}
     clipboard: {}
@@ -45,6 +45,11 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
     return Object.keys($scope.selected.clipboard).length == 0
 
   $scope.openFile = ->
+    for key, file of $scope.selected.files
+      file.getContent().then (content) =>
+        blob = new Blob([content])
+        url = URL.createObjectURL(blob)
+        $window.open(url, file.metadata.name)
 
   $scope.renameFile = ->
     for key, file of $scope.selected.files
