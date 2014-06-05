@@ -1,5 +1,5 @@
 angular.module('fileManager').
-controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $document) ->
+controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $document, $window) ->
   $scope.selected = {
     files: {}
     clipboard: {}
@@ -54,6 +54,11 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
 
   # ---------Context-Menu------------
   $scope.openFile = ->
+    for key, file of $scope.selected.files
+      file.getContent().then (content) =>
+        blob = new Blob([content])
+        url = URL.createObjectURL(blob)
+        $window.open(url, file.metadata.name)
 
   $scope.shareFiles = ->
     for key, file of $scope.selected.files
