@@ -104,7 +104,7 @@ directive('file', ($state, session)->
       scope.go = ->
         if scope.file.isFolder()
           $state.go('.', {
-            path: "/#{scope.file._id}"
+            path: scope.file._id
           }, {
             location: true
           })

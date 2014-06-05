@@ -16,7 +16,6 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
         when 120 then $scope.pasteFiles()  # + V
   )
 
-
   # ----------Navigation Button------
   $scope.isRoot = ->
     path = $stateParams.path
