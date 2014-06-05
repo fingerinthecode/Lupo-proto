@@ -129,19 +129,22 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File) ->
               type: 0
             content: []
           )
-          for share in list.rows
-            s = crypto.asymDecrypt(
+          for shareDoc in list
+            clearShareDoc = crypto.asymDecrypt(
               session.getMainPrivateKey()
-              share.value
+              shareDoc
             )
-            console.log s
+            console.log clearShareDoc
             @shares.content.push {
-              _id: s.docId
-              key: s.key
+              _id: clearShareDoc.docId
+              key: clearShareDoc.key
             }
             @fileTree.push @shares
             console.log @fileTree[-1..][0]
 
+
+      getFileContent: (id) ->
+        new File({_id: id}).getContent()
 
       addFile: (metadata, content) ->
         _funcName = 'addFile'
@@ -184,24 +187,27 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File) ->
 
     getInstance: (path, scope, scopeVar, user) ->
       _funcName = "getInstance"
-      console.log _funcName, path
-      if path is "" or path is "/"
-        folderId = session.getRootFolder()
-      else
-        folderId = path[1..]
-      assert.defined folderId, "folderId", _funcName
-      console.log "shares", this.instance.shares
-      folder = if folderId == "shares" then this.instance.shares else new File({_id: folderId})
-      this.instance.goForward(folder).finally(
-        =>
-          console.log "moved to folderId", folderId
-          unless scope[scopeVar]?
-            scope[scopeVar] = this.instance
-          unless this.instance.shares
-            this.instance.getShares()
-        (err) =>
-          console.error(err)
-      )
+      console.log _funcName, path, (if $scopeVar? then "$scope." + scopeVar), user
+      if path?
+        if path is "" or path is "/"
+          folderId = session.getRootFolderId()
+        else
+          folderId = path[1..]
+        assert.defined folderId, "folderId", _funcName
+        console.log "shares", this.instance.shares
+        console.log "folderId", folderId
+        folder = if folderId == "shares" then this.instance.shares else new File({_id: folderId})
+        this.instance.goForward(folder).finally(
+          =>
+            console.log "moved to folderId", folderId
+            if scope? and scopeVar
+              unless scope[scopeVar]?
+                scope[scopeVar] = this.instance
+              unless this.instance.shares
+                this.instance.getShares()
+          (err) =>
+            console.error(err)
+        )
       return this.instance
   }
 )
