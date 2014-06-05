@@ -8,22 +8,22 @@ angular.module('session')
     flash: {}
 
     getMainPublicKey: ->
-      @user.private.publicKey
+      @user.publicKey
 
     getMainPrivateKey: ->
-      @user.private.privateKey
+      @user.privateKey
 
     getMasterKey: ->
-      @user.private.masterKey
+      @user.masterKey
 
     getRootFolder: ->
-      @user.private.rootFolder
+      @user.rootFolder
 
     isConnected: ->
-      @user.private.login?
+      @user.login?
 
     isConnected: ->
-      @user? and @user.private and @user.private.login?
+      @user? and @user.login?
 
     save: (key, value) ->
       @user.session[key] = value
