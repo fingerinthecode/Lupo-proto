@@ -30,8 +30,9 @@ directive('file', ($state, session)->
       # ------------------DragAndDrop----------------------------
       element.on('dragstart', ($event)->
         $img = element.find('img')
+
         $event.dataTransfer.effectAllowed = "move"
-        $event.dataTransfer.setData('unused data', 'unused data')
+        $event.dataTransfer.setData('DownloadURL', "application/zip:Test:https://codeload.github.com/LupoLibero/Lupo-proto/zip/master")
         $event.dataTransfer.setDragImage($img[0], 10, 10)
         scope.selectFile() if not scope.isSelected()
       )
