@@ -5,10 +5,8 @@ factory('storage', ($q, $location, assert, pouchdb) ->
   remoteDb = new PouchDB(dbUrl)
   localDb = new PouchDB('lupo-proto')
   #TMP
-  PouchDB.replicate(remoteDb, localDb)
-  #PouchDB.sync(localDb, remoteDb, {
-  #  live: true
-  #}).on('change', (e) -> console.log(e))
+  PouchDB.replicate(localDb, remoteDb)
+  #.on('change', (e) -> console.log(e))
   #.on('complete', (e) -> console.log(e))
   #.on('error', (e) -> console.error(e))
 
@@ -18,40 +16,90 @@ factory('storage', ($q, $location, assert, pouchdb) ->
       _funcName = _indent + "storage.get"
       console.log _funcName, _id
       deferred = $q.defer()
-      localDb.get(_id, (err, result) =>
+      localDeferred = $q.defer()
+      otherOneFailed = false
+      localDb.get _id, (err, result) =>
         if err?
-          console.error err
-          deferred.reject err
+          console.error "local", err
+          if otherOneFailed
+            deferred.reject err
+          otherOneFailed = true
         else
           deferred.resolve result
-      )
+      remoteDb.get _id, (err, result) =>
+        if err?
+          console.error "remote", err
+          if otherOneFailed
+            deferred.reject err
+          otherOneFailed = true
+        else
+          deferred.resolve result
       return deferred.promise
 
-    save: (doc) ->
-      _funcName = _indent + "storage.save"
-      console.log _funcName
+    _save: (doc, remoteAndLocal) ->
       deferred = $q.defer()
-      method = if doc._id? then "put" else "post"
+      if doc._id?
+        method = "put"
+      else
+        method = "post"
+        delete doc._id
+        delete doc._rev
       console.log method, doc
-      localDb[method](doc)
-      .then((result) =>
+      (if remoteAndLocal
+        localDb[method](doc)
+      else
+        remoteDb[method](doc)
+      )
+      .then (result) =>
         deferred.resolve(result)
-      ).catch (err) =>
-        console.error(err)
+      .catch (err) =>
+        console.error(err, method)
         deferred.reject(err)
       return deferred.promise
 
+    saveLocal: (doc) ->
+      _funcName = _indent + "storage.saveLocal"
+      console.log _funcName
+      @_save doc, true
+
+    saveRemoteOnly: (doc) ->
+      _funcName = _indent + "storage.saveRemoteOnly"
+      console.log _funcName
+      @_save doc, false
+
+    save: (doc) ->
+      @_save(doc, true)
+
+
+    queryRemote: (fun, options) ->
+      deferred = $q.defer()
+      remoteDb.query fun, options, (err, result) =>
+        if result.rows.length == 0
+            deferred.resolve []
+        else
+          deferred.resolve (doc.value for doc in result.rows)
+      return deferred.promise
 
     query: (fun, options) ->
       _funcName = _indent + "query"
       console.log _funcName, fun, options
       deferred = $q.defer()
-      localDb.query fun, options
-      .then (result) =>
-        deferred.resolve result
-      .catch (err) =>
-        console.error err
-        deferred.reject err
+      localDeferred = $q.defer()
+      otherOneFailed = true
+      localDb.query fun, options, (err, result) =>
+        if result.rows.length == 0
+          if otherOneFailed
+            deferred.resolve []
+          otherOneFailed = true
+        else
+          deferred.resolve (doc.value for doc in result.rows)
+      remoteDb.query fun, options, (err, result) =>
+        if result.rows.length == 0
+          if otherOneFailed
+            deferred.resolve []
+          otherOneFailed = true
+        else
+          deferred.resolve (doc.value for doc in result.rows)
       return deferred.promise
   }
 )
