@@ -5,7 +5,7 @@ directive('file', ($state, session)->
     replace: true
     scope: {
       file: '='
-      selected: '=selectedFiles'
+      selected:  '=selectedFiles'
       clipboard: '=clipboardFiles'
     }
     template: """
@@ -37,7 +37,8 @@ directive('file', ($state, session)->
         scope.selectFile() if not scope.isSelected()
       )
       element.on('dragover', ($event)->
-        if scope.file.isFolder() and scope.file._id != $event.dataTransfer.getData('id')
+        if scope.file.isFolder() and
+        not scope.selected.hasOwnProperty(scope.file._id)
           element.attr('droppable', true)
           $event.dataTransfer.dropEffect = 'move'
         else
@@ -47,7 +48,7 @@ directive('file', ($state, session)->
         $event.preventDefault()
       )
       element.on('drop', ($event)->
-        for file in scope.selected
+        for key, file of scope.selected
           file.move(scope.file._id)
         scope.selected = {}
       )

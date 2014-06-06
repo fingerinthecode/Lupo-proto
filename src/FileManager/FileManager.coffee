@@ -1,5 +1,5 @@
 angular.module('fileManager').
-factory('fileManager', ($q, assert, crypto, session, storage, cache, File) ->
+factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stateParams) ->
   TYPE_FOLDER = 0
   TYPE_FILE = 1
 
@@ -57,6 +57,13 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File) ->
         this.createFile("README", "Welcome", root._id, masterKey).then =>
           this.createFolder("Shares", root._id, masterKey)
         return root._id
+
+    getCurrentDirId: ->
+      if $stateParams.path? and
+      $stateParamas.path != ''
+        return $stateParams.path
+      else
+        return session.getRootFolderId()
 
     instance: {
       history:  []

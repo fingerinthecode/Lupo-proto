@@ -70,10 +70,11 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
     $scope.selected.files = {}
 
   $scope.pasteFiles = ->
+    current_id = explorer.getCurrentDirId()
     # Paste from Cut
     if $scope.clipboard.cut?
       for key, file of $scope.clipboard.cut
-        console.log file
+        file.move(current_id)
     # Paste from Copy
     else if $scope.clipboard.copy?
       for key, file of $scope.clipboard.cut
