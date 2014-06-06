@@ -16,8 +16,8 @@ angular.module('session')
     getMasterKey: ->
       @user.masterKey
 
-    getRootFolder: ->
-      @user.rootFolder
+    getRootFolderId: ->
+      @user.rootFolderId
 
     isConnected: ->
       @user.login?
