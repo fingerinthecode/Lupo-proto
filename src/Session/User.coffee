@@ -16,3 +16,6 @@ angular.module('session')
           key: username
         }
       )
+
+    @all: ->
+      storage.queryRemote("proto/getUserByName")

@@ -7,8 +7,3 @@ angular.module('fileManager')
       controller:  'FileManagerCtrl'
       loginRequired: true
     })
-    .state('download', {
-      url:         '/files{path:.*}'
-      templateUrl: 'partials/download.html'
-      controller:  'FileDownloadCtrl'
-    })

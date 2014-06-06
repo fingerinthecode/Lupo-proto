@@ -86,15 +86,18 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
         deferred.resolve(doc)
       return deferred.promise
 
-    _saveDoc: (doc, key) ->
+    _saveDoc: (doc, key, remoteOnly) ->
       _funcName = "_saveDoc"
-      console.debug _funcName, doc
+      console.debug _funcName, doc, remoteOnly
       assert.defined(doc, "doc", _funcName)
       unless key? or key? and key.length
         key = session.getMasterKey()
       assert.defined(key, "key", _funcName)
       crypto.encryptDataField(key, doc)
-      storage.save(doc)
+      if remoteOnly
+        storage.saveRemoteOnly(doc)
+      else
+        storage.save(doc)
 
     #
     # Public methods
@@ -187,12 +190,15 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
         data: @content
       }
       if @metadata?
-        content._id = if @metadata.contentId? then @metadata.contentId
+        if @metadata.contentId?
+          content._id = @metadata.contentId
       else
-        content._id = if @_id then @_id
-        content._rev = if @_rev then @_rev
+        if @_id
+          content._id = @_id
+         if @_rev
+          content._rev = @_rev
       @_preventConflict(content, key).then (content) =>
-        @_saveDoc(content, key)
+        @_saveDoc(content, key, true)
 
     listContent: (key) ->
       _funcName = "listContent"
@@ -275,7 +281,7 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
       #TMP: later share would have a "user" parameter
       User.getByName(username).then(
         (list) =>
-          user = list.rows[0].value
+          user = list[0]
           console.log "user", user
           shareDoc = {
             "_id": crypto.hash(user._id + @_id, 32)

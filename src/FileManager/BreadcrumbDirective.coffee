@@ -27,7 +27,7 @@ angular.module('fileManager')
           })
 
           parent_id = file.metadata.parentId
-          if parent_id? and parent_id != session.getRootFolder()
+          if parent_id? and parent_id != session.getRootFolderId()
             getPath(parent_id)
   }
 )
