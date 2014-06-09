@@ -1,4 +1,4 @@
-angular.module('fileManager', ['pouchdb', 'session', 'directive'])
+angular.module('fileManager', ['pouchdb', 'session', 'directive', 'ngTagsInput'])
 .config ($sceDelegateProvider) ->
   $sceDelegateProvider.resourceUrlWhitelist [
     'self'

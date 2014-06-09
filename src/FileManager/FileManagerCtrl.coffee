@@ -1,5 +1,7 @@
 angular.module('fileManager').
-controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $document, $window) ->
+controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $document, $window, History, User, $q) ->
+  $scope.users = [{name: 'test'}, {name: 'machin'}, {name: 'truc'}, {name: 'coucou'}, {name: 'pff'}]
+  $scope.share = []
   $scope.selected = {
     files: {}
     clipboard: {}
@@ -18,6 +20,16 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
   )
 
   # ----------Navigation Button------
+  $scope.loadUsers = ($query)->
+    defer   = $q.defer()
+    results = []
+    for user in $scope.users
+      reg = new RegExp("^#{$query}.*")
+      if user.name.match(reg)
+        results.push(user)
+    defer.resolve(results)
+    return defer.promise
+
   $scope.isRoot = ->
     path = $stateParams.path
     return path is '' or path is '/'
@@ -54,9 +66,15 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
     for key, file of $scope.selected.files
       file.nameEditable = true
 
+  $scope.modalShare = ->
+    $scope.shareModal = true
+  $scope.closeModalShare = ->
+    $scope.shareModal = false
+
   $scope.shareFiles = ->
-    for key, file of $scope.selected.files
-      file.share('Bob')
+    for user in $scope.share
+      for file in $scope.selected.files
+        file.share(user)
 
   $scope.cutFiles = ->
     $scope.selected.clipboard = {}

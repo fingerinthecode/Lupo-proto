@@ -29,7 +29,6 @@ directive('file', ($state, session)->
       # ------------------DragAndDrop----------------------------
       element.on('dragstart', ($event)->
         $img = element.find('img')
-
         $event.dataTransfer.effectAllowed = "move"
         $event.dataTransfer.setData('DownloadURL', "application/zip:Test:https://codeload.github.com/LupoLibero/Lupo-proto/zip/master")
         $event.dataTransfer.setDragImage($img[0], 10, 10)
@@ -60,7 +59,6 @@ directive('file', ($state, session)->
       ###
       scope.selectFile = ($event = {}, ifnoselection = false) ->
         if ifnoselection and Object.keys?(scope.selected).length > 0
-          console.log 'disable selection'
           return true
 
         if not $event.ctrlKey ? false
