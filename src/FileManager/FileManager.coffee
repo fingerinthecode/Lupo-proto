@@ -269,37 +269,6 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
           (err) =>
             console.error(err)
         )
-      console.log _funcName, path, (if $scopeVar? then "$scope." + scopeVar), user
-      if path?
-        if path is "" or path is "/"
-          folderId = session.getRootFolderId()
-        else
-          folderId = path
-        assert.defined folderId, "folderId", _funcName
-        console.log "shares", this.instance.shares
-        console.log "folderId", folderId
-        folder = if folderId == "shares" then this.instance.shares else new File({_id: folderId})
-        this.instance.goForward(folder).finally(
-          =>
-            console.log "moved to folderId", folderId
-            if scope? and scopeVar
-              unless scope[scopeVar]?
-                scope[scopeVar] = this.instance
-              unless this.instance.shares
-                this.instance.getShares()
-          (err) =>
-            console.error(err)
-        )
-              unless this.instance.shares
-                this.instance.getShares()
-          (err) =>
-            console.error(err)
-        )
-            unless this.instance.shares
-              this.instance.getShares()
-          (err) =>
-            console.error(err)
-        )
       return this.instance
   }
 )
