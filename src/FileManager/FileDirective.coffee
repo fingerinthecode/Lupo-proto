@@ -58,8 +58,8 @@ directive('file', ($state, session)->
       # $event (optional): javascript click event
       # ifnoselection (optional): keep the selection if not empty
       ###
-      scope.selectFile = ($event = {}, ifnoselection = false) ->
-        if ifnoselection and Object.keys?(scope.selected).length > 0
+      scope.selectFile = ($event = {}, contextMenu = false) ->
+        if contextMenu and scope.selected.hasOwnProperty(scope.file._id)
           return true
 
         if not $event.ctrlKey ? false
