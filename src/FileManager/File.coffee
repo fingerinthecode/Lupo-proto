@@ -1,5 +1,5 @@
 angular.module('fileManager').
-factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
+factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
   #TMP
   TYPE_FOLDER = 0
   TYPE_FILE = 1
@@ -280,6 +280,14 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
             console.error("move roll back")
             @addToFolder(@metadata.parentId)
         )
+
+    openFolder: =>
+      if @isFolder()
+        $state.go('.', {
+          path: @_id
+        }, {
+          location: true
+        })
 
     share: (username) ->
       _funcName = "share"

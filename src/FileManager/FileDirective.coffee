@@ -9,7 +9,7 @@ directive('file', ($state, session)->
       clipboard: '=clipboardFiles'
     }
     template: """
-              <div class="file" ng-dblclick="go()" ng-click="selectFile($event)"
+              <div class="file" ng-dblclick="file.openFolder()" ng-click="selectFile($event)"
               ng-class="{'is-selected': isSelected(), 'file-list': !user.displayThumb, 'file-thumb': user.displayThumb, 'is-cut': isCut()}"
               draggable="true">
                 <div context-menu="selectFile({}, true)" data-target="fileMenu">
@@ -99,14 +99,6 @@ directive('file', ($state, session)->
           switch scope.file.metadata.name.split('.')[-1..][0]
             when "pdf" then scope.fileType = "pdf"
             else scope.fileType = "text"
-
-      scope.go = ->
-        if scope.file.isFolder()
-          $state.go('.', {
-            path: scope.file._id
-          }, {
-            location: true
-          })
 
       #scope.downloadUrl = 'data:' + scope.file.mime + ';charset=utf-8,' + encodeURIComponent(scope.file.getContent())
   }
