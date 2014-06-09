@@ -6,8 +6,7 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     files: {}
     clipboard: {}
   }
-  $scope.History = History
-  explorer       = fileManager.getInstance($stateParams.path, $scope, "explorer") if session.isConnected()
+  $scope.explorer = fileManager.getInstance($stateParams.path) if session.isConnected()
 
   if $stateParams.slash != '/'
     $state.go('.', {
@@ -55,11 +54,9 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     return Object.keys($scope.selected.clipboard).length == 0
 
   $scope.openFile = ->
-    for key, file of $scope.selected.files
-      file.getContent().then (content) =>
-        blob = new Blob([content])
-        url = URL.createObjectURL(blob)
-        $window.open(url, file.metadata.name)
+    for i, file of $scope.selected.files
+      $scope.explorer.openFile(file)
+
 
   $scope.renameFile = ->
     for key, file of $scope.selected.files
@@ -100,5 +97,5 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
 
   $scope.deleteFiles = ->
     for key, file of $scope.selected.files
-      file.delete()
+      $scope.explorer.deleteFile(file)
 )

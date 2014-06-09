@@ -1,8 +1,8 @@
 angular.module('session')
 .factory 'User', (assert, storage) ->
   class User
-    constructor: (@login, @username, @masterKey, @privateKey, @publicKey, @rootFolderId) ->
-      console.log "User", login, username
+    constructor: (@username, @publicKey, @login, @masterKey, @privateKey, @rootFolderId) ->
+      console.log "User", login, username, @masterkey
       @keyRing = {}
 
     @getByName: (username = '') ->

@@ -99,6 +99,13 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
       else
         storage.save(doc)
 
+    _deleteDoc: (doc, key) ->
+      _funcName = "_deleteDoc"
+      console.log _funcName
+      assert.defined(doc, "doc", _funcName)
+      storage.del(doc)
+
+
     #
     # Public methods
     #
@@ -297,3 +304,10 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache) ->
         (err) =>
           console.error err
       )
+
+    remove: ->
+      _funcName = 'remove'
+      console.log _funcName
+      File.getFile(@metadata.parentId).then (currentParent) =>
+        assert.array currentParent.content, "currentParent.content", _funcName
+      @removeFromFolder().then =>

@@ -159,8 +159,11 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
         console.log _funcName, metadata
         assert.defined metadata.name, "metadata.name", _funcName
         assert.defined content, "content", _funcName
-        fm.createFile(metadata.name, content, this.currentId())
-        .then (file) =>
+        (if metadata.type == "" or metadata.type == TYPE_FOLDER
+          fm.createFolder(metadata.name, this.currentId())
+        else
+          fm.createFile(metadata.name, content, this.currentId())
+        ).then (file) =>
           this.fileTree.push file
 
       createFile: ->
@@ -182,19 +185,90 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
         basename = "new folder"
         i = 0
         name = basename
-        assert.defined this.fileTree, "this.fileTree", "createFolder"
-        assert.array this.fileTree, "this.fileTree", "createFolder"
-        while name in (f.name for f in this.fileTree)
+        assert.defined @fileTree, "this.fileTree", "createFolder"
+        assert.array   @fileTree, "this.fileTree", "createFolder"
+        while name in (f.name for f in @fileTree)
           i += 1
           name = basename + " " + i
-        fm.createFolder(name, this.currentId())
+        fm.createFolder(name, @currentId())
         .then (folder) =>
-          this.fileTree.push folder
+          @fileTree.push folder
 
+
+      openFile: (file) ->
+        console.log "openFile", file.name
+        StringToArrayBuffer = (str) ->
+          buf = new ArrayBuffer(str.length)
+          bufView = new Uint8Array(buf)
+          for i in [0..str.length-1]
+            bufView[i] = str.charCodeAt(i)
+          return buf
+
+        string2ArrayBuffer = (string) ->
+          console.log "string2ArrayBuffer"
+          deferred = $q.defer()
+          f = new FileReader()
+          f.onload = (e) ->
+            deferred.resolve e.target.result
+          b = new Blob([string])
+          console.log "blob", b
+          f.readAsArrayBuffer(b)
+          return deferred.promise
+
+        string2ArrayBuffer = (str) ->
+          buf = new ArrayBuffer(str.length)
+          bufView = new Uint8Array(buf)
+          for i in [0..str.length-1]
+            bufView[i] = str.charCodeAt(i)
+          return buf
+
+        file.getContent().then (content) =>
+          console.log "content", content
+          switch file.metadata.name.split('.')[-1..][0].toLowerCase()
+            when "pdf" then type = "application/pdf"
+            when "jpg" then type = "image/jpeg"
+            when "png" then type = "image/png"
+            when "mp3" then type = "audio/mpeg"
+            else type = "text/plain"
+          blob = new Blob([string2ArrayBuffer(content)], {type: type})
+          url = URL.createObjectURL(blob)
+          link = document.createElement('a')
+          link.href = url
+          link.download = file.metadata.name
+          e = document.createEvent('MouseEvents')
+          e.initEvent('click' ,true ,true)
+          link.dispatchEvent(e)
+
+      deleteFile: (file) ->
+        file.remove().then =>
+          for i, f of @fileTree
+            if f.metadata.name == file.metadata.name
+              delete @fileTree[i]
     }
 
-    getInstance: (path, scope, scopeVar, user) ->
+    getInstance: (path) ->
       _funcName = "getInstance"
+      console.log _funcName, path, (if $scopeVar? then "$scope." + scopeVar)
+      if path?
+        if path is "" or path is "/"
+          folderId = session.getRootFolderId()
+        else
+          folderId = path
+        assert.defined folderId, "folderId", _funcName
+        console.log "shares", this.instance.shares
+        console.log "folderId", folderId
+        folder = if folderId == "shares" then this.instance.shares else new File({_id: folderId})
+        this.instance.goForward(folder).finally(
+          =>
+            console.log "moved to folderId", folderId
+            if scope? and scopeVar
+              unless scope[scopeVar]?
+                scope[scopeVar] = this.instance
+              unless this.instance.shares
+                this.instance.getShares()
+          (err) =>
+            console.error(err)
+        )
       console.log _funcName, path, (if $scopeVar? then "$scope." + scopeVar), user
       if path?
         if path is "" or path is "/"
@@ -213,6 +287,16 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
                 scope[scopeVar] = this.instance
               unless this.instance.shares
                 this.instance.getShares()
+          (err) =>
+            console.error(err)
+        )
+              unless this.instance.shares
+                this.instance.getShares()
+          (err) =>
+            console.error(err)
+        )
+            unless this.instance.shares
+              this.instance.getShares()
           (err) =>
             console.error(err)
         )

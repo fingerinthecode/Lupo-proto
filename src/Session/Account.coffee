@@ -34,8 +34,8 @@ angular.module('session')
             crypto.encryptDataField(masterKey, privateUserDoc)
             storage.save(privateUserDoc).then =>
               session.user = new User(
-                login, username, masterKey
-                keys.private, keys.public, rootId)
+                username, keys.public, login
+                 masterKey, keys.private, rootId)
 
     signIn: (login, password) ->
       console.log "signIn", login
@@ -50,8 +50,8 @@ angular.module('session')
               (publicDoc) =>
                 console.log "publicDoc", publicDoc
                 session.user = new User(
-                  login, publicDoc.name, masterKey
-                  privateDoc.data.privateKey, publicDoc.publicKey,
+                  publicDoc.name, publicDoc.publicKey
+                  login, masterKey, privateDoc.data.privateKey,
                   privateDoc.data.rootId)
             )
           catch SyntaxError

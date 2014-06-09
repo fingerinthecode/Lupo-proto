@@ -19,7 +19,6 @@ directive('file', ($state, session)->
                   <input type="text" ng-model="newName" ng-show="isEditMode()" ng-blur="changeName(true)" ng-keypress="changeName($event)" select="isEditMode()"/>
 
                   <span class="file-size" ng-if="!file.isFolder()">{{ file.metadata.size |size }}</span>
-                  <button ng-click="file.move('8DB8676E-71D0-4E3D-8663-87C21CB566C6')">MoveToParent</button>
                 </div>
               </div>
               """
