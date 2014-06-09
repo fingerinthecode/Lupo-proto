@@ -7,6 +7,7 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     clipboard: {}
   }
   $scope.explorer = fileManager.getInstance($stateParams.path) if session.isConnected()
+  $scope.History  = History
 
   if $stateParams.slash != '/'
     $state.go('.', {
@@ -55,8 +56,10 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
 
   $scope.openFile = ->
     for i, file of $scope.selected.files
-      $scope.explorer.openFile(file)
-
+      if not file.isFolder()
+        $scope.explorer.openFile(file)
+      else
+        file.openFolder()
 
   $scope.renameFile = ->
     for key, file of $scope.selected.files
