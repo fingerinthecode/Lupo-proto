@@ -1,13 +1,20 @@
 angular.module('fileManager').
-controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $document, $window, History, User, $q) ->
+controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManager, $document, $window, History, User, $q) ->
   $scope.users = [{name: 'test'}, {name: 'machin'}, {name: 'truc'}, {name: 'coucou'}, {name: 'pff'}]
   $scope.share = []
   $scope.selected = {
     files: {}
     clipboard: {}
   }
-  if session.isConnected()
-    explorer = fileManager.getInstance($stateParams.path, $scope, "explorer")
+  explorer       = fileManager.getInstance($stateParams.path, $scope, "explorer") if session.isConnected()
+
+  if $stateParams.slash != '/'
+    $state.go('.', {
+      slash: '/'
+    }, {
+      location: 'replace'
+      reload:   true
+    })
 
   # -------------Shortcut-----------
   $document.on('keypress', ($event)->
