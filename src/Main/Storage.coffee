@@ -16,19 +16,18 @@ factory('storage', ($q, $location, assert, pouchdb) ->
       _funcName = _indent + "storage.get"
       console.log _funcName, _id
       deferred = $q.defer()
-      localDeferred = $q.defer()
       otherOneFailed = false
-      localDb.get _id, (err, result) =>
+      remoteDb.get _id, (err, result) =>
         if err?
-          console.error "local", err
+          console.error "remote", err
           if otherOneFailed
             deferred.reject err
           otherOneFailed = true
         else
           deferred.resolve result
-      remoteDb.get _id, (err, result) =>
+      localDb.get _id, (err, result) =>
         if err?
-          console.error "remote", err
+          console.error "local", err
           if otherOneFailed
             deferred.reject err
           otherOneFailed = true
@@ -70,6 +69,10 @@ factory('storage', ($q, $location, assert, pouchdb) ->
     save: (doc) ->
       @_save(doc, true)
 
+    del: (doc) ->
+      deletedDoc = {_id: doc._id, _rev: doc._rev, _deleted: true}
+      @saveLocal(deletedDoc).catch =>
+        @saveRemoteOnly(deletedDoc)
 
     queryRemote: (fun, options) ->
       deferred = $q.defer()
@@ -85,7 +88,7 @@ factory('storage', ($q, $location, assert, pouchdb) ->
       console.log _funcName, fun, options
       deferred = $q.defer()
       localDeferred = $q.defer()
-      otherOneFailed = true
+      otherOneFailed = false
       localDb.query fun, options, (err, result) =>
         if result.rows.length == 0
           if otherOneFailed

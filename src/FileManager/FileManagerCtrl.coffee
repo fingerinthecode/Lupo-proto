@@ -5,7 +5,8 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
     clipboard: {}
   }
   if session.isConnected()
-    explorer = fileManager.getInstance($stateParams.path, $scope, "explorer")
+    $scope.explorer = fileManager.getInstance($stateParams.path)
+
 
   # -------------Shortcut-----------
   $document.on('keypress', ($event)->
@@ -45,11 +46,9 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
     return Object.keys($scope.selected.clipboard).length == 0
 
   $scope.openFile = ->
-    for key, file of $scope.selected.files
-      file.getContent().then (content) =>
-        blob = new Blob([content])
-        url = URL.createObjectURL(blob)
-        $window.open(url, file.metadata.name)
+    for i, file of $scope.selected.files
+      $scope.explorer.openFile(file)
+
 
   $scope.renameFile = ->
     for key, file of $scope.selected.files
@@ -84,5 +83,5 @@ controller('FileManagerCtrl', ($scope, $stateParams, session, fileManager, $docu
 
   $scope.deleteFiles = ->
     for key, file of $scope.selected.files
-      file.delete()
+      $scope.explorer.deleteFile(file)
 )
