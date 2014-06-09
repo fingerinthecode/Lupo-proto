@@ -6,6 +6,7 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     files: {}
     clipboard: {}
   }
+  $scope.History = History
   explorer       = fileManager.getInstance($stateParams.path, $scope, "explorer") if session.isConnected()
 
   if $stateParams.slash != '/'
@@ -25,7 +26,6 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
         when 120 then $scope.pasteFiles()  # + V
   )
 
-  # ----------Navigation Button------
   $scope.loadUsers = ($query)->
     defer   = $q.defer()
     results = []
@@ -40,18 +40,9 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     path = $stateParams.path
     return path is '' or path is '/'
 
-  $scope.goBack = ->
-    window.history.go(-1)
-
-  $scope.goForward = ->
-    window.history.go(+1)
-
-  $scope.goParent = ->
-
   # -------------Display Mode--------
   $scope.toList = ->
     session.user.displayThumb = false
-    console.log "toList"
 
   $scope.toThumb = ->
     session.user.displayThumb = true
