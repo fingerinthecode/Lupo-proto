@@ -1,6 +1,7 @@
 angular.module('fileManager').
-controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManager, $document, $window, History, User, $q, notification) ->
-  $scope.users = [{name: 'test'}, {name: 'machin'}, {name: 'truc'}, {name: 'coucou'}, {name: 'pff'}]
+controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManager, $document, History, User, $q, notification) ->
+  User.all().then (list) =>
+    $scope.users = list
   $scope.share = []
   $scope.selected = {
     files: {}
@@ -69,9 +70,10 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
   $scope.modalShare = ->
     $scope.shareModal = true
     if Object.keys($scope.selected.files).length == 1
-      for i, file in $scope.selected.files
-        $scope.share = [{name: name} for name in file.metadata.sharedWith]
-        break
+      for _id, file of $scope.selected.files
+        if file.metadata.sharedWith?
+          $scope.share = ({name: name} for name in file.metadata.sharedWith)
+          break
 
   $scope.closeModalShare = ->
     $scope.shareModal = false
@@ -79,7 +81,7 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
   $scope.shareFiles = ->
     $scope.closeModalShare()
     for user in $scope.share
-      for i, file in $scope.selected.files
+      for _id, file of $scope.selected.files
         file.share(user.name)
     $scope.share = []
     notification.addAlert('File(s) Shared', 'success')

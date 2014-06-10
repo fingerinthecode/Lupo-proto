@@ -277,7 +277,11 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
               })
             "userId": user._id
           }
-          storage.save(shareDoc)
+          storage.save(shareDoc).then =>
+            unless @metadata.sharedWith
+              @metadata.sharedWith = []
+            @metadata.sharedWith.push username
+            @saveMetadata()
         (err) =>
           console.error err
       )
