@@ -42,7 +42,6 @@ factory('History', ($rootScope, $stateParams, $state, File, $location)->
       @go(-1)
 
     @cantBack: =>
-      console.info @_current
       return 0 == @_current
 
     @forward: =>

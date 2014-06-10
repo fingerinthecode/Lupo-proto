@@ -2,7 +2,7 @@
 <ul id="fileMenu" class="context-menu" role="context-menu">
   <li class="context-menu-item" ng-class="{'is-disable': singleSelect()}"     ><a tabindex="-1" ng-click="openFile()"   >Open</a></li>
   <li class="context-menu-item" ng-class="{'is-disable': singleSelect()}"     ><a tabindex="-1" ng-click="renameFile()" >Rename</a></li>
-  <li class="context-menu-item"                                               ><a tabindex="-1" ng-click="shareFiles()" >Share</a></li>
+  <li class="context-menu-item"                                               ><a tabindex="-1" ng-click="modalShare()" >Share</a></li>
   <li class="context-menu-item"                                               ><a tabindex="-1" ng-click="cutFiles()"   >Cut</a></li>
   <li class="context-menu-item"                                               ><a tabindex="-1" ng-click="copyFiles()"  >Copy</a></li>
   <li class="context-menu-item" ng-class="{'is-disable': clipboardNotEmpty()}"><a tabindex="-1" ng-click="pasteFiles()" >Paste</a></li>
@@ -56,18 +56,20 @@
 </div>
 
 <div class="modal" ng-if="shareModal">
-  <div class="modal-header">
-    <div class="close"></div>
-    <h3 class="modal-header-title">Share</h3>
-  </div>
-  <div class="modal-content">
-    <tags-input ng-model="share" placeholder="Pseudo" display-property="name">
-      <auto-complete source="loadUsers($query)"></auto-complete>
-    </tags-input>
+  <div class="modal-container">
+    <div class="modal-header">
+      <div class="close"></div>
+      <h3 class="modal-header-title">Share</h3>
+    </div>
+    <div class="modal-content">
+      <tags-input ng-model="share" placeholder="Pseudo" display-property="name">
+        <auto-complete source="loadUsers($query)"></auto-complete>
+      </tags-input>
 
-  </div>
-  <div class="modal-footer">
-    <button class="button-cancel" ng-click="closeModalShare()">Cancel</button>
-    <button class="button-ok"     ng-click="shareFiles()">Share</button>
+    </div>
+    <div class="modal-footer">
+      <button class="button-cancel" ng-click="closeModalShare()">Cancel</button>
+      <button class="button-ok"     ng-click="shareFiles()">Share</button>
+    </div>
   </div>
 </div>
