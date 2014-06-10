@@ -263,23 +263,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
         @metadata.name = newName
         @saveMetadata()
 
-    move: (newParentId) ->
-      _funcName = 'move'
-      console.log _funcName, @metadata.parentId, newParentId
-      assert.defined newParentId,   "newParentId",   _funcName
-      assert.defined @metadata.parentId, "@parentId", _funcName
-      File.getFile(@metadata.parentId).then (currentParent) =>
-        assert.array currentParent.content, "currentParent.content", _funcName
-      @removeFromFolder().then =>
-        @addToFolder(newParentId). then(
-          =>
-            @metadata.parentId = newParentId
-            @saveMetadata()
-          (err) =>
-            # roll back
-            console.error("move roll back")
-            @addToFolder(@metadata.parentId)
-        )
 
     openFolder: =>
       if @isFolder()
@@ -316,6 +299,7 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
     remove: ->
       _funcName = 'remove'
       console.log _funcName
-      File.getFile(@metadata.parentId).then (currentParent) =>
-        assert.array currentParent.content, "currentParent.content", _funcName
-      @removeFromFolder().then =>
+      if @metadata.contentId?
+        @_deleteDoc(@metadata.contentId)
+      @_deleteDoc(@_id)
+

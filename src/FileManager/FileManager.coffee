@@ -159,12 +159,28 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
         console.log _funcName, metadata
         assert.defined metadata.name, "metadata.name", _funcName
         assert.defined content, "content", _funcName
-        (if metadata.type == "" or metadata.type == TYPE_FOLDER
+
+        console.log "type", metadata.type
+        tmpFile = {
+          metadata: {
+            name: metadata.name
+            size: metadata.size
+          }
+        }
+        if metadata.type == "" or metadata.type == TYPE_FOLDER
+          tmpFile.metadata.type = TYPE_FOLDER
+        else
+          tmpFile.metadata.type = TYPE_FILE
+        tmpFile = new File(tmpFile)
+        tmpFile.uploading = true
+        length = @fileTree.push tmpFile
+        console.log length, @fileTree
+        (if tmpFile.metadata.type == TYPE_FOLDER
           fm.createFolder(metadata.name, this.currentId())
         else
           fm.createFile(metadata.name, content, this.currentId())
         ).then (file) =>
-          this.fileTree.push file
+          @fileTree[length-1] = file
 
       createFile: ->
         console.log "createFile", this
@@ -194,27 +210,26 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
         .then (folder) =>
           @fileTree.push folder
 
+      moveFile: (file, newParentId) ->
+        _funcName = 'moveFile'
+        console.log _funcName, file.metadata.parentId, newParentId
+        assert.defined newParentId,   "newParentId",   _funcName
+        assert.defined file.metadata.parentId, "file.parentId", _funcName
+        @removeFileFromParentFolder().then =>
+          file.addToFolder(newParentId). then(
+            =>
+              @metadata.parentId = newParentId
+              @saveMetadata().then =>
+                if newParentId == fm.getCurrentDirId()
+                  @fileTree.push file
+            (err) =>
+              # roll back
+              console.error("move roll back")
+              @addToFolder(@metadata.parentId)
+          )
 
       openFile: (file) ->
         console.log "openFile", file.name
-        StringToArrayBuffer = (str) ->
-          buf = new ArrayBuffer(str.length)
-          bufView = new Uint8Array(buf)
-          for i in [0..str.length-1]
-            bufView[i] = str.charCodeAt(i)
-          return buf
-
-        string2ArrayBuffer = (string) ->
-          console.log "string2ArrayBuffer"
-          deferred = $q.defer()
-          f = new FileReader()
-          f.onload = (e) ->
-            deferred.resolve e.target.result
-          b = new Blob([string])
-          console.log "blob", b
-          f.readAsArrayBuffer(b)
-          return deferred.promise
-
         string2ArrayBuffer = (str) ->
           buf = new ArrayBuffer(str.length)
           bufView = new Uint8Array(buf)
@@ -239,11 +254,36 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
           e.initEvent('click' ,true ,true)
           link.dispatchEvent(e)
 
+      removeFileFromParentFolder: (file) ->
+        _funcName = "removeFileFromFolder"
+        console.log _funcName
+        assert.defined file._id, "file._id", _funcName
+        assert.defined file.metadata.parentId, "file.metadata.parentId", _funcName
+        File.getFile(file.metadata.parentId).then (folder) =>
+          assert.array folder.content, "folder.content", _funcName
+          folder.content.splice(
+            folder.content.indexOf(file._id)
+            1)
+          folder.saveContent().then =>
+            #TODO: change @ to a triggered update via changes watcher
+            cache.expire(folder._id, "content")
+            folder.listContent()
+
       deleteFile: (file) ->
-        file.remove().then =>
-          for i, f of @fileTree
-            if f.metadata.name == file.metadata.name
-              delete @fileTree[i]
+        _funcName = "deleteFile"
+        console.log _funcName
+        @removeFileFromParentFolder(file).then =>
+          if file.isFolder()
+            file.listContent().then (list) =>
+              for f in list
+                f.remove()
+          file.remove()
+          @fileTree.splice(
+            @fileTree.indexOf(file)
+            1)
+          #for i, f of @fileTree
+          #  if f.metadata.name == file.metadata.name
+          #    delete @fileTree[i]
     }
 
     getInstance: (path) ->

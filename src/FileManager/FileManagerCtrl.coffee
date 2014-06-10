@@ -90,7 +90,7 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     # Paste from Cut
     if $scope.clipboard.cut?
       for key, file of $scope.clipboard.cut
-        file.move(current_id)
+        $scope.explorer.moveFile(file, current_id)
     # Paste from Copy
     else if $scope.clipboard.copy?
       for key, file of $scope.clipboard.cut
