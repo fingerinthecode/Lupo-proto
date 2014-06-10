@@ -104,4 +104,8 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
   $scope.deleteFiles = ->
     for key, file of $scope.selected.files
       $scope.explorer.deleteFile(file)
+
+
+  window.onbeforeunload = ->
+    return 'If you reload you will loose the selection and other thing. Are you sure ?'
 )
