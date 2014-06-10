@@ -29,9 +29,11 @@ directive('file', ($state, session)->
 
       # ------------------DragAndDrop----------------------------
       element.on('dragstart', ($event)->
+        url = "https://codeload.github.com/LupoLibero/Lupo-proto/zip/master"
+
         $img = element.find('img')
         $event.dataTransfer.effectAllowed = "move"
-        $event.dataTransfer.setData('DownloadURL', "application/zip:Test:https://codeload.github.com/LupoLibero/Lupo-proto/zip/master")
+        $event.dataTransfer.setData('DownloadURL', "application/zip:#{scope.file.metadata.name}:#{url}")
         $event.dataTransfer.setDragImage($img[0], 10, 10)
         scope.selectFile() if not scope.isSelected()
       )
@@ -50,6 +52,8 @@ directive('file', ($state, session)->
         for key, file of scope.selected
           file.move(scope.file._id)
         scope.selected = {}
+        $event.stopPropagation()
+        $event.preventDefault()
       )
 
       # ----------------------Selection-------------------------

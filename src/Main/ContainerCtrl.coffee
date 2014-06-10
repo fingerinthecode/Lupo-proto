@@ -1,5 +1,5 @@
 angular.module('lupo-proto').
-controller('ContainerCtrl', ($scope, $rootScope, session, notification, $state)->
+controller('ContainerCtrl', ($scope, $rootScope, session, notification, $state, $document)->
   $scope.session = session
 
   $rootScope.$on('$stateChangeSuccess', ($event, toState, toParams, fromState, fromParams)->
@@ -24,5 +24,11 @@ controller('ContainerCtrl', ($scope, $rootScope, session, notification, $state)-
     notification.addAlert("The language doesn't exist")
     if lang isnt 'en'
       $rootScope.$broadcast('$ChangeLanguage', 'en')
+  )
+
+  $body = $document.find('body')
+  $body.attr('droppable', true)
+  $body.on('dragover', ($event)->
+    $event.dataTransfer.dropEffect = 'none'
   )
 )
