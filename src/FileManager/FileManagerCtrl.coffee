@@ -70,7 +70,7 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     $scope.shareModal = true
     if Object.keys($scope.selected.files).length == 1
       for i, file in $scope.selected.files
-        $scope.share = [{name: name} for name in file.metadata.shareWith]
+        $scope.share = [{name: name} for name in file.metadata.sharedWith]
         break
 
   $scope.closeModalShare = ->
