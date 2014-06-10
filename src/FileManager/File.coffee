@@ -263,7 +263,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
         @metadata.name = newName
         @saveMetadata()
 
-
     openFolder: =>
       if @isFolder()
         $state.go('.', {

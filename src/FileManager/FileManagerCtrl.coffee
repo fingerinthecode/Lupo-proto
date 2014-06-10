@@ -68,14 +68,20 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
 
   $scope.modalShare = ->
     $scope.shareModal = true
+    if Object.keys($scope.selected.files).length == 1
+      for i, file in $scope.selected.files
+        $scope.share = [{name: name} for name in file.metadata.shareWith]
+        break
+
   $scope.closeModalShare = ->
     $scope.shareModal = false
 
   $scope.shareFiles = ->
     $scope.closeModalShare()
     for user in $scope.share
-      for file in $scope.selected.files
-        file.share(user)
+      for i, file in $scope.selected.files
+        file.share(user.name)
+    $scope.share = []
     notification.addAlert('File(s) Shared', 'success')
 
   $scope.cutFiles = ->
