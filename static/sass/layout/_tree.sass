@@ -7,11 +7,17 @@
   bottom: $statusbar-height + 15
   list-style: none
   margin: 0
-  overflow-y: auto
+  overflow-y: scroll
+  overflow-x: scroll
 
 .tree-element
   margin-left: $tree-indent
   margin-top:  $tree-element-spacing
+  width: 150px
 
 .tree>.tree-element
   margin-top: $tree-padding
+
+.tree-element-title
+  text-decoration: none
+  color: $base-color

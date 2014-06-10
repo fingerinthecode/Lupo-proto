@@ -1,5 +1,5 @@
 angular.module('fileManager').
-controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManager, $document, $window, History, User, $q) ->
+controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManager, $document, $window, History, User, $q, notification) ->
   $scope.users = [{name: 'test'}, {name: 'machin'}, {name: 'truc'}, {name: 'coucou'}, {name: 'pff'}]
   $scope.share = []
   $scope.selected = {
@@ -31,7 +31,8 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     results = []
     for user in $scope.users
       reg = new RegExp("^#{$query}.*")
-      if user.name.match(reg)
+      if user.name.match(reg) and
+      user.name != session.user.username
         results.push(user)
     defer.resolve(results)
     return defer.promise
@@ -71,9 +72,11 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     $scope.shareModal = false
 
   $scope.shareFiles = ->
+    $scope.closeModalShare()
     for user in $scope.share
       for file in $scope.selected.files
         file.share(user)
+    notification.addAlert('File(s) Shared', 'success')
 
   $scope.cutFiles = ->
     $scope.selected.clipboard = {}
@@ -101,4 +104,8 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
   $scope.deleteFiles = ->
     for key, file of $scope.selected.files
       $scope.explorer.deleteFile(file)
+
+
+  window.onbeforeunload = ->
+    return 'If you reload you will loose the selection and other thing. Are you sure ?'
 )
