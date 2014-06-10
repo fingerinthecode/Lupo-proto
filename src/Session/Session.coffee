@@ -1,9 +1,7 @@
 angular.module('session')
-.factory 'session', (crypto) ->
+.factory 'session', (crypto, storage) ->
   {
     user: {}
-    vars:
-      displayThumb: true
     flash: {}
     keyRing: {}
 
@@ -19,13 +17,13 @@ angular.module('session')
       @user.publicKey
 
     getMainPrivateKey: ->
-      @user.privateKey
+      @user.privateDoc.data.privateKey
 
     getMasterKey: ->
       @user.masterKey
 
     getRootFolderId: ->
-      @user.rootFolderId
+      @user.privateDoc.data.rootId
 
     isConnected: ->
       @user.login?
@@ -37,14 +35,20 @@ angular.module('session')
       @user.session[key] = value
 
     get: (key) ->
-      if @vars.hasOwnProperty(key)
-        return @vars[key]
+      if @user.prefs.hasOwnProperty(key)
+        return @user.prefs[key]
       else
         return null
 
     set: (key, value) ->
-      @vars[key] = value
-      #@save()
+      @user.prefs[key] = value
+      @save()
+
+    save: () ->
+      tmpDoc = angular.copy(@user.privateDoc)
+      crypto.encryptDataField(@getMasterKey(), tmpDoc)
+      storage.save(tmpDoc).then (result) =>
+        @user.privateDoc._rev = result.rev
 
     saveFlash: (key, value) ->
       @flash[key] = value
