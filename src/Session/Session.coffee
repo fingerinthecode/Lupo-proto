@@ -1,11 +1,19 @@
 angular.module('session')
-.factory 'session', ->
+.factory 'session', (crypto) ->
   {
-    user: {
-      session: {}
+    user: {}
+    vars:
       displayThumb: true
-    }
     flash: {}
+    keyRing: {}
+
+    registerKey: (key) ->
+      keyId = crypto.getKeyIdFromKey(key)
+      @keyRing[keyId] = key
+      return keyId
+
+    getKey: (keyId) ->
+      @keyRing[keyId]
 
     getMainPublicKey: ->
       @user.publicKey
@@ -29,10 +37,14 @@ angular.module('session')
       @user.session[key] = value
 
     get: (key) ->
-      if @user.session.hasOwnProperty(key)
-        return @session[key]
+      if @vars.hasOwnProperty(key)
+        return @vars[key]
       else
         return null
+
+    set: (key, value) ->
+      @vars[key] = value
+      #@save()
 
     saveFlash: (key, value) ->
       @flash[key] = value
