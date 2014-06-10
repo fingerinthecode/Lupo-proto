@@ -1,25 +1,23 @@
 angular.module('fileManager').
-factory('History', ($rootScope, $stateParams, $state, File)->
+factory('History', ($rootScope, $stateParams, $state, File, $location)->
   class History
     @_history: []
     @_current: null
+    @_goto:    false
 
     @add: =>
-      current = @_history[@_current]
-      if current? and
-      $stateParams == current.params and
-      current.name == $state.current.name
-        return false
+      if not @_goto
+        if @_current?
+          @_history = @_history[0..@_current]
+        @_history.push({
+          name:   $state.current.name
+          params: angular.copy($stateParams)
+        })
+        @_current = @_history.length-1
+      else
+        @_goto = false
 
-      if @_current?
-        @_history = @_history[0..@_current]
-      @_history.push({
-        name:   $state.current.name
-        params: angular.copy($stateParams)
-      })
-      @_current = @_history.length-1
-
-    @goto: (num)=>
+    @go: (num)=>
       if not num?
         throw 'History.goto need a parameters to be pass'
         return false
@@ -27,7 +25,9 @@ factory('History', ($rootScope, $stateParams, $state, File)->
       if @_current+num > @_history.length-1 or
       @_current+num < 0
         throw "History can go to the #{@_current+num} position"
+        return false
 
+      @_goto    = true
       @_current = @_current + num
       goto      = @_history[@_current]
       $state.transitionTo(
@@ -39,10 +39,17 @@ factory('History', ($rootScope, $stateParams, $state, File)->
       )
 
     @back: =>
-      @goto(-1)
+      @go(-1)
+
+    @cantBack: =>
+      console.info @_current
+      return 0 == @_current
 
     @forward: =>
-      @goto(1)
+      @go(1)
+
+    @cantForward: =>
+      return @_history.length-1 == @_current
 
     @parent: =>
       id = $stateParams.path
@@ -57,10 +64,9 @@ factory('History', ($rootScope, $stateParams, $state, File)->
           console.log err
       )
 
-
-  $rootScope.$on('$stateChangeSuccess', ->
-    History.add()
-    console.log $state
+  $rootScope.$on('$stateChangeSuccess', ($event, toState, toParams, fromState, fromParams) ->
+    if !toParams.hasOwnProperty('slash') or toParams.slash == '/'
+      History.add()
   )
 
   return History
