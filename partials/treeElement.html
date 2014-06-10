@@ -1,10 +1,10 @@
-<div class="tree-element">
+<div class="tree-element" ng-if="element.isFolder()" ng-init="element.childs = [];loadChilds(element);">
   <button class="btn-link icon" ng-class="{
     'icon-arrow-right': !element.open,
     'icon-arrow-down':   element.open,
-  }" ng-click="element.open=!element.open" ng-show="element.isFolder()"></button>
-  <a class="tree-element-title" ui-sref=".({path: element._id})">{{ element.metadata.name }}</span>
+  }" ng-click="element.open=!element.open" ng-show="element.childs.length != 0"></button>
+  <a class="tree-element-title" ui-sref=".({path: element._id})">{{ element.metadata.name |ellipsis:20 }}</a>
   <div  class="tree-element-content" ng-if="element.open">
-    <div ng-repeat="element in element.content" ng-include="'partials/treeElement.html'"></div>
+    <div ng-repeat="element in element.childs" ng-include="'partials/treeElement.html'"></div>
   </div>
 </div>
