@@ -4,6 +4,10 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
   TYPE_FOLDER = 0
   TYPE_FILE = 1
   class File
+    @TYPES:
+      FOLDER: 0
+      FILE:   1
+
     constructor: (pObj) ->
       console.log "File", pObj
       if pObj
@@ -249,14 +253,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
         @_rev = _rev
         @metadata.name = newName
         @saveMetadata()
-
-    openFolder: =>
-      if @isFolder()
-        $state.go('.', {
-          path: @_id
-        }, {
-          location: true
-        })
 
     share: (username) ->
       _funcName = "share"

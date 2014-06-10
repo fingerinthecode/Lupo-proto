@@ -20,6 +20,6 @@ factory 'assert', () ->
         assert(newVal == oldVal, "<" + funcName + "> " + oldVarName + "/" + newVarName +
           " has changed (" + oldVal + "/" + newVal + ")")
 
-    custom: (test) ->
-      assert test
+    custom: (test, message, funcName) ->
+      assert test, "<" + funcName + "> " + message
   }

@@ -15,19 +15,21 @@ angular.module('fileManager')
     link: (scope, element, attrs) ->
       scope.breadcrumb = []
       scope.$watch($stateParams, ->
-        scope.breadcrumb = []
-        getPath($stateParams.path)
+        if session.isConnected()
+          scope.breadcrumb = []
+          getPath($stateParams.path)
       )
 
-      getPath = (id)=>
-        File.getFile(id).then (file)=>
-          scope.breadcrumb.unshift({
-            _id:  file._id
-            name: file.metadata.name
-          })
+      getPath = (id) ->
+        if id != ""
+          File.getFile(id).then (file)=>
+            scope.breadcrumb.unshift({
+              _id:  file._id
+              name: file.metadata.name
+            })
 
-          parent_id = file.metadata.parentId
-          if parent_id? and parent_id != session.getRootFolderId()
-            getPath(parent_id)
+            parent_id = file.metadata.parentId
+            if parent_id? and parent_id != session.getRootFolderId()
+              getPath(parent_id)
   }
 )

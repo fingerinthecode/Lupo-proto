@@ -11,8 +11,8 @@
 
 <!-- BackgroundMenu -->
 <ul id="backgroundMenu" class="context-menu" role="context-menu">
-  <li class="context-menu-item"><a tabindex="-1" ng-click="explorer.createFile()"  >New File</a></li>
-  <li class="context-menu-item"><a tabindex="-1" ng-click="explorer.createFolder()">New Folder</a></li>
+  <li class="context-menu-item"><a tabindex="-1" ng-click="explorer.newFile()"  >New File</a></li>
+  <li class="context-menu-item"><a tabindex="-1" ng-click="explorer.newFolder()">New Folder</a></li>
   <li class="context-menu-item"><a tabindex="-1" ng-click=""                       >Normal right click</a></li>
 </ul>
 
@@ -23,9 +23,6 @@
   <button class="btn-link navbar-button" ng-click="History.parent()"  ng-disabled="isRoot()"             ><i class="icon icon-parent"></i></button>
 
   <breadcrumb></breadcrumb>
-
-  <button class="btn-link navbar-button" ng-click="explorer.createFile()"><img src="images/icon_document_new_16.svg" alt="new file"></button>
-  <button class="btn-link navbar-button" ng-click="explorer.createFolder()"><img src="images/icon_folder_new_16.svg" alt="new folder"></button>
 </nav>
 
 

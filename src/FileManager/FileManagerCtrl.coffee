@@ -1,5 +1,8 @@
 angular.module('fileManager').
 controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManager, $document, History, User, $q, notification) ->
+  unless session.isConnected()
+    return
+
   User.all().then (list) =>
     $scope.users = list
   $scope.share = []
@@ -7,7 +10,7 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     files: {}
     clipboard: {}
   }
-  $scope.explorer = fileManager.getInstance($stateParams.path) if session.isConnected()
+  $scope.explorer = fileManager.updatePath()
   $scope.History  = History
 
   if $stateParams.slash != '/'

@@ -19,12 +19,12 @@ factory('History', ($rootScope, $stateParams, $state, File, $location)->
 
     @go: (num)=>
       if not num?
-        throw 'History.goto need a parameters to be pass'
+        throw 'History.goto need a parameter'
         return false
 
       if @_current+num > @_history.length-1 or
       @_current+num < 0
-        throw "History can go to the #{@_current+num} position"
+        throw "History can't go to the #{@_current+num} position"
         return false
 
       @_goto    = true
@@ -55,7 +55,7 @@ factory('History', ($rootScope, $stateParams, $state, File, $location)->
       File.getFile(id).then(
         (file)=>
           $state.go('.', {
-            path: file.metadata.parent_id
+            path: file.metadata.parentId
           }, {
             location: true
           })

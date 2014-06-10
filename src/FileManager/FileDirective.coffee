@@ -1,5 +1,5 @@
 angular.module('fileManager').
-directive('file', ($state, session)->
+directive('file', ($state, session, fileManager)->
   return {
     restrict: 'E'
     replace: true
@@ -9,7 +9,7 @@ directive('file', ($state, session)->
       clipboard: '=clipboardFiles'
     }
     template: """
-              <div class="file" ng-dblclick="file.openFolder()" ng-click="selectFile($event)"
+              <div class="file" ng-dblclick="explorer.openFileOrFolder(file)" ng-click="selectFile($event)"
               ng-class="{'is-selected': isSelected(), 'file-list': !user.prefs.displayThumb, 'file-thumb': user.prefs.displayThumb, 'is-cut': isCut()}"
               draggable="true">
                 <div context-menu="selectFile({}, true)" data-target="fileMenu">
@@ -26,6 +26,7 @@ directive('file', ($state, session)->
     link: (scope, element, attrs)->
       scope.user = session.user
       scope.newName = scope.file.metadata.name
+      scope.explorer = fileManager
 
       # ------------------DragAndDrop----------------------------
       element.on('dragstart', ($event)->
@@ -49,8 +50,8 @@ directive('file', ($state, session)->
         $event.preventDefault()
       )
       element.on('drop', ($event)->
-        for key, file of scope.selected
-          file.move(scope.file._id)
+        for _id, file of scope.selected
+          fileManager.moveFile(file, scope.file._id)
         scope.selected = {}
         $event.stopPropagation()
         $event.preventDefault()
