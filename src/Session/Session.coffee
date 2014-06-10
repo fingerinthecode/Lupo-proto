@@ -1,23 +1,29 @@
 angular.module('session')
-.factory 'session', ->
+.factory 'session', (crypto, storage) ->
   {
-    user: {
-      session: {}
-      displayThumb: true
-    }
+    user: {}
     flash: {}
+    keyRing: {}
+
+    registerKey: (key) ->
+      keyId = crypto.getKeyIdFromKey(key)
+      @keyRing[keyId] = key
+      return keyId
+
+    getKey: (keyId) ->
+      @keyRing[keyId]
 
     getMainPublicKey: ->
       @user.publicKey
 
     getMainPrivateKey: ->
-      @user.privateKey
+      @user.privateDoc.data.privateKey
 
     getMasterKey: ->
       @user.masterKey
 
     getRootFolderId: ->
-      @user.rootFolderId
+      @user.privateDoc.data.rootId
 
     isConnected: ->
       @user.login?
@@ -29,10 +35,20 @@ angular.module('session')
       @user.session[key] = value
 
     get: (key) ->
-      if @user.session.hasOwnProperty(key)
-        return @session[key]
+      if @user.prefs.hasOwnProperty(key)
+        return @user.prefs[key]
       else
         return null
+
+    set: (key, value) ->
+      @user.prefs[key] = value
+      @save()
+
+    save: () ->
+      tmpDoc = angular.copy(@user.privateDoc)
+      crypto.encryptDataField(@getMasterKey(), tmpDoc)
+      storage.save(tmpDoc).then (result) =>
+        @user.privateDoc._rev = result.rev
 
     saveFlash: (key, value) ->
       @flash[key] = value

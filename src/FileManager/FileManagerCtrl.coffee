@@ -43,10 +43,10 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
 
   # -------------Display Mode--------
   $scope.toList = ->
-    session.user.displayThumb = false
+    session.set('displayThumb', false)
 
   $scope.toThumb = ->
-    session.user.displayThumb = true
+    session.set('displayThumb', true)
 
   # ---------Context-Menu------------
   $scope.singleSelect = ->

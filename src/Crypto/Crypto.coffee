@@ -39,11 +39,11 @@ factory('crypto', ($q, assert)->
       )
       return deferred.promise
 
-    publicKeyIdFromKey: (publicKey) ->
-      _funcName = _indent + "publicKeyIdFromKey"
+    getKeyIdFromKey: (key) ->
+      _funcName = _indent + "getKeyIdFromKey"
       console.log _funcName
-      assert.defined publicKey, "publicKey", _funcName
-      @hash(publicKey, 32)
+      assert.defined key, "key", _funcName
+      @hash key, 32
 
     asymEncrypt: (publicKey, data) ->
       _funcName = _indent + "asymEncrypt"

@@ -1,9 +1,9 @@
 angular.module('session')
 .factory 'User', (assert, storage) ->
   class User
-    constructor: (@username, @publicKey, @login, @masterKey, @privateKey, @rootFolderId) ->
-      console.log "User", login, username, @masterkey
-      @keyRing = {}
+    constructor: (@username, @publicKey, @login, @masterKey, @privateDoc) ->
+      console.log "User", login, username
+      @prefs = @privateDoc.data.prefs
 
     @getByName: (username = '') ->
       _funcName = "getByName"

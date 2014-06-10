@@ -33,7 +33,11 @@ angular.module('fileManager')
                 console.log(file.size)
 
                 strResult = arrayBuffer2String(evt.target.result)
-                scope.explorer.addFile(file, strResult)
+                scope.explorer.addFile({
+                  name: file.name
+                  size: file.size
+                  type: file.type
+                }, strResult)
                 console.log strResult.length, strResult
 
 

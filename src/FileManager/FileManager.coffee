@@ -4,14 +4,14 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
   TYPE_FILE = 1
 
   fm = {
-    _createFile: (name, content, type, parentId, key) ->
+    _createFile: (name, content, type, parentId, keyId) ->
       _funcName = "_createFile"
-      console.log _funcName, name, content, parentId
+      console.info _funcName, name, content, parentId
       assert.defined name,     "name",     _funcName
       assert.defined content,  "content",  _funcName
       assert.defined type,     "type",     _funcName
       assert.defined parentId, "parentId", _funcName
-      new File({_id: parentId}).listContent(key).then(
+      new File({_id: parentId, keyId: keyId}).listContent().then(
         (list) =>
           console.log "list", list
           assert.defined list, "list", _funcName
@@ -24,38 +24,37 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
                 name: name
                 size: if type != TYPE_FOLDER then content.length
               }
+              keyId: keyId
             }
-            newFile.save(key)
+            newFile.save()
             .then (result) =>
-              newFile.addToFolder(parentId, key)
+              newFile.addToFolder(parentId)
 
         (err) =>
           return "parent does not exist"
       )
 
-    createFile: (name, content, parentId, key) ->
+    createFile: (name, content, parentId, keyId) ->
       _funcName = "createFile"
-      console.log _funcName, name, content, parentId
+      console.info _funcName, name, content, parentId
       assert.defined name,     "name",     _funcName
       assert.defined content,  "content",  _funcName
       assert.defined parentId, "parentId", _funcName
-      this._createFile(name, content, TYPE_FILE, parentId, key)
+      this._createFile(name, content, TYPE_FILE, parentId, keyId)
 
-    createFolder: (name, parentId, key) ->
-      console.log "createFolder", name, parentId
+    createFolder: (name, parentId, keyId) ->
+      console.info "createFolder", name, parentId
       assert.defined name,     "name",     "createFolder"
-      assert.defined content,  "content",  "createFolder"
       assert.defined parentId, "parentId", "createFolder"
-      this._createFile(name, [], TYPE_FOLDER, parentId, key)
+      this._createFile(name, [], TYPE_FOLDER, parentId, keyId)
 
-    createRootFolder: (masterKey) ->
-      console.log "createRootFolder"
-      assert.defined masterKey, "masterKey", "createRootFolder"
-      new File({content: []}).save(masterKey)
+    createRootFolder: (masterKeyId) ->
+      console.info "createRootFolder", masterKeyId
+      assert.defined masterKeyId, "masterKeyId", "createRootFolder"
+      new File({content: [], keyId: masterKeyId}).save()
       .then (root) =>
         console.log "root", root
-        this.createFile("README", "Welcome", root._id, masterKey).then =>
-          this.createFolder("Shares", root._id, masterKey)
+        this.createFile("README", "Welcome", root._id, masterKeyId)
         return root._id
 
     getCurrentDirId: ->
@@ -124,8 +123,8 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
           watcher.call()
 
       getShares: () ->
-        console.log "getShares", session
-        publicKeyId = crypto.publicKeyIdFromKey(session.getMainPublicKey())
+        console.info "getShares", session
+        publicKeyId = crypto.getKeyIdFromKey(session.getMainPublicKey())
         console.log publicKeyId
         @shares = []
         storage.query 'proto/getShares', {key: publicKeyId}
@@ -143,9 +142,10 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
               shareDoc
             )
             console.log clearShareDoc
+            keyId = session.registerKey(clearShareDoc.key)
             @shares.content.push {
               _id: clearShareDoc.docId
-              key: clearShareDoc.key
+              keyId: keyId
             }
             @fileTree.push @shares
             console.log @fileTree[-1..][0]
@@ -156,10 +156,10 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
 
       addFile: (metadata, content) ->
         _funcName = 'addFile'
-        console.log _funcName, metadata
+        console.info _funcName, metadata
         assert.defined metadata.name, "metadata.name", _funcName
         assert.defined content, "content", _funcName
-
+        metadata.name = @uniqueName(metadata.name)
         console.log "type", metadata.type
         tmpFile = {
           metadata: {
@@ -182,54 +182,58 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
         ).then (file) =>
           @fileTree[length-1] = file
 
-      createFile: ->
-        console.log "createFile", this
-        basename = "new document"
+      uniqueName: (name, parentDirContent) ->
+        console.info "uniqueName", name
+        unless parentDirContent
+          parentDirContent = @fileTree
+        assert.defined parentDirContent, "parentDirContent", "createFolder"
+        assert.array   parentDirContent, "parentDirContent", "createFolder"
+        s = name.split('.')
+        basename  = s[0]
+        extension = '.' + s[1..].join('.')
         i = 0
-        name = basename
-        assert.defined this.fileTree, "this.fileTree", "createFile"
-        assert.array this.fileTree, "this.fileTree", "createFile"
-        while name in (f.name for f in this.fileTree)
+        while name in (f.metadata.name for f in parentDirContent)
           i += 1
-          name = basename + " " + i
+          name = basename + " (" + i + ")" + extension
+        console.info "new name", name
+        return name
+
+      createFile: ->
+        console.info "createFile", this
+        name = @uniqueName("new document")
         fm.createFile(name, "", this.currentId())
         .then (file) =>
           this.fileTree.push file
 
       createFolder: ->
-        console.log "createFolder"
-        basename = "new folder"
-        i = 0
-        name = basename
-        assert.defined @fileTree, "this.fileTree", "createFolder"
-        assert.array   @fileTree, "this.fileTree", "createFolder"
-        while name in (f.name for f in @fileTree)
-          i += 1
-          name = basename + " " + i
+        console.info "createFolder"
+        name = @uniqueName("new folder")
         fm.createFolder(name, @currentId())
         .then (folder) =>
           @fileTree.push folder
 
       moveFile: (file, newParentId) ->
         _funcName = 'moveFile'
-        console.log _funcName, file.metadata.parentId, newParentId
+        console.info _funcName, file.metadata.parentId, newParentId
         assert.defined newParentId,   "newParentId",   _funcName
         assert.defined file.metadata.parentId, "file.parentId", _funcName
         @removeFileFromParentFolder().then =>
-          file.addToFolder(newParentId). then(
-            =>
-              @metadata.parentId = newParentId
-              @saveMetadata().then =>
-                if newParentId == fm.getCurrentDirId()
-                  @fileTree.push file
-            (err) =>
-              # roll back
-              console.error("move roll back")
-              @addToFolder(@metadata.parentId)
-          )
+          new File({_id: newParentId}).listContent().then (content) =>
+            file.metadata.name = uniqueName(file.metadata.name, content)
+            file.addToFolder(newParentId). then(
+              =>
+                @metadata.parentId = newParentId
+                @saveMetadata().then =>
+                  if newParentId == fm.getCurrentDirId()
+                    @fileTree.push file
+              (err) =>
+                # roll back
+                console.error("move roll back")
+                file.addToFolder(@metadata.parentId)
+            )
 
       openFile: (file) ->
-        console.log "openFile", file.name
+        console.info "openFile", file.name
         string2ArrayBuffer = (str) ->
           buf = new ArrayBuffer(str.length)
           bufView = new Uint8Array(buf)
@@ -256,7 +260,7 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
 
       removeFileFromParentFolder: (file) ->
         _funcName = "removeFileFromFolder"
-        console.log _funcName
+        console.info _funcName
         assert.defined file._id, "file._id", _funcName
         assert.defined file.metadata.parentId, "file.metadata.parentId", _funcName
         File.getFile(file.metadata.parentId).then (folder) =>
@@ -271,7 +275,7 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
 
       deleteFile: (file) ->
         _funcName = "deleteFile"
-        console.log _funcName
+        console.info _funcName
         @removeFileFromParentFolder(file).then =>
           if file.isFolder()
             file.listContent().then (list) =>
@@ -288,7 +292,7 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
 
     getInstance: (path) ->
       _funcName = "getInstance"
-      console.log _funcName, path, (if $scopeVar? then "$scope." + scopeVar)
+      console.info _funcName, path, (if $scopeVar? then "$scope." + scopeVar)
       if path?
         if path is "" or path is "/"
           folderId = session.getRootFolderId()
@@ -301,11 +305,8 @@ factory('fileManager', ($q, assert, crypto, session, storage, cache, File, $stat
         this.instance.goForward(folder).finally(
           =>
             console.log "moved to folderId", folderId
-            if scope? and scopeVar
-              unless scope[scopeVar]?
-                scope[scopeVar] = this.instance
-              unless this.instance.shares
-                this.instance.getShares()
+            unless this.instance.shares
+              this.instance.getShares()
           (err) =>
             console.error(err)
         )

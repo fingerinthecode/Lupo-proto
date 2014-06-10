@@ -14,6 +14,7 @@ angular.module('session')
       privateUserDoc.salt = crypto.newSalt(2)
       masterKey = crypto.getMasterKey(password, privateUserDoc.salt)
       assert(masterKey?, "error in masterKey generation (Session)")
+      masterKeyId = session.registerKey(masterKey)
 
       privateUserDoc._id = this.getMainDocId(login, password)
       assert(privateUserDoc._id?)
@@ -23,19 +24,27 @@ angular.module('session')
         storage.save({
           "name": username
           "publicKey": keys.public
-          "_id": crypto.publicKeyIdFromKey(keys.public)
+          "_id": crypto.getKeyIdFromKey(keys.public)
         }).then (publicDoc) =>
-          fileManager.createRootFolder(masterKey).then (rootId) =>
+          fileManager.createRootFolder(masterKeyId).then (rootId) =>
             privateUserDoc.data = {
               "privateKey": keys.private,
               "rootId": rootId,
               "publicDocId": publicDoc.id
+              "prefs": {
+                "displayThumb": true
+              }
             }
+            clearData = angular.copy(privateUserDoc.data)
             crypto.encryptDataField(masterKey, privateUserDoc)
-            storage.save(privateUserDoc).then =>
+            storage.save(privateUserDoc).then (savedPrivateDoc) =>
               session.user = new User(
                 username, keys.public, login
-                 masterKey, keys.private, rootId)
+                masterKey, {
+                  _id: savedPrivateDoc.id
+                  _rev: savedPrivateDoc.rev
+                  data: clearData
+                })
 
     signIn: (login, password) ->
       console.log "signIn", login
@@ -44,15 +53,15 @@ angular.module('session')
         (privateDoc) =>
           console.log privateDoc
           masterKey = crypto.getMasterKey(password, privateDoc.salt)
+          session.registerKey(masterKey)
           try
             crypto.decryptDataField(masterKey, privateDoc)
             storage.get(privateDoc.data.publicDocId).then(
               (publicDoc) =>
-                console.log "publicDoc", publicDoc
+                console.log "publicDoc", publicDoc, masterKey
                 session.user = new User(
                   publicDoc.name, publicDoc.publicKey
-                  login, masterKey, privateDoc.data.privateKey,
-                  privateDoc.data.rootId)
+                  login, masterKey, privateDoc)
             )
           catch SyntaxError
             return 'wrong password'
