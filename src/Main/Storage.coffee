@@ -1,35 +1,8 @@
 angular.module('lupo-proto').
-factory('storage', ($q, $location, assert, pouchdb) ->
+factory('storage', ($q, $location, assert, db) ->
   dbUrl = $location.absUrl().split('#')[0]
   dbUrl += 'lupo-proto/'
-  remoteDb = new PouchDB(dbUrl)
-  #localDb = new PouchDB('lupo-proto')
-  #TMP
-  #PouchDB.replicate(localDb, remoteDb, {live: true})
-  #.on('change', (e) -> console.log("upload", e))
-  #.on('complete', (e) -> console.log("upload", e))
-  #.on('error', (e) -> console.error("upload", e))
-  syncIds = {list: []}
-  ###
-  localDb.allDocs().then (list) =>
-    syncIds.list = (row.id for row in list.rows)
-    syncIds.list.push "proto"
-    PouchDB.replicate(localDb, remoteDb,
-      live: true
-    )
-    .on 'change', (change) =>
-      #syncIds.list.push result.id
-      console.log "local change", change
-    .on('complete', (e) -> console.log("complete", e))
-    .on('uptodate', (e) -> console.log("uptodate", e))
-    .on('error', (e) -> console.error("error", e))
-    remoteDb.change(
-      live: true
-    ).on 'change', (change) =>
-      console.log "remote change", change
-      if syncIds.indexOf(change.id) > -1
-        console.log "remote change!!"
-  ###
+  remoteDb = new db(dbUrl)
   _indent = "  "
   {
     purge: (db) ->
@@ -49,12 +22,12 @@ factory('storage', ($q, $location, assert, pouchdb) ->
       _funcName = _indent + "storage.get"
       console.log _funcName, _id
       deferred = $q.defer()
-      remoteDb.get _id, (err, result) =>
-        if err?
-          console.error "NOT FOUND", _id, err
-          deferred.reject err
-        else
-          deferred.resolve result
+      remoteDb.get _id
+      .then (result) =>
+        deferred.resolve result
+      .catch (err) =>
+        console.error "NOT FOUND", _id, err
+        deferred.reject err
       return deferred.promise
 
     _save: (doc) ->
@@ -91,25 +64,19 @@ factory('storage', ($q, $location, assert, pouchdb) ->
       deletedDoc = {_id: doc._id, _rev: doc._rev, _deleted: true}
       @save(deletedDoc)
 
-    queryRemote: (fun, options) ->
-      deferred = $q.defer()
-      remoteDb.query fun, options, (err, result) =>
-        if result.rows.length == 0
-            deferred.resolve []
-        else
-          deferred.resolve (doc.value for doc in result.rows)
-      return deferred.promise
-
     query: (fun, options) ->
       _funcName = _indent + "query"
       console.log _funcName, fun, options
       deferred = $q.defer()
       otherOneFailed = false
-      remoteDb.query fun, options, (err, result) =>
+      remoteDb.query fun, options
+      .then (result) ->
         if result.rows.length == 0
           deferred.resolve []
         else
           deferred.resolve (doc.value for doc in result.rows)
+      .catch (error) ->
+        deferred.reject error
       return deferred.promise
   }
 )
