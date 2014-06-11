@@ -5,32 +5,38 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
   {
     updatePath: ->
       _funcName = "updatePath"
-      console.info _funcName
+      console.info _funcName, $stateParams.path
       usSpinnerService.spin('main')
       folderId = @getCurrentDirId()
       assert.defined folderId, "folderId", _funcName
-      console.log "shares", @shares
       console.log "folderId", folderId
-      if folderId == "shares"
-        if not @shares?
-          $state.go(".", session.getRootFolderId())
-        else
-          folder = @shares
-      else
-        folder = new File({_id: folderId})
-      @goToFolder(folder).finally(
-        =>
-          console.log "moved to folderId", folderId
-          if @isRootFolder(folder)
-            @getShares().then =>
-              if @shares.content.length > 0
-                @fileTree.push @shares
-          usSpinnerService.stop('main')
+      folder = new File({_id: folderId})
+      @getSharesFolderIfNeeded(folder).then =>
+        console.debug "shares", @shares
+        if folder._id == "shares"
+          if @shares.content.length == 0
+            $state.go(".", session.getRootFolderId())
+          else
+            folder = @shares
+        @goToFolder(folder).finally(
+          =>
+            console.log "moved to folderId", folderId
+            if @isRootFolder(folder)
+              @getShares().then =>
+                if @shares.content.length > 0
+                  @fileTree.push @shares
+            usSpinnerService.stop('main')
 
-        (err) =>
-          console.error(err)
-      )
+          (err) =>
+            console.error(err)
+        )
       return @
+
+    getSharesFolderIfNeeded: (folder) ->
+      if folder._id == "shares"
+        @getShares()
+      else
+        $q.when()
 
     isRootFolder: (folder) ->
       console.error "isRootFolder", folder._id, session.getRootFolderId()
@@ -160,7 +166,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
             }
             newFile.save()
             .then (result) =>
-              newFile.addToFolder(parentId)
+              newFile.addToFolder(parentId, keyId)
 
         (err) =>
           return "parent does not exist"
@@ -187,7 +193,8 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       .then (root) =>
         console.log "root", root
         this.createFile("README", "Welcome", root._id, masterKeyId)
-        return root._id
+        .then =>
+          return root._id
 
     moveFile: (file, newParentId) ->
       _funcName = 'moveFile'

@@ -38,9 +38,9 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
         key = session.getMasterKey()
       assert.defined(key, "key", _funcName)
       storage.get(id).then (doc) =>
-        crypto.decryptDataField(key, doc)
-        doc.keyId = keyId
-        return doc
+        crypto.decryptDataField(key, doc).then =>
+          doc.keyId = keyId
+          return doc
 
     @getFile: (id, keyId) ->
       _funcName = "@getFile"
@@ -101,8 +101,8 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
       unless key? or key? and key.length
         key = session.getMasterKey()
       assert.defined(key, "key", _funcName)
-      crypto.encryptDataField(key, doc)
-      storage.save(doc)
+      crypto.encryptDataField(key, doc).then =>
+        storage.save(doc)
 
     _deleteDoc: (doc) ->
       _funcName = "_deleteDoc"
@@ -264,19 +264,19 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
           console.log "user", user
           shareDoc = {
             "_id": crypto.hash(user._id + @_id, 32)
-            "data": crypto.asymEncrypt(
-              user.publicKey
-              {
-                "docId": @_id
-                "key":   session.getMasterKey()
-              })
+            "data": {
+              "docId": @_id
+              "key":   session.getMasterKey()
+            }
             "userId": user._id
           }
-          storage.save(shareDoc).then =>
-            unless @metadata.sharedWith
-              @metadata.sharedWith = []
-            @metadata.sharedWith.push username
-            @saveMetadata()
+          crypto.asymEncrypt user.publicKey, shareDoc.data
+          .then =>
+            storage.save(shareDoc).then =>
+              unless @metadata.sharedWith
+                @metadata.sharedWith = []
+              @metadata.sharedWith.push username
+              @saveMetadata()
         (err) =>
           console.error err
       )

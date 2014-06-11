@@ -1,22 +1,91 @@
+crypto =
+  call: (method, args, callback) ->
+    console.info method, args, callback
+    if callback?
+      args.push(callback)
+    @[method].apply(@, args)
+
+  createRSAKeys: (keySize, callback) ->
+    _funcName = "createRSAKeys"
+    console.log _funcName, keySize, callback
+    crypt = new JSEncrypt({default_key_size: keySize})
+    if callback?
+      crypt.getKey ->
+        callback {
+          public: crypt.getPublicKey()
+          private: crypt.getPrivateKey()
+        }
+    else
+      crypt.getKey()
+      return {
+        public: crypt.getPublicKey()
+        private: crypt.getPrivateKey()
+      }
+
+  symEncrypt: (iv, key, data, callback) ->
+    key = sjcl.codec.hex.toBits key
+    aes = new sjcl.cipher.aes(key)
+    result = {
+      data: 	sjcl.mode.ccm.encrypt(aes, sjcl.codec.utf8String.toBits(data), iv)
+      algo: "aes",
+      iv: iv
+    }
+    if callback?
+      callback(result)
+    return result
+
+  symDecrypt: (key, obj, callback) ->
+    key = sjcl.codec.hex.toBits key
+    aes = new sjcl.cipher.aes(key)
+    result = sjcl.codec.utf8String.fromBits(
+      sjcl.mode.ccm.decrypt(aes,  obj.data, obj.iv)
+    )
+    if callback?
+      callback(result)
+    return result
+
 angular.module('crypto').
 factory('crypto', ($q, assert)->
-  _indent = "  "
+  defers = {}
+  id = 0
+  if window.Worker?
+    worker = new Worker("js/crypto_worker.js")
+    worker.addEventListener 'message', (e) ->
+      console.log "RECEIVED", e.data
+      defers[e.data.id].resolve(e.data.result)
+
+  heavy = (method) ->
+    id++
+    defers[id] = $q.defer()
+    args = (arg for arg in arguments)
+    args = args[1..]
+    if worker?
+      worker.postMessage {
+        id: id
+        method: method
+        args: args
+      }
+    else
+      crypto.call method, args, (result) ->
+        defers[id].resolve(result)
+    return defers[id].promise
+
   object = {
     newSalt: (nbwords) ->
-      _funcName = _indent + "newSalt"
+      _funcName = "newSalt"
       console.log _funcName
       assert.defined nbwords, "nbwords", _funcName
       sjcl.random.randomWords(nbwords)
     ,
     hash: (data, size) ->
-      _funcName = _indent + "hash"
+      _funcName = "hash"
       console.log _funcName
       assert.defined data, "data", _funcName
       h = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(data))
       return if size then h[0..size] else h
 
     getMasterKey: (password, salt) ->
-      _funcName = _indent + "getMasterKey"
+      _funcName = "getMasterKey"
       console.log _funcName
       assert.defined password, "password", _funcName
       assert.defined salt, "salt", _funcName
@@ -25,28 +94,20 @@ factory('crypto', ($q, assert)->
       )
 
     createRSAKeys: (keySize) ->
-      _funcName = _indent + "createRSAKeys"
+      _funcName = "createRSAKeys"
       console.log _funcName, keySize
       assert.defined keySize, "keySize", _funcName
       assert.custom(keySize > 0)
-      deferred = $q.defer()
-      crypt = new JSEncrypt({default_key_size: keySize})
-      crypt.getKey(->
-        deferred.resolve {
-          public: crypt.getPublicKey()
-          private: crypt.getPrivateKey()
-        }
-      )
-      return deferred.promise
+      return heavy 'createRSAKeys', keySize
 
     getKeyIdFromKey: (key) ->
-      _funcName = _indent + "getKeyIdFromKey"
+      _funcName = "getKeyIdFromKey"
       console.log _funcName
       assert.defined key, "key", _funcName
       @hash key, 32
 
     asymEncrypt: (publicKey, data) ->
-      _funcName = _indent + "asymEncrypt"
+      _funcName = "asymEncrypt"
       console.log _funcName, publicKey, data
       assert.defined publicKey, "publicKey", _funcName
       assert.defined data, "data", _funcName
@@ -57,7 +118,7 @@ factory('crypto', ($q, assert)->
       )
 
     asymDecrypt: (privateKey, data) ->
-      _funcName = _indent + "asymDecrypt"
+      _funcName = "asymDecrypt"
       console.log _funcName, privateKey, data
       assert.defined privateKey, "privateKey", _funcName
       assert.defined data, "data", _funcName
@@ -68,41 +129,34 @@ factory('crypto', ($q, assert)->
       )
 
     symEncrypt: (key, data) ->
-      _funcName = _indent + "symEncrypt"
+      _funcName = "symEncrypt"
       assert.defined key, "key", _funcName
       assert.defined data, "data", _funcName
       iv = this.newSalt(4)
-      key = sjcl.codec.hex.toBits key
-      aes = new sjcl.cipher.aes(key)
-      {
-        data: 	sjcl.mode.ccm.encrypt(aes, sjcl.codec.utf8String.toBits(data), iv)
-        algo: "aes",
-        iv: iv
-      }
-    ,
+      return heavy _funcName, iv, key, data
+
+
     symDecrypt: (key, obj) ->
-      _funcName = _indent + "symDecrypt"
+      _funcName = "symDecrypt"
       assert.defined key, "key", _funcName
       assert.defined obj, "obj", _funcName
-      key = sjcl.codec.hex.toBits key
-      aes = new sjcl.cipher.aes(key)
-      sjcl.codec.utf8String.fromBits(
-        sjcl.mode.ccm.decrypt(aes,  obj.data, obj.iv)
-      )
-    ,
+      return heavy _funcName, key, obj
+
     encryptDataField: (key, doc) ->
-      _funcName = _indent + "encryptDataField"
+      _funcName = "encryptDataField"
       assert.defined key, "key", _funcName
       assert.defined doc, "doc", _funcName
       assert.defined doc.data, "doc.data", _funcName
-      doc.data = @symEncrypt(key, JSON.stringify(doc.data))
+      @symEncrypt(key, JSON.stringify(doc.data)).then (data) =>
+        doc.data = data
     ,
     decryptDataField: (key, doc) ->
-      _funcName = _indent + "decryptDataField"
+      _funcName = "decryptDataField"
       assert.defined key, "key", _funcName
       assert.defined doc, "doc", _funcName
       assert.defined doc.data, "doc.data", _funcName
-      doc.data = JSON.parse(@symDecrypt(key, doc.data))
+      @symDecrypt(key, doc.data).then (data) =>
+        doc.data = JSON.parse(data)
   }
 )
 

@@ -36,15 +36,15 @@ angular.module('session')
               }
             }
             clearData = angular.copy(privateUserDoc.data)
-            crypto.encryptDataField(masterKey, privateUserDoc)
-            storage.save(privateUserDoc).then (savedPrivateDoc) =>
-              session.user = new User(
-                username, keys.public, login
-                masterKey, {
-                  _id: savedPrivateDoc.id
-                  _rev: savedPrivateDoc.rev
-                  data: clearData
-                })
+            crypto.encryptDataField(masterKey, privateUserDoc).then =>
+              storage.save(privateUserDoc).then (savedPrivateDoc) =>
+                session.user = new User(
+                  username, keys.public, login
+                  masterKey, {
+                    _id: savedPrivateDoc.id
+                    _rev: savedPrivateDoc.rev
+                    data: clearData
+                  })
 
     signIn: (login, password) ->
       console.log "signIn", login
@@ -55,14 +55,14 @@ angular.module('session')
           masterKey = crypto.getMasterKey(password, privateDoc.salt)
           session.registerKey(masterKey)
           try
-            crypto.decryptDataField(masterKey, privateDoc)
-            storage.get(privateDoc.data.publicDocId).then(
-              (publicDoc) =>
-                console.log "publicDoc", publicDoc, masterKey
-                session.user = new User(
-                  publicDoc.name, publicDoc.publicKey
-                  login, masterKey, privateDoc)
-            )
+            crypto.decryptDataField(masterKey, privateDoc).then =>
+              storage.get(privateDoc.data.publicDocId).then(
+                (publicDoc) =>
+                  console.log "publicDoc", publicDoc, masterKey
+                  session.user = new User(
+                    publicDoc.name, publicDoc.publicKey
+                    login, masterKey, privateDoc)
+              )
           catch SyntaxError
             return 'wrong password'
       )

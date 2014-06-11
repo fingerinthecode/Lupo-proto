@@ -47,8 +47,9 @@ angular.module('session')
     save: () ->
       tmpDoc = angular.copy(@user.privateDoc)
       crypto.encryptDataField(@getMasterKey(), tmpDoc)
-      storage.save(tmpDoc).then (result) =>
-        @user.privateDoc._rev = result.rev
+      .then =>
+        storage.save(tmpDoc).then (result) =>
+          @user.privateDoc._rev = result.rev
 
     saveFlash: (key, value) ->
       @flash[key] = value
