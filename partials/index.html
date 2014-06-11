@@ -22,9 +22,25 @@
     <span us-spinner spinner-key="main"></span>
     <div class="view" ui-view></div>
 
+    <script>
+      window.Worker = null;
+      if(!window.Worker) {
+        body    = window.document.getElementsByTagName('body')[0];
+        scripts = [
+          "vendor/jsencrypt/bin/jsencrypt.js",
+          "js/crypto.js",
+        ];
+
+        for(i in scripts) {
+          script     = window.document.createElement('script');
+          script.src = scripts[i];
+          body.appendChild(script);
+        }
+      }
+    </script>
+
+    <script src="vendor/sjcl/sjcl.js"                               ></script>
     <script src="vendor/assert/assert.js"                               ></script>
-    <script src="vendor/sjcl/sjcl.js"                                   ></script>
-    <script src="vendor/jsencrypt/bin/jsencrypt.js"                     ></script>
     <script src="vendor/pouchdb/dist/pouchdb-nightly.js"                ></script>
     <script src="vendor/spin.js/spin.js"                                ></script>
 

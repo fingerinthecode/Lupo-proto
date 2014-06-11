@@ -70,6 +70,13 @@ module.exports = (grunt) ->
         dest: 'temp/'
         ext: '.js'
       }
+      lib: {
+        expand: true
+        cwd: 'static/coffee'
+        src: '*.coffee'
+        dest: 'static/js/'
+        ext: '.js'
+      }
     }
     copy: {
       dist: {
