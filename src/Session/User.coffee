@@ -18,4 +18,4 @@ angular.module('session')
       )
 
     @all: ->
-      storage.queryRemote("proto/getUserByName")
+      storage.query("proto/getUserByName")

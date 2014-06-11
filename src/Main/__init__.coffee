@@ -7,6 +7,7 @@ angular.module('lupo-proto', [
   'session'
   'crypto'
   'pouchdb'
+  'db'
   'fileManager'
   'ng-context-menu'
 ]).value('db', [
