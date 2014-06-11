@@ -34,7 +34,7 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     defer   = $q.defer()
     results = []
     for user in $scope.users
-      reg = new RegExp("^#{$query}.*")
+      reg = new RegExp("^#{$query}.*", 'i')
       if user.name.match(reg) and
       user.name != session.user.username
         results.push(user)
