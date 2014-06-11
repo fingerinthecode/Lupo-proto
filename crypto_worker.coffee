@@ -1,0 +1,61 @@
+@window = @
+importScripts('../vendor/jsencrypt/bin/jsencrypt.js')
+importScripts('../vendor/sjcl/sjcl.js')
+
+crypto =
+  call: (method, args, callback) ->
+    console.info method, args, callback
+    if callback?
+      args.push(callback)
+    @[method].apply(@, args)
+
+  createRSAKeys: (keySize, callback) ->
+    _funcName = "createRSAKeys"
+    console.log _funcName, keySize, callback
+    crypt = new JSEncrypt({default_key_size: keySize})
+    if callback?
+      crypt.getKey ->
+        callback {
+          public: crypt.getPublicKey()
+          private: crypt.getPrivateKey()
+        }
+    else
+      crypt.getKey()
+      return {
+        public: crypt.getPublicKey()
+        private: crypt.getPrivateKey()
+      }
+
+  symEncrypt: (iv, key, data, callback) ->
+    key = sjcl.codec.hex.toBits key
+    aes = new sjcl.cipher.aes(key)
+    result = {
+      data: 	sjcl.mode.ccm.encrypt(aes, sjcl.codec.utf8String.toBits(data), iv)
+      algo: "aes",
+      iv: iv
+    }
+    if callback?
+      callback(result)
+    return result
+
+  symDecrypt: (key, obj, callback) ->
+    key = sjcl.codec.hex.toBits key
+    aes = new sjcl.cipher.aes(key)
+    result = sjcl.codec.utf8String.fromBits(
+      sjcl.mode.ccm.decrypt(aes,  obj.data, obj.iv)
+    )
+    if callback?
+      callback(result)
+    return result
+
+
+@addEventListener 'message',
+  (e) ->
+    console.error "WORKER", e.data
+
+    result = crypto.call(e.data.method, e.data.args)
+    self.postMessage {
+        id: e.data.id
+        result: result
+      }
+  false
