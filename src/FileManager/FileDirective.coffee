@@ -1,5 +1,5 @@
 angular.module('fileManager').
-directive('file', ($state, session, fileManager)->
+directive('file', ($state, session, fileManager, usSpinnerService)->
   return {
     restrict: 'E'
     replace: true
@@ -13,7 +13,8 @@ directive('file', ($state, session, fileManager)->
               ng-class="{'is-selected': isSelected(), 'file-list': !user.prefs.displayThumb, 'file-thumb': user.prefs.displayThumb, 'is-cut': isCut()}"
               draggable="true">
                 <div context-menu="selectFile({}, true)" data-target="fileMenu">
-                  <img class="file-icon" ng-src="images/icon_{{ fileIcon() }}_24.svg" alt="icon" draggable="false"/>
+                  <img class="file-icon" ng-src="images/icon_{{ fileIcon() }}_48.svg" alt="icon" draggable="false" ng-hide="file.loading"/>
+                  <img class="file-icon" ng-src="images/loading.gif" alt="loading" ng-show="file.loading"/>
 
                   <div class="file-title" ng-hide="isEditMode()" ng-if="!user.prefs.displayThumb">{{ file.metadata.name }}</div>
                   <div class="file-title" ng-hide="isEditMode()" ng-if="user.prefs.displayThumb" >{{ file.metadata.name |ellipsis:20 }}</div>
@@ -107,5 +108,6 @@ directive('file', ($state, session, fileManager)->
             else scope.fileType = "text"
 
       #scope.downloadUrl = 'data:' + scope.file.mime + ';charset=utf-8,' + encodeURIComponent(scope.file.getContent())
+
   }
 )
