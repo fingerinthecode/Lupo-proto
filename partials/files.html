@@ -59,8 +59,8 @@
       <h3 class="modal-header-title">Share</h3>
     </div>
     <div class="modal-content">
-      <tags-input ng-model="share" placeholder="Pseudo" display-property="name">
-        <auto-complete source="loadUsers($query)"></auto-complete>
+      <tags-input ng-model="share" placeholder="Pseudo" display-property="name" add-from-autocomplete-only="true">
+        <auto-complete source="loadUsers($query)" debounce-delay="40"></auto-complete>
       </tags-input>
 
     </div>
