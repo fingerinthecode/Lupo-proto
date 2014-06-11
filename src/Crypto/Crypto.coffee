@@ -8,7 +8,7 @@ factory('crypto', ($q, assert)->
       console.log "RECEIVED", e.data
       defers[e.data.id].resolve(e.data.result)
 
-  heavy = (method) ->
+  asyncCall = (method) ->
     id++
     defers[id] = $q.defer()
     args = (arg for arg in arguments)
@@ -24,35 +24,54 @@ factory('crypto', ($q, assert)->
         defers[id].resolve(result)
     return defers[id].promise
 
+  syncCall = (method) ->
+    id++
+    defers[id] = $q.defer()
+    args = (arg for arg in arguments)
+    args = args[1..]
+    if worker?
+      worker.postMessage {
+        id: id
+        method: method
+        args: args
+      }
+      locked = true
+      result
+      defers[id].promise.then (result) =>
+        locked = false
+        result = result
+      while locked
+        continue
+      return result
+    else
+      return crypto.call method, args
+
   object = {
     newSalt: (nbwords) ->
       _funcName = "newSalt"
       console.log _funcName
       assert.defined nbwords, "nbwords", _funcName
-      sjcl.random.randomWords(nbwords)
+      return syncCall _funcName, nbwords
     ,
     hash: (data, size) ->
       _funcName = "hash"
       console.log _funcName
       assert.defined data, "data", _funcName
-      h = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(data))
-      return if size then h[0..size] else h
+      return syncCall _funcName, data, size
 
     getMasterKey: (password, salt) ->
       _funcName = "getMasterKey"
       console.log _funcName
       assert.defined password, "password", _funcName
       assert.defined salt, "salt", _funcName
-      sjcl.codec.hex.fromBits(
-        sjcl.misc.pbkdf2(password, salt, 1000, 256)
-      )
+      return syncCall _funcName, password, salt
 
     createRSAKeys: (keySize) ->
       _funcName = "createRSAKeys"
       console.log _funcName, keySize
       assert.defined keySize, "keySize", _funcName
       assert.custom(keySize > 0)
-      return heavy 'createRSAKeys', keySize
+      return asyncCall _funcName, keySize
 
     getKeyIdFromKey: (key) ->
       _funcName = "getKeyIdFromKey"
@@ -62,39 +81,30 @@ factory('crypto', ($q, assert)->
 
     asymEncrypt: (publicKey, data) ->
       _funcName = "asymEncrypt"
-      console.log _funcName, publicKey, data
+      console.log _funcName, data
       assert.defined publicKey, "publicKey", _funcName
       assert.defined data, "data", _funcName
-      crypt = new JSEncrypt()
-      crypt.setPublicKey(publicKey)
-      crypt.encrypt(
-        JSON.stringify(data)
-      )
+      return asyncCall _funcName, publicKey, data
 
     asymDecrypt: (privateKey, data) ->
       _funcName = "asymDecrypt"
-      console.log _funcName, privateKey, data
+      console.log _funcName, data
       assert.defined privateKey, "privateKey", _funcName
       assert.defined data, "data", _funcName
-      crypt = new JSEncrypt()
-      crypt.setPrivateKey(privateKey)
-      JSON.parse (
-        crypt.decrypt(data)
-      )
+      return asyncCall _funcName, privateKey, data
 
     symEncrypt: (key, data) ->
       _funcName = "symEncrypt"
       assert.defined key, "key", _funcName
       assert.defined data, "data", _funcName
-      iv = this.newSalt(4)
-      return heavy _funcName, iv, key, data
+      return asyncCall _funcName, key, data
 
 
     symDecrypt: (key, obj) ->
       _funcName = "symDecrypt"
       assert.defined key, "key", _funcName
       assert.defined obj, "obj", _funcName
-      return heavy _funcName, key, obj
+      return asyncCall _funcName, key, obj
 
     encryptDataField: (key, doc) ->
       _funcName = "encryptDataField"

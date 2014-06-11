@@ -70,15 +70,15 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
           content: []
         )
         for shareDoc in list
-          clearShareDoc = crypto.asymDecrypt(
+          crypto.asymDecrypt(
             session.getMainPrivateKey()
             shareDoc
-          )
-          keyId = session.registerKey(clearShareDoc.key)
-          @shares.content.push {
-            _id: clearShareDoc.docId
-            keyId: keyId
-          }
+          ).then (clearShareDoc) =>
+            keyId = session.registerKey(clearShareDoc.key)
+            @shares.content.push {
+              _id: clearShareDoc.docId
+              keyId: keyId
+            }
 
 
     getFileContent: (id) ->
@@ -102,7 +102,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       else
         tmpFile.metadata.type = TYPE_FILE
       tmpFile = new File(tmpFile)
-      tmpFile.uploading = true
+      tmpFile.loading = true
       length = @fileTree.push tmpFile
       console.log length, @fileTree
       (if tmpFile.metadata.type == TYPE_FOLDER
@@ -218,10 +218,17 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
           )
 
     openFileOrFolder: (file) ->
-      if file.isFolder()
+      usSpinnerService.spin('main')
+      (if file.isFolder()
         @openFolder(file)
       else
         @openFile(file)
+      ).then(
+        =>
+          usSpinnerService.stop('main')
+        =>
+          usSpinnerService.stop('main')
+      )
 
     openFolder: (folder) ->
       console.info "openFolder",
