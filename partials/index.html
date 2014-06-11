@@ -7,15 +7,15 @@
     <link rel="stylesheet" href="vendor/ng-tags-input/ng-tags-input.css">
   </head>
   <body ng-app="lupo-proto" ng-controller="ContainerCtrl">
-    <!-- App Menu -->
-    <img src="images/appmenu.png" class="appmenu" />
-
     <!-- Header -->
     <div class="header">
-      <img src="images/header.jpg" style="height: 120px; width: 100%"/>
+      <img src="images/header.jpg"/>
       <h3>Version 0.0.1</h3>
-      <h5 ng-show="session.username">Welcome {{ session.username }}</h5>
+      <h5 ng-show="session.user.username">Welcome {{ session.user.username }}</h5>
     </div>
+
+    <!-- App Menu -->
+    <img src="images/appmenu.png" class="appmenu" />
 
     <notification-overlay></notification-overlay>
 
