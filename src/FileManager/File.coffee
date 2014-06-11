@@ -37,7 +37,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
       if not key? or not key.length
         key = session.getMasterKey()
       assert.defined(key, "key", _funcName)
-      console.log("key", key)
       storage.get(id).then (doc) =>
         crypto.decryptDataField(key, doc)
         doc.keyId = keyId

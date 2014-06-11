@@ -1,18 +1,19 @@
 angular.module('fileManager').
-factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File) ->
+factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, usSpinnerService) ->
   TYPE_FOLDER = 0
   TYPE_FILE = 1
   {
     updatePath: ->
       _funcName = "updatePath"
       console.info _funcName
+      usSpinnerService.spin('main')
       folderId = @getCurrentDirId()
       assert.defined folderId, "folderId", _funcName
       console.log "shares", @shares
       console.log "folderId", folderId
       if folderId == "shares"
         if not @shares?
-          $state.go("/" + session.getRootFolderId())
+          $state.go(".", session.getRootFolderId())
         else
           folder = @shares
       else
@@ -20,14 +21,19 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       @goToFolder(folder).finally(
         =>
           console.log "moved to folderId", folderId
-          if isRootFolder(folder) and not @shares?
-            @getShares()
+          if @isRootFolder(folder)
+            @getShares().then =>
+              if @shares.content.length > 0
+                @fileTree.push @shares
+          usSpinnerService.stop('main')
+
         (err) =>
           console.error(err)
       )
       return @
 
     isRootFolder: (folder) ->
+      console.error "isRootFolder", folder._id, session.getRootFolderId()
       return folder._id == session.getRootFolderId()
 
     goToFolder: (folder) ->
@@ -36,8 +42,6 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       assert.defined folder, "folder", _funcName
       folder.listContent().then (list) =>
         @fileTree = list
-        if @shares? and @isRootFolder(folder)
-          @fileTree.push @shares
 
     getCurrentDirId: ->
       if $stateParams.path? and

@@ -69,7 +69,6 @@ factory('crypto', ($q, assert)->
 
     symEncrypt: (key, data) ->
       _funcName = _indent + "symEncrypt"
-      console.log _funcName
       assert.defined key, "key", _funcName
       assert.defined data, "data", _funcName
       iv = this.newSalt(4)
@@ -83,7 +82,6 @@ factory('crypto', ($q, assert)->
     ,
     symDecrypt: (key, obj) ->
       _funcName = _indent + "symDecrypt"
-      console.log _funcName
       assert.defined key, "key", _funcName
       assert.defined obj, "obj", _funcName
       key = sjcl.codec.hex.toBits key
@@ -94,7 +92,6 @@ factory('crypto', ($q, assert)->
     ,
     encryptDataField: (key, doc) ->
       _funcName = _indent + "encryptDataField"
-      console.log _funcName
       assert.defined key, "key", _funcName
       assert.defined doc, "doc", _funcName
       assert.defined doc.data, "doc.data", _funcName
@@ -102,7 +99,6 @@ factory('crypto', ($q, assert)->
     ,
     decryptDataField: (key, doc) ->
       _funcName = _indent + "decryptDataField"
-      console.log _funcName
       assert.defined key, "key", _funcName
       assert.defined doc, "doc", _funcName
       assert.defined doc.data, "doc.data", _funcName
