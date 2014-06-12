@@ -3,14 +3,21 @@
 .file
   cursor: pointer
 
+.file-icon
+  position: relative
+
+  background-color: lightgrey
+
 .file-list
   width:  100%
-  height: 30px
+  height: 48px
   margin-bottom: $file-list-spacing
 
 .file-list .file-icon
   float: left
   margin-right: $file-list-icon-spacing
+  width: 48px
+  height: 48px
 
 .file-list:nth-child(odd)
   background-color: lightgrey
@@ -24,8 +31,6 @@
   width: $file-thumb-size - ($file-thumb-spacing*2)
   height: $file-thumb-size - ($file-thumb-spacing*2)
   margin: 5px auto
-
-  background-color: lightgrey
 
 .file-thumb .file-title
   text-align: center

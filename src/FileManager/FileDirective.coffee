@@ -10,24 +10,41 @@ directive('file', ($state, session, fileManager, usSpinnerService)->
     }
     template: """
               <div class="file" ng-dblclick="explorer.openFileOrFolder(file)" ng-click="selectFile($event)"
-              ng-class="{'is-selected': isSelected(), 'file-list': !user.prefs.displayThumb, 'file-thumb': user.prefs.displayThumb, 'is-cut': isCut()}"
+              ng-class="{'is-selected': isSelected(), 'file-list': isList(), 'file-thumb': isThumb(), 'is-cut': isCut()}"
               draggable="true">
                 <div context-menu="selectFile({}, true)" data-target="fileMenu">
                   <img class="file-icon" ng-src="images/icon_{{ fileIcon() }}_48.svg" alt="icon" draggable="false" ng-hide="file.loading"/>
-                  <span class="file-icon" ui-spinner spinner-start-active="1"></span>
 
-                  <div class="file-title" ng-hide="isEditMode()" ng-if="!user.prefs.displayThumb">{{ file.metadata.name }}</div>
-                  <div class="file-title" ng-hide="isEditMode()" ng-if="user.prefs.displayThumb" >{{ file.metadata.name |ellipsis:20 }}</div>
+                  <div class="file-icon" ng-show="file.loading">
+                    <span ng-if="isThumb()" us-spinner=""></span>
+                    <span ng-if="isList()"  us-spinner="spinnerListConfig"></span>
+                  </div>
+
+                  <div class="file-title" ng-hide="isEditMode()" ng-if="isList()">{{ file.metadata.name }}</div>
+                  <div class="file-title" ng-hide="isEditMode()" ng-if="isThumb()" >{{ file.metadata.name |ellipsis:20 }}</div>
                   <input type="text" ng-model="newName" ng-show="isEditMode()" ng-blur="changeName(true)" ng-keypress="changeName($event)" select="isEditMode()"/>
 
-                  <div class="file-size" ng-if="!file.isFolder() && !user.prefs.displayThumb">{{ file.metadata.size |size }}</div>
+                  <div class="file-size" ng-if="!file.isFolder() && isList()">{{ file.metadata.size |size }}</div>
                 </div>
               </div>
               """
     link: (scope, element, attrs)->
-      scope.user = session.user
-      scope.newName = scope.file.metadata.name
+      scope.user     = session.user
+      scope.newName  = scope.file.metadata.name
       scope.explorer = fileManager
+
+      scope.spinnerListConfig = {
+        lines:  9
+        length: 8
+        width:  4
+        radius: 7
+      }
+
+      scope.isThumb = ->
+        return !!session.get('displayThumb')
+
+      scope.isList = ->
+        return not session.get('displayThumb')
 
       # ------------------DragAndDrop----------------------------
       element.on('dragstart', ($event)->
