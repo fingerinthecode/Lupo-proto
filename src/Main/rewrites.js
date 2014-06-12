@@ -8,6 +8,7 @@ module.exports = [
   {from: '/favicon.ico',       to: 'static/images/favicon.ico'},
   {from: '/',                  to: 'partials/index.html'},
   {from: '/index.html',        to: 'partials/index.html'},
+  {from: '/get/:id',           to: '../../:id'},
   {from: '/:db',               to: '../../../:db'},
   {from: '/:db/*',             to: '../../../:db/*'},
 ]

@@ -28,24 +28,22 @@
     "tests"
   ],
   "dependencies": {
-    "angular": "1.3.*",
-    "angular-couchdb": "LupoLibero/ngCouch",
+    "angular": "1.2.*",
     "angular-ui-router": "~0.2.10",
-    "angular-resource": "~1.2.16",
+    "angular-resource": "~1.2.*",
     "sjcl": "bitwiseshiftleft/sjcl",
     "jsencrypt": "travist/jsencrypt",
-    "angular-pouchdb": "~0.1.5",
     "assert": "Jxck/assert",
     "angular-spinner": "~0.4.0",
     "ng-context-menu": "ianwalter/ng-context-menu#~0.1.3",
     "angular-gettext": "~0.2.9",
     "ngCouch": "LupoLibero/ngCouch",
-    "angular-animate": "~1.2.16",
+    "angular-animate": "~1.2.*",
     "pouchdb": "~2.2.3",
-    "ng-tags-input": "~2.0.1"
+    "ng-tags-input": "~2.0.1",
+    "angular-sanitize": "1.2.*"
   },
   "resolutions": {
-    "angular": "1.3.*",
     "pouchdb": "~2.2.3"
   }
 }
