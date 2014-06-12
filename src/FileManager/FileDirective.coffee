@@ -20,7 +20,7 @@ directive('file', ($state, session, fileManager, usSpinnerService)->
                   <div class="file-title" ng-hide="isEditMode()" ng-if="user.prefs.displayThumb" >{{ file.metadata.name |ellipsis:20 }}</div>
                   <input type="text" ng-model="newName" ng-show="isEditMode()" ng-blur="changeName(true)" ng-keypress="changeName($event)" select="isEditMode()"/>
 
-                  <div class="file-size" ng-if="!file.isFolder()">{{ file.metadata.size |size }}</div>
+                  <div class="file-size" ng-if="!file.isFolder() && !user.prefs.displayThumb">{{ file.metadata.size |size }}</div>
                 </div>
               </div>
               """
