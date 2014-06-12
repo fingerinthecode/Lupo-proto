@@ -1,1 +1,1 @@
-angular.module('translation', ['gettext', 'angularSpinner', 'directive', 'ngCouchDB'])
+angular.module('translation', ['gettext', 'angularSpinner', 'directive'])
