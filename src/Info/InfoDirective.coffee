@@ -4,12 +4,15 @@ directive('info', ($rootScope, $state, $filter)->
     restrict: 'E'
     replace: true
     template: """
-              <div class="info" ng-bind-html="html">
+              <div class="info" ng-hide="close">
+                <button class="button-link close" ng-click="close=true">&times;</button>
+                <div class="info-content" ng-bind-html="html"></div>
               </div>
               """
     link: (scope, element, attrs)->
-      scope.drag = false
-      scope.html = ""
+      scope.close = false
+      scope.drag  = false
+      scope.html  = ""
 
       scope.refresh = ($event)->
         name = $state.current.name.toUpperCase()
