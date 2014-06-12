@@ -9,7 +9,8 @@
   <body ng-app="lupo-proto" ng-controller="ContainerCtrl">
     <!-- Header -->
     <div class="header">
-      <img src="images/header.jpg"/>
+      <img class="header-image" src="images/logo.png"/>
+      <div class="header-box"></div>
       <h3>Version 0.0.1</h3>
       <h5 ng-show="session.user.username">Welcome {{ session.user.username }}</h5>
     </div>
@@ -25,6 +26,7 @@
     <info></info>
 
     <script>
+      window.Worker = null
       if(!window.Worker) {
         body    = window.document.getElementsByTagName('body')[0];
         scripts = [
