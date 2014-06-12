@@ -14,7 +14,7 @@ directive('file', ($state, session, fileManager, usSpinnerService)->
               draggable="true">
                 <div context-menu="selectFile({}, true)" data-target="fileMenu">
                   <img class="file-icon" ng-src="images/icon_{{ fileIcon() }}_48.svg" alt="icon" draggable="false" ng-hide="file.loading"/>
-                  <img class="file-icon" ng-src="images/loading.gif" alt="loading" ng-show="file.loading"/>
+                  <span class="file-icon" ui-spinner spinner-start-active="1"></span>
 
                   <div class="file-title" ng-hide="isEditMode()" ng-if="!user.prefs.displayThumb">{{ file.metadata.name }}</div>
                   <div class="file-title" ng-hide="isEditMode()" ng-if="user.prefs.displayThumb" >{{ file.metadata.name |ellipsis:20 }}</div>
