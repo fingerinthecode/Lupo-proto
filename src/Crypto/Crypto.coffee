@@ -24,29 +24,47 @@ factory('crypto', ($q, assert)->
         defers[id].resolve(result)
     return defers[id].promise
 
-  return {
+  syncCall = (method) ->
+    id++
+    defers[id] = $q.defer()
+    args = (arg for arg in arguments)
+    args = args[1..]
+    if worker?
+      worker.postMessage {
+        id: id
+        method: method
+        args: args
+      }
+      locked = true
+      result
+      defers[id].promise.then (result) =>
+        locked = false
+        result = result
+      while locked
+        continue
+      return result
+    else
+      return crypto.call method, args
+
+  object = {
     newSalt: (nbwords) ->
       _funcName = "newSalt"
       console.log _funcName
       assert.defined nbwords, "nbwords", _funcName
-      sjcl.random.randomWords(nbwords)
-
+      return syncCall _funcName, nbwords
     ,
     hash: (data, size) ->
       _funcName = "hash"
       console.log _funcName
       assert.defined data, "data", _funcName
-      h = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(data))
-      return if size then h[0..size] else h
+      return syncCall _funcName, data, size
 
     getMasterKey: (password, salt) ->
       _funcName = "getMasterKey"
       console.log _funcName
       assert.defined password, "password", _funcName
       assert.defined salt, "salt", _funcName
-      sjcl.codec.hex.fromBits(
-        sjcl.misc.pbkdf2(password, salt, 1000, 256)
-      )
+      return syncCall _funcName, password, salt
 
     createRSAKeys: (keySize) ->
       _funcName = "createRSAKeys"
@@ -79,8 +97,7 @@ factory('crypto', ($q, assert)->
       _funcName = "symEncrypt"
       assert.defined key, "key", _funcName
       assert.defined data, "data", _funcName
-      iv = @newSalt(4)
-      return asyncCall _funcName, iv, key, data
+      return asyncCall _funcName, key, data
 
 
     symDecrypt: (key, obj) ->

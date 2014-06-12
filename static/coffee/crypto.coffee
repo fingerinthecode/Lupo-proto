@@ -5,6 +5,27 @@ crypto =
       args.push(callback)
     @[method].apply(@, args)
 
+  newSalt: (nbWords, callback) ->
+    result = sjcl.random.randomWords(nbwords)
+    if callback?
+      callback(result)
+    return result
+
+  hash: (data, size) ->
+    h = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(data))
+    result = if size then h[0..size] else h
+    if callback?
+      callback(result)
+    return result
+
+  getMasterKey: (password, salt) ->
+    result = sjcl.codec.hex.fromBits(
+      sjcl.misc.pbkdf2(password, salt, 1000, 256)
+    )
+    if callback?
+      callback(result)
+    return result
+
   createRSAKeys: (keySize, callback) ->
     _funcName = "createRSAKeys"
     console.log _funcName, keySize, callback
@@ -46,9 +67,9 @@ crypto =
     key = sjcl.codec.hex.toBits key
     aes = new sjcl.cipher.aes(key)
     result = {
-      data: sjcl.mode.ccm.encrypt(aes, sjcl.codec.utf8String.toBits(data), iv)
+      data: 	sjcl.mode.ccm.encrypt(aes, sjcl.codec.utf8String.toBits(data), iv)
       algo: "aes",
-      iv:   iv
+      iv: @newSalt(4)
     }
     if callback?
       callback(result)
