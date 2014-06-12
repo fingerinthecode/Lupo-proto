@@ -1,19 +1,27 @@
 angular.module('info').
-directive('info', ($rootScope, $state)->
+directive('info', ($rootScope, $state, $filter)->
   return {
     restrict: 'E'
     replace: true
     template: """
-              <div class="info">
-                {{ key |translate }}
+              <div class="info" ng-bind-html="html">
               </div>
               """
     link: (scope, element, attrs)->
       scope.drag = false
-      $rootScope.$on('$stateChangeSuccess', ->
-        name      = $state.current.name.toUpperCase()
-        scope.key = "INFO_#{name}"
-      )
+      scope.html = ""
+
+      scope.refresh = ($event)->
+        name = $state.current.name.toUpperCase()
+        key  = "INFO_#{name}"
+        html = $filter('translate')(key)
+        if html != key
+          scope.html = html
+        else
+          scope.html = ""
+
+      $rootScope.$on('$stateChangeSuccess', scope.refresh)
+      $rootScope.$on('$translateChangeSuccess', scope.refresh)
 
       element.on('mousedown', ($event)->
         scope.drag  = true
@@ -30,7 +38,6 @@ directive('info', ($rootScope, $state)->
         if scope.drag
           mouse  = scope.mouse
           origin = scope.original
-          console.info scope, origin, mouse, $event
           element.css({
             left: origin.left + $event.clientX - mouse.x + "px"
             top:  origin.top  + $event.clientY - mouse.y + "px"

@@ -1,1 +1,1 @@
-angular.module('info', [])
+angular.module('info', ['ngSanitize'])
