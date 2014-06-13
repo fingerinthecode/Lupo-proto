@@ -3,8 +3,8 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
   unless session.isConnected()
     return
 
-  $scope.rightClick = ->
-    $document.find('#context-menu').trigger('righclick')
+  $scope.rightClick = ($event)->
+    $event.shiftkey = true
 
   User.all().then (list) =>
     $scope.users = list
@@ -61,6 +61,16 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
 
   $scope.clipboardNotEmpty = ->
     return Object.keys($scope.selected.clipboard).length == 0
+
+  $scope.selectionIsFolder = ->
+    folder = false
+    for i, file of $scope.selected.files
+      if file.isFolder()
+        folder = true
+    return folder
+
+  $scope.selectionIsFile = ->
+    return !$scope.selectionIsFolder()
 
   $scope.openFile = ->
     for i, file of $scope.selected.files
