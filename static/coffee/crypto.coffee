@@ -1,13 +1,10 @@
 crypto =
   call: (method, args, callback) ->
-    console.info method, args, callback
     if callback?
       args.push(callback)
     @[method].apply(@, args)
 
   createRSAKeys: (keySize, callback) ->
-    _funcName = "createRSAKeys"
-    console.log _funcName, keySize, callback
     crypt = new JSEncrypt({default_key_size: keySize})
     if callback?
       crypt.getKey ->
@@ -22,7 +19,7 @@ crypto =
         private: crypt.getPrivateKey()
       }
 
-  asymEncrypt: (publicKey, data) ->
+  asymEncrypt: (publicKey, data, callback) ->
     crypt = new JSEncrypt()
     crypt.setPublicKey(publicKey)
     result = crypt.encrypt(
@@ -32,7 +29,7 @@ crypto =
       callback(result)
     return result
 
-  asymDecrypt: (privateKey, data) ->
+  asymDecrypt: (privateKey, data, callback) ->
     crypt = new JSEncrypt()
     crypt.setPrivateKey(privateKey)
     result = JSON.parse (
@@ -57,9 +54,13 @@ crypto =
   symDecrypt: (key, obj, callback) ->
     key = sjcl.codec.hex.toBits key
     aes = new sjcl.cipher.aes(key)
-    result = sjcl.codec.utf8String.fromBits(
-      sjcl.mode.ccm.decrypt(aes,  obj.data, obj.iv)
-    )
+    try
+      result = sjcl.codec.utf8String.fromBits(
+        sjcl.mode.ccm.decrypt(aes,  obj.data, obj.iv)
+      )
+    catch InternalError
+      console.error "symDecrypt error"
+      result = undefined
     if callback?
       callback(result)
     return result

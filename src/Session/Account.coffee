@@ -36,16 +36,16 @@ angular.module('session')
               }
             }
             clearData = angular.copy(privateUserDoc.data)
-            crypto.encryptDataField(masterKey, privateUserDoc)
-            storage.save(privateUserDoc).then (savedPrivateDoc) =>
-              session.user = new User(
-                username, keys.public, login
-                masterKey, {
-                  _id: savedPrivateDoc.id
-                  _rev: savedPrivateDoc.rev
-                  data: clearData
-                })
-              console.error "SIGNUP FINISHED"
+            crypto.encryptDataField(masterKey, privateUserDoc).then =>
+              storage.save(privateUserDoc).then (savedPrivateDoc) =>
+                session.user = new User(
+                  username, keys.public, login
+                  masterKey, {
+                    _id: savedPrivateDoc.id
+                    _rev: savedPrivateDoc.rev
+                    data: clearData
+                  })
+                console.error "SIGNUP FINISHED"
 
     signIn: (login, password) ->
       console.log "signIn", login

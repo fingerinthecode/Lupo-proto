@@ -242,6 +242,8 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
                   deferred.resolve(list)
           unless atLeastOne
             deferred.resolve([])
+        .catch (err) =>
+          deferred.reject(err)
       return deferred.promise
 
     rename: (newName) ->

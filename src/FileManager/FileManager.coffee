@@ -1,5 +1,5 @@
 angular.module('fileManager').
-factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, usSpinnerService) ->
+factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, usSpinnerService, notification) ->
   TYPE_FOLDER = 0
   TYPE_FILE = 1
   {
@@ -18,7 +18,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
             $state.go(".", session.getRootFolderId())
           else
             folder = @shares
-        @goToFolder(folder).finally(
+        @goToFolder(folder).then(
           =>
             console.log "moved to folderId", folderId
             if @isRootFolder(folder)
@@ -28,7 +28,9 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
             usSpinnerService.stop('main')
 
           (err) =>
-            console.error(err)
+            usSpinnerService.stop('main')
+            notification.addAlert("Not authorized")
+            $state.go('.', {path: ""}, {location: 'replace'})
         )
       return @
 
@@ -228,6 +230,9 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
           usSpinnerService.stop('main')
         =>
           usSpinnerService.stop('main')
+          notification.addAlert("Not authorized")
+          $state.go('.')
+          notification.addAlert("Not authorized")
       )
 
     openFolder: (folder) ->

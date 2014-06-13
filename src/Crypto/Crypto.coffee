@@ -5,8 +5,10 @@ factory('crypto', ($q, assert)->
   if window.Worker?
     worker = new Worker("js/crypto_worker.js")
     worker.addEventListener 'message', (e) ->
-      console.log "RECEIVED", e.data
-      defers[e.data.id].resolve(e.data.result)
+      if e.data.result?
+        defers[e.data.id].resolve(e.data.result)
+      else
+        defers[e.data.id].reject()
 
   asyncCall = (method) ->
     id++
@@ -21,7 +23,10 @@ factory('crypto', ($q, assert)->
       }
     else
       crypto.call method, args, (result) ->
-        defers[id].resolve(result)
+        if result?
+          defers[id].resolve(result)
+        else
+          defers[id].reject()
     return defers[id].promise
 
   return {
@@ -96,7 +101,7 @@ factory('crypto', ($q, assert)->
       assert.defined doc.data, "doc.data", _funcName
       @symEncrypt(key, JSON.stringify(doc.data)).then (data) =>
         doc.data = data
-    ,
+
     decryptDataField: (key, doc) ->
       _funcName = "decryptDataField"
       assert.defined key, "key", _funcName

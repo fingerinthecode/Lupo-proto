@@ -5,8 +5,6 @@ importScripts('crypto.js')
 
 @addEventListener 'message',
   (e) ->
-    console.error "WORKER", e.data
-
     result = crypto.call(e.data.method, e.data.args)
     self.postMessage {
         id: e.data.id
