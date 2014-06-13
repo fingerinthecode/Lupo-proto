@@ -1,0 +1,33 @@
+[
+  {
+    "_id": "local:fr",
+    "Login": "Utilisateur",
+    "Password": "Mots de passe",
+    "Submit": "Envoyé",
+    "Sign up": "S'enregistrer",
+    "{{$count}} element": [
+      "{{$count}} element",
+      "{{$count}} elements"
+    ],
+    "Open": "Ouvrir",
+    "Rename": "Renomer",
+    "Share": "Partager",
+    "Cut": "Couper",
+    "Copy": "Copier",
+    "Paste": "Coller",
+    "Delete": "Suprimer",
+    "New File": "Nouveau Fichier",
+    "New Folder": "Nouveau Dossier",
+    "Normal right click": "Click droit normal",
+    "Cancel": "Annuler",
+    "Login:": "Utilisateur :",
+    "Password:": "Mot De Passe :",
+    "Confirm password:": "Répété le mots de passe :",
+    "Public name (optional):": "Noms Publique (optionnel) :",
+    "new document": "nouveau fichier",
+    "new folder": "nouveau dossier",
+    "Shares": "Partages",
+    "README": "LISEZ MOI",
+    "Welcome": "Bienvenue"
+  }
+]

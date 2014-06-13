@@ -1,5 +1,5 @@
 angular.module('fileManager').
-factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, usSpinnerService, notification) ->
+factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, usSpinnerService, $filter, notification) ->
   TYPE_FOLDER = 0
   TYPE_FILE = 1
   {
@@ -67,7 +67,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
         @shares = new File(
           _id: "shares"
           metadata:
-            name: 'Partages'
+            name: $filter('translate')('Shares')
             type: 0
           content: []
         )
@@ -132,14 +132,14 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
 
     newFile: ->
       console.info "createFile"
-      name = @uniqueName("new document")
+      name = @uniqueName($filter('translate')("new document"))
       @createFile(name, "", @getCurrentDirId())
       .then (file) =>
         this.fileTree.push file
 
     newFolder: ->
       console.info "createFolder"
-      name = @uniqueName("new folder")
+      name = @uniqueName($filter('translate')("new folder"))
       @createFolder(name, @getCurrentDirId())
       .then (folder) =>
         @fileTree.push folder
@@ -194,7 +194,12 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       new File({content: [], keyId: masterKeyId}).save()
       .then (root) =>
         console.log "root", root
-        this.createFile("README", "Welcome", root._id, masterKeyId)
+        this.createFile(
+          $filter('translate')("README"),
+          $filter('translate')("Welcome"),
+          root._id,
+          masterKeyId
+        )
         .then =>
           return root._id
 

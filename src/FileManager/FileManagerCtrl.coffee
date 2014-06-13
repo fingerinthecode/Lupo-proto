@@ -3,6 +3,9 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
   unless session.isConnected()
     return
 
+  $scope.rightClick = ->
+    $document.find('#context-menu').trigger('righclick')
+
   User.all().then (list) =>
     $scope.users = list
   $scope.share = []
