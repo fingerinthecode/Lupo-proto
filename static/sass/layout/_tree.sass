@@ -10,14 +10,24 @@
   overflow-y: auto
   overflow-x: auto
 
+.tree-loader
+  position: relative
+  float: left
+  width: 25px
+  height: 25px
+
 .tree-element
+  display: block
   margin-left: $tree-indent
   margin-top:  $tree-element-spacing
-  width: 150px
+  width: 200px
 
 .tree>.tree-element
   margin-top: $tree-padding
 
 .tree-element-title
+  margin-left: 5px
+  display: inline-block
+  height: 35px
   text-decoration: none
   color: $base-color
