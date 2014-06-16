@@ -22,18 +22,19 @@ crypto =
   asymEncrypt: (publicKey, data, callback) ->
     crypt = new JSEncrypt()
     crypt.setPublicKey(publicKey)
-    result = crypt.encrypt(
-      JSON.stringify(data)
-    )
+    result = {
+      data: crypt.encrypt JSON.stringify(data)
+      algo: "rsa"
+    }
     if callback?
       callback(result)
     return result
 
-  asymDecrypt: (privateKey, data, callback) ->
+  asymDecrypt: (privateKey, dataObj, callback) ->
     crypt = new JSEncrypt()
     crypt.setPrivateKey(privateKey)
     result = JSON.parse (
-      crypt.decrypt(data)
+      crypt.decrypt(dataObj.data)
     )
     if callback?
       callback(result)

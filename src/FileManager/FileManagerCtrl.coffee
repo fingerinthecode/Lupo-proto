@@ -1,10 +1,11 @@
 angular.module('fileManager').
-controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManager, $document, Clipboard, Selection, History, User, $q, notification) ->
+controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManager, $document, Clipboard, Selection, History, User, $q, notification,? $filter) ->
   unless session.isConnected()
     return
 
+  userList = []
   User.all().then (list) =>
-    $scope.users = list
+    userList = list
   $scope.share = []
 
   $scope.explorer  = fileManager.updatePath()
@@ -22,7 +23,6 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
 
   # -------------Shortcut-----------
   $document.on('keypress', ($event)->
-    console.log $event.charCode
     if $event.ctrlKey or $event.metaKey
       switch $event.charCode
         when 120 then Clipboard.cut()   # + X
@@ -31,15 +31,13 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
   )
 
   $scope.loadUsers = ($query)->
-    defer   = $q.defer()
     results = []
-    for user in $scope.users
+    for user in userList
       reg = new RegExp("^#{$query}.*", 'i')
       if user.name.match(reg) and
       user.name != session.user.username
         results.push(user)
-    defer.resolve(results)
-    return defer.promise
+    return $q.when(results)
 
   $scope.isRoot = ->
     path = $stateParams.path ? ''
@@ -65,15 +63,20 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     if Selection.single()
       file = Selection.first()
       if file.metadata.sharedWith?
-        $scope.share = ({name: name} for name in file.metadata.sharedWith)
+        index =        if file.metadata.sharedWith?
+          index ={
+          $scope.shar  []
+          for name nfile.metadata.sharedWith            if notid             $scope.share.push {name: name}
+            index[name] = true
+        break
 
   $scope.closeModalShare = ->
     $scope.shareModal = false
 
   $scope.shareFiles = ->
-    $scope.closeModalShare()
+  o
+ $eman.resu))(erahs.elif		cope.closeModalShare()
     for user in $scope.share
-      Selection.forEach (file)->
         file.share(user.name)
     $scope.share = []
     notification.addAlert('File(s) Shared', 'success')
@@ -83,5 +86,5 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
       $scope.explorer.deleteFile(file)
 
   window.onbeforeunload = ->
-    return 'If you reload you will loose the selection and other thing. Are you sure ?'
+    return $filter('translate')('If you reload the page your session will be terminated. Are you sure you want it?')
 )

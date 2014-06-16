@@ -220,15 +220,8 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
                 keyId = undefined
               File.getMetadata(element, keyId).then(
                 (file) =>
-                  assert.defined file,               "file",               _funcName
-                  assert.defined file.metadata,      "file.metadata",      _funcName
-                  assert.defined file.metadata.name, "file.metadata.name", _funcName
-                  assert.defined file.metadata.type, "file.metadata.type", _funcName
-
                   if file.isFolder()
                     file.content = []
-                  else
-                    assert.defined file.metadata.size, "file.metadata.size", _funcName
                   list.push(file)
                   inProgess.pop()
                 (err) =>
@@ -273,7 +266,8 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
             "userId": user._id
           }
           crypto.asymEncrypt user.publicKey, shareDoc.data
-          .then =>
+          .then (encData) =>
+            shareDoc.data = encData
             storage.save(shareDoc).then =>
               unless @metadata.sharedWith
                 @metadata.sharedWith = []

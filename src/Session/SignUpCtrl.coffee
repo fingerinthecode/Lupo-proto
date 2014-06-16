@@ -9,7 +9,6 @@ controller('SignUpCtrl', ($scope, account, usSpinnerService, $state) ->
           usSpinnerService.stop('main')
           $state.go('files')
         (err) =>
-          alert(err)
           usSpinnerService.stop('main')
       )
     else
