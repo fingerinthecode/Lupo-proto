@@ -6,11 +6,3 @@ exports.getUserByName = {
     }
   }
 }
-
-exports.getShares = {
-  map: function(doc) {
-    if (doc.hasOwnProperty('userId') && doc.hasOwnProperty('data')) {
-      emit(doc.userId, doc.data);
-    }
-  }
-}

@@ -13,11 +13,13 @@ directive('file', ($state, session, fileManager, usSpinnerService)->
               ng-class="{'is-selected': isSelected(), 'file-list': isList(), 'file-thumb': isThumb(), 'is-cut': isCut()}"
               draggable="true">
                 <div context-menu="selectFile({}, true)" data-target="fileMenu">
-                  <img class="file-icon" ng-src="images/icon_{{ fileIcon() }}_48.svg" alt="icon" draggable="false" ng-hide="file.loading"/>
-
-                  <div class="file-icon" ng-show="file.loading">
-                    <span ng-if="isThumb()" us-spinner=""></span>
-                    <span ng-if="isList()"  us-spinner="spinnerListConfig"></span>
+                  <div class="file-icon">
+                    <span ng-if="isThumb()" us-spinner spinner-key="{{file.metadata.name}}">
+                      <img class="file-icon" ng-src="{{ fileIcon }}" draggable="false"/>
+                    </span>
+                    <span ng-if="isList()"  us-spinner="spinnerListConfig" spinner-key="{{file.metadata.name}}">
+                      <img class="file-icon" ng-src="{{ fileIcon }}" draggable="false"/>
+                    </span>
                   </div>
 
                   <div class="file-title" ng-hide="isEditMode()" ng-if="isList()">{{ file.metadata.name }}</div>
@@ -116,15 +118,29 @@ directive('file', ($state, session, fileManager, usSpinnerService)->
           $event.preventDefault()
           $event.stopPropagation()
 
-      scope.fileIcon = () ->
+      iconPath = (icon) ->
+        'images/icon_' + icon + '_48.svg'
+
+      getFileIcon = () ->
+        if scope.file.metadata.thumb
+          return scope.file.metadata.thumb
         if scope.file.isFolder()
-          return 'folder'
+          fileType = 'folder'
         else
           switch scope.file.metadata.name.split('.')[-1..][0]
-            when "pdf" then scope.fileType = "pdf"
-            else scope.fileType = "text"
+            when "pdf" then fileType = "pdf"
+            else fileType = "text"
+        return iconPath fileType
+
+      scope.$watch 'file', () =>
+        if scope.file.loading
+          usSpinnerService.spin(scope.file.metadata.name)
+        else
+          usSpinnerService.stop(scope.file.metadata.name)
+        scope.fileIcon = getFileIcon()
 
       #scope.downloadUrl = 'data:' + scope.file.mime + ';charset=utf-8,' + encodeURIComponent(scope.file.getContent())
-
+      scope.file.getFileImg = () ->
+        element.find('img')[0]
   }
 )

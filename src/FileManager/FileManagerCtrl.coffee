@@ -1,13 +1,14 @@
 angular.module('fileManager').
-controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManager, $document, History, User, $q, notification) ->
+controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManager, $document, History, User, $q, notification, $filter) ->
   unless session.isConnected()
     return
 
   $scope.rightClick = ($event)->
     $event.shiftkey = true
 
+  userList = []
   User.all().then (list) =>
-    $scope.users = list
+    userList = list
   $scope.share = []
   $scope.selected = {
     files: {}
@@ -34,15 +35,13 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
   )
 
   $scope.loadUsers = ($query)->
-    defer   = $q.defer()
     results = []
-    for user in $scope.users
+    for user in userList
       reg = new RegExp("^#{$query}.*", 'i')
       if user.name.match(reg) and
       user.name != session.user.username
         results.push(user)
-    defer.resolve(results)
-    return defer.promise
+    return $q.when(results)
 
   $scope.isRoot = ->
     path = $stateParams.path
@@ -88,8 +87,13 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     if Object.keys($scope.selected.files).length == 1
       for _id, file of $scope.selected.files
         if file.metadata.sharedWith?
-          $scope.share = ({name: name} for name in file.metadata.sharedWith)
-          break
+          index = {}
+          $scope.share = []
+          for name in file.metadata.sharedWith
+            if not index[name]?
+              $scope.share.push {name: name}
+            index[name] = true
+        break
 
   $scope.closeModalShare = ->
     $scope.shareModal = false
@@ -131,5 +135,5 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
 
 
   window.onbeforeunload = ->
-    return 'If you reload you will loose the selection and other thing. Are you sure ?'
+    return $filter('translate')('If you reload the page your session will be terminated. Are you sure you want it?')
 )

@@ -23,8 +23,10 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
             console.log "moved to folderId", folderId
             if @isRootFolder(folder)
               @getShares().then =>
-                if @shares.content.length > 0
-                  @fileTree.push @shares
+                if not @fileTree.length or
+                @shares.content.length > 0 and
+                @fileTree[0]._id != "shares"
+                  @fileTree.unshift @shares
             usSpinnerService.stop('main')
 
           (err) =>
@@ -71,16 +73,22 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
             type: 0
           content: []
         )
-        for shareDoc in list
-          crypto.asymDecrypt(
-            session.getMainPrivateKey()
-            shareDoc
-          ).then (clearShareDoc) =>
-            keyId = session.registerKey(clearShareDoc.key)
-            @shares.content.push {
-              _id: clearShareDoc.docId
-              keyId: keyId
-            }
+        diffList = []
+        for _id in list
+          diffList.push storage.get(_id).then (shareDoc) =>
+            crypto.asymDecrypt(
+              session.getMainPrivateKey()
+              shareDoc.data
+            ).then (clearData) =>
+              keyId = session.registerKey(clearData.key)
+              @shares.content.push {
+                _id: clearData.docId
+                keyId: keyId
+              }
+              console.debug "shares", @shares
+            .catch (err) =>
+              console.error "asymDecrypt error"
+        return $q.all(diffList)
 
 
     getFileContent: (id) ->
@@ -91,35 +99,23 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       console.info _funcName, metadata
       assert.defined metadata.name, "metadata.name", _funcName
       assert.defined content, "content", _funcName
-      metadata.name = @uniqueName(metadata.name)
-      console.log "type", metadata.type
-      tmpFile = {
-        metadata: {
-          name: metadata.name
-          size: metadata.size
-        }
-      }
-      if metadata.type == "" or metadata.type == TYPE_FOLDER
-        tmpFile.metadata.type = TYPE_FOLDER
+
+      (if metadata.type == TYPE_FOLDER
+        @createFolder(metadata, @getCurrentDirId())
       else
-        tmpFile.metadata.type = TYPE_FILE
-      tmpFile = new File(tmpFile)
-      tmpFile.loading = true
-      length = @fileTree.push tmpFile
-      console.log length, @fileTree
-      (if tmpFile.metadata.type == TYPE_FOLDER
-        @createFolder(metadata.name, @getCurrentDirId())
-      else
-        @createFile(metadata.name, content, @getCurrentDirId())
+        @createFile(metadata, content, @getCurrentDirId())
       ).then (file) =>
-        @fileTree[length-1] = file
+        for i, f of @fileTree
+          if f.metadata.name == file.metadata.name
+            @fileTree[i] = file
+            break
 
     uniqueName: (name, parentDirContent) ->
       console.info "uniqueName", name
       unless parentDirContent
         parentDirContent = @fileTree
-      assert.defined parentDirContent, "parentDirContent", "createFolder"
-      assert.array   parentDirContent, "parentDirContent", "createFolder"
+      assert.defined parentDirContent, "parentDirContent", "uniqueName"
+      assert.array   parentDirContent, "parentDirContent", "uniqueName"
       s = name.split('.')
       basename  = s[0]
       extension = '.' + s[1..].join('.')
@@ -133,37 +129,34 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
     newFile: ->
       console.info "createFile"
       name = @uniqueName($filter('translate')("new document"))
-      @createFile(name, "", @getCurrentDirId())
+      @createFile({name: name}, "", @getCurrentDirId())
       .then (file) =>
         this.fileTree.push file
 
     newFolder: ->
       console.info "createFolder"
       name = @uniqueName($filter('translate')("new folder"))
-      @createFolder(name, @getCurrentDirId())
+      @createFolder({name: name}, @getCurrentDirId())
       .then (folder) =>
         @fileTree.push folder
 
-    _createFile: (name, content, type, parentId, keyId) ->
+    _createFile: (metadata, content, parentId, keyId) ->
       _funcName = "_createFile"
-      console.info _funcName, name, content, parentId
-      assert.defined name,     "name",     _funcName
+      console.info _funcName, metadata, content, parentId
+      assert.defined metadata, "metadata", _funcName
       assert.defined content,  "content",  _funcName
-      assert.defined type,     "type",     _funcName
       assert.defined parentId, "parentId", _funcName
       new File({_id: parentId, keyId: keyId}).listContent().then(
         (list) =>
           console.log "list", list
           assert.defined list, "list", _funcName
-          unless name in [f.metadata.name for f in list]
+          unless metadata.name in [f.metadata.name for f in list]
             content = if content? then content else ""
+            if metadata.type != TYPE_FOLDER
+              metadata.size = metadata.size || content.length
             newFile = new File {
               content: content
-              metadata: {
-                type: type
-                name: name
-                size: if type != TYPE_FOLDER then content.length
-              }
+              metadata: metadata
               keyId: keyId
             }
             newFile.save()
@@ -174,19 +167,21 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
           return "parent does not exist"
       )
 
-    createFile: (name, content, parentId, keyId) ->
+    createFile: (metadata, content, parentId, keyId) ->
       _funcName = "createFile"
-      console.info _funcName, name, content, parentId
-      assert.defined name,     "name",     _funcName
+      console.info _funcName, metadata, content, parentId
+      assert.defined metadata, "metadata", _funcName
       assert.defined content,  "content",  _funcName
       assert.defined parentId, "parentId", _funcName
-      this._createFile(name, content, TYPE_FILE, parentId, keyId)
+      metadata.type = TYPE_FILE
+      this._createFile(metadata, content, parentId, keyId)
 
-    createFolder: (name, parentId, keyId) ->
-      console.info "createFolder", name, parentId
-      assert.defined name,     "name",     "createFolder"
+    createFolder: (metadata, parentId, keyId) ->
+      console.info "createFolder", metadata, parentId
+      assert.defined metadata, "metadata", "createFolder"
       assert.defined parentId, "parentId", "createFolder"
-      this._createFile(name, [], TYPE_FOLDER, parentId, keyId)
+      metadata.type = TYPE_FOLDER
+      this._createFile(metadata, [], parentId, keyId)
 
     createRootFolder: (masterKeyId) ->
       console.info "createRootFolder", masterKeyId
@@ -195,9 +190,9 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       .then (root) =>
         console.log "root", root
         this.createFile(
-          $filter('translate')("README"),
-          $filter('translate')("Welcome"),
-          root._id,
+          {name: $filter('translate')("README")}
+          $filter('translate')("Welcome")
+          root._id
           masterKeyId
         )
         .then =>
