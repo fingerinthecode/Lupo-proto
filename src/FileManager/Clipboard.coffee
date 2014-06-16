@@ -5,9 +5,8 @@ factory('Clipboard', (Selection, fileManager)->
     @_files: {}
 
     @isEmpty: ->
-      for id, file in @_files
+      for id, file of @_files
         return false
-        break
       return true
 
     @clear: ->
@@ -49,10 +48,9 @@ factory('Clipboard', (Selection, fileManager)->
     @fileIsCopy: (file)->
       return @isCopy() and @hasFile(file)
 
-    @first: ->
+    @getFirst: ->
       for id, file of @_files
         return file
-        break
 
     @forEach: (callback)->
       for id, file of @_files

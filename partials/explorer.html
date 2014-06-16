@@ -1,0 +1,30 @@
+<!-- Nav Bar -->
+<nav class="navbar">
+  <button class="btn-link navbar-button" ng-click="History.back()"    ng-disabled="History.cantBack()"    ><i class="icon icon-back"></i></button>
+  <button class="btn-link navbar-button" ng-click="History.forward()" ng-disabled="History.cantForward()" ><i class="icon icon-forward"></i></button>
+  <button class="btn-link navbar-button" ng-click="History.parent()"  ng-disabled="isRoot()"              ><i class="icon icon-parent"></i></button>
+
+  <breadcrumb></breadcrumb>
+</nav>
+
+<!-- Container -->
+<div class="container">
+
+  <!-- Three -->
+  <filetree tree="fileManager.fileTree"></filetree>
+
+  <!-- Content -->
+  <div class="content" context-menu data-target="backgroundMenu" ng-click="Selection.clear()" ui-view></div>
+</div>
+
+<!-- Status Bar -->
+<div class="statusbar">
+  <div class="statusbar-elements" translate translate-n="fileManager.fileTree.length" translate-plural="{{$count}} elements">{{$count}} element</div>
+  <div class="statusbar-separator"></div>
+  <div class="statusbar-information" ng-hide="Selection.isEmpty()"
+  translate translate-n="Selection.number" translate-plural="{{$count}} Files {{Selection.getSize()|size}}">{{$count}} File {{Selection.getSize()|size}}</div>
+  <div class="statusbar-display">
+    <a ng-click="toList()"  class="icon icon-list"></a>
+    <a ng-click="toThumb()" class="icon icon-thumb"></a>
+  </div>
+</div>

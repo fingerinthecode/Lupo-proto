@@ -7,7 +7,7 @@ controller('SignUpCtrl', ($scope, account, usSpinnerService, $state) ->
       account.signUp($scope.login, $scope.password, $scope.publicName).then(
         (data) =>
           usSpinnerService.stop('main')
-          $state.go('files')
+          $state.go('explorer.files')
         (err) =>
           usSpinnerService.stop('main')
       )

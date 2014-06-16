@@ -1,11 +1,36 @@
+<!-- temporary hack -->
+<div drop-zone="fileManager" style="width: 100%; height:100%">
+  <file ng-repeat="file in fileManager.fileTree" file="file"></file>
+</div>
+
+
+<div class="modal" ng-if="shareModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <div class="close"></div>
+      <h3 class="modal-header-title" translate>Share</h3>
+    </div>
+    <div class="modal-content">
+      <tags-input ng-model="share" placeholder="{{ 'Pseudo' |translate }}" display-property="name" add-from-autocomplete-only="true">
+        <auto-complete source="loadUsers($query)" debounce-delay="40"></auto-complete>
+      </tags-input>
+    </div>
+    <div class="modal-footer">
+      <button class="button-cancel" ng-click="closeModalShare()" translate>Cancel</button>
+      <button class="button-ok"     ng-click="shareFiles()"      translate>Share</button>
+    </div>
+  </div>
+</div>
+
+
 <!-- FileMenu -->
-<ul id="fileMenu" class="context-menu" role="context-menu">
-  <li class="context-menu-item" ng-class="{'is-disable': Selection.single()}" ng-click="openFile()">
+<ul id="fileMenu" class="context-menu">
+  <li class="context-menu-item" ng-class="{'is-disable': !Selection.isSingle()}" ng-click="openFile()">
     <i class="icon icon-download"    ng-if="!Selection.hasAtLeastOneFolder()"></i>
     <i class="icon icon-folder-open" ng-if=" Selection.hasAtLeastOneFolder()"></i>
     <span translate>Open</span>
   </li>
-  <li class="context-menu-item" ng-class="{'is-disable': !Selection.single()}" ng-click="renameFile()">
+  <li class="context-menu-item" ng-class="{'is-disable': !Selection.isSingle()}" ng-click="renameFile()">
     <i class="icon icon-rename"></i>
     <span translate>Rename</span>
   </li>
@@ -31,13 +56,14 @@
   </li>
 </ul>
 
+
 <!-- BackgroundMenu -->
 <ul id="backgroundMenu" class="context-menu" role="context-menu">
-  <li class="context-menu-item" ng-click="explorer.newFile()">
+  <li class="context-menu-item" ng-click="fileManager.newFile()">
     <i class="icon icon-file"></i>
     <span translate>New File</span>
   </li>
-  <li class="context-menu-item" ng-click="explorer.newFolder()">
+  <li class="context-menu-item" ng-click="fileManager.newFolder()">
     <i class="icon icon-folder-close"></i>
     <span translate>New Folder</span>
   </li>
@@ -46,58 +72,3 @@
     <span translate>Paste</span>
   </li>
 </ul>
-
-<!-- Nav Bar -->
-<nav class="navbar">
-  <button class="btn-link navbar-button" ng-click="History.back()"    ng-disabled="History.cantBack()"    ><i class="icon icon-back"></i></button>
-  <button class="btn-link navbar-button" ng-click="History.forward()" ng-disabled="History.cantForward()" ><i class="icon icon-forward"></i></button>
-  <button class="btn-link navbar-button" ng-click="History.parent()"  ng-disabled="isRoot()"              ><i class="icon icon-parent"></i></button>
-
-  <breadcrumb></breadcrumb>
-</nav>
-
-
-<!-- Container -->
-<div class="container">
-
-  <!-- Three -->
-  <filetree tree="explorer.fileTree"></filetree>
-
-  <!-- Content -->
-  <div class="content" context-menu data-target="backgroundMenu" ng-click="Selection.clear()">
-    <!-- temporary hack -->
-    <div drop-zone="explorer" style="width: 100%; height:100%">
-      <file ng-repeat="file in explorer.fileTree" file="file"></file>
-    </div>
-  </div>
-</div>
-
-<!-- Status Bar -->
-<div class="statusbar">
-  <div class="statusbar-elements" translate translate-n="explorer.fileTree.length" translate-plural="{{$count}} elements">{{$count}} element</div>
-  <div class="statusbar-separator"></div>
-  <div class="statusbar-information" ng-hide="true">File 17ko</div>
-  <div class="statusbar-display">
-    <a ng-click="toList()"  class="icon icon-list"></a>
-    <a ng-click="toThumb()" class="icon icon-thumb"></a>
-  </div>
-</div>
-
-<div class="modal" ng-if="shareModal">
-  <div class="modal-container">
-    <div class="modal-header">
-      <div class="close"></div>
-      <h3 class="modal-header-title" translate>Share</h3>
-    </div>
-    <div class="modal-content">
-      <tags-input ng-model="share" placeholder="{{ 'Pseudo' |translate }}" display-property="name" add-from-autocomplete-only="true">
-        <auto-complete source="loadUsers($query)" debounce-delay="40"></auto-complete>
-      </tags-input>
-
-    </div>
-    <div class="modal-footer">
-      <button class="button-cancel" ng-click="closeModalShare()" translate>Cancel</button>
-      <button class="button-ok"     ng-click="shareFiles()"      translate>Share</button>
-    </div>
-  </div>
-</div>

@@ -25,24 +25,39 @@ factory('Selection', ()->
       if contextMenu and @hasFile(file)
         return true
 
-      if not ctrl
-        @clear()
+      @clear() if not ctrl
 
       if not @hasFile(file)
         @add(file)
       else
         @remove(file)
 
+    @isEmpty: ->
+      return @number == 0
+
     @isSingle: ->
-      return @_number == 1
+      return @number == 1
 
     @isMultiple: ->
-      return @_number > 1
+      return @number > 1
+
+    @forEach: (callback)->
+      for id, file of @_files
+        callback(file)
+
+    @getSize: ->
+      total = 0
+      for id, file of @_files
+        total += file.metadata.size ? 0
+      return total
+
+    @getFirst: ->
+      for i, file of @_files
+        return file
 
     @hasAtLeastOneFolder: ->
       for i, file of @_files
         if file.isFolder()
           return true
-          break
       return false
 )

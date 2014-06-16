@@ -1,7 +1,7 @@
 angular.module('session').
 controller('SignInCtrl', ($scope, account, notification, usSpinnerService, session, $state) ->
 
-  flash = session.getFlash('redirect')
+  redirect = session.getFlash('redirect')
 
   $scope.signInSubmit = () ->
     usSpinnerService.spin('main')
@@ -9,10 +9,10 @@ controller('SignInCtrl', ($scope, account, notification, usSpinnerService, sessi
       (data) =>
         console.log "data", data
         usSpinnerService.stop('main')
-        if flash?
-          $state.go(flash[0], flash[1])
+        if redirect?
+          $state.go(redirect.name, redirect.params)
         else
-          $state.go('files')
+          $state.go('explorer.files')
       (err) =>
         notification.addAlert("Incorrect login/password")
         usSpinnerService.stop('main')
