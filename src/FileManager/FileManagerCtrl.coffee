@@ -1,17 +1,16 @@
 angular.module('fileManager').
-controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManager, $document, History, User, $q, notification) ->
+controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManager, $document, Clipboard, Selection, History, User, $q, notification) ->
   unless session.isConnected()
     return
 
   User.all().then (list) =>
     $scope.users = list
   $scope.share = []
-  $scope.selected = {
-    files: {}
-    clipboard: {}
-  }
-  $scope.explorer = fileManager.updatePath()
-  $scope.History  = History
+
+  $scope.explorer  = fileManager.updatePath()
+  $scope.History   = History
+  $scope.Clipboard = Clipboard
+  $scope.Selection = Selection
 
   if $stateParams.slash != '/'
     $state.go('.', {
@@ -23,11 +22,12 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
 
   # -------------Shortcut-----------
   $document.on('keypress', ($event)->
+    console.log $event.charCode
     if $event.ctrlKey or $event.metaKey
       switch $event.charCode
-        when 120 then $scope.cutFiles()    # + X
-        when 99  then $scope.copyFiles()   # + C
-        when 120 then $scope.pasteFiles()  # + V
+        when 120 then Clipboard.cut()   # + X
+        when 99  then Clipboard.copy()  # + C
+        when 118 then Clipboard.paste() # + V
   )
 
   $scope.loadUsers = ($query)->
@@ -42,8 +42,8 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
     return defer.promise
 
   $scope.isRoot = ->
-    path = $stateParams.path
-    return path is '' or path is '/'
+    path = $stateParams.path ? ''
+    return path is ''
 
   # -------------Display Mode--------
   $scope.toList = ->
@@ -52,41 +52,20 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
   $scope.toThumb = ->
     session.set('displayThumb', true)
 
-  # ---------Context-Menu------------
-  $scope.singleSelect = ->
-    return Object.keys($scope.selected.files).length > 1
-
-  $scope.clipboardNotEmpty = ->
-    return Object.keys($scope.selected.clipboard).length == 0
-
-  $scope.selectionIsFolder = ->
-    folder = false
-    for i, file of $scope.selected.files
-      if file.isFolder()
-        folder = true
-    return folder
-
-  $scope.selectionIsFile = ->
-    return !$scope.selectionIsFolder()
-
   $scope.openFile = ->
-    for i, file of $scope.selected.files
-      if not file.isFolder()
-        $scope.explorer.openFile(file)
-      else
-        file.openFolder()
+    Selection.forEach (file)->
+      explorer.openFileOrFolder(file)
 
   $scope.renameFile = ->
-    for key, file of $scope.selected.files
+    Selection.forEach (file)->
       file.nameEditable = true
 
   $scope.modalShare = ->
     $scope.shareModal = true
-    if Object.keys($scope.selected.files).length == 1
-      for _id, file of $scope.selected.files
-        if file.metadata.sharedWith?
-          $scope.share = ({name: name} for name in file.metadata.sharedWith)
-          break
+    if Selection.single()
+      file = Selection.first()
+      if file.metadata.sharedWith?
+        $scope.share = ({name: name} for name in file.metadata.sharedWith)
 
   $scope.closeModalShare = ->
     $scope.shareModal = false
@@ -94,38 +73,14 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
   $scope.shareFiles = ->
     $scope.closeModalShare()
     for user in $scope.share
-      for _id, file of $scope.selected.files
+      Selection.forEach (file)->
         file.share(user.name)
     $scope.share = []
     notification.addAlert('File(s) Shared', 'success')
 
-  $scope.cutFiles = ->
-    $scope.selected.clipboard = {}
-    $scope.selected.clipboard.cut = angular.copy($scope.selected.files)
-    $scope.selected.files = {}
-
-  $scope.copyFiles = ->
-    $scope.selected.clipboard = {}
-    $scope.selected.clipboard.copy = angular.copy($scope.selected.files)
-    $scope.selected.files = {}
-
-  $scope.pasteFiles = ->
-    current_id = explorer.getCurrentDirId()
-    # Paste from Cut
-    if $scope.clipboard.cut?
-      for key, file of $scope.clipboard.cut
-        $scope.explorer.moveFile(file, current_id)
-    # Paste from Copy
-    else if $scope.clipboard.copy?
-      for key, file of $scope.clipboard.cut
-        console.log file
-    # Clear Clipboard
-    $scope.clipboard = {}
-
   $scope.deleteFiles = ->
-    for key, file of $scope.selected.files
+    Selection.forEach (file)->
       $scope.explorer.deleteFile(file)
-
 
   window.onbeforeunload = ->
     return 'If you reload you will loose the selection and other thing. Are you sure ?'

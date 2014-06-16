@@ -10,7 +10,7 @@ controller('ContainerCtrl', ($scope, $rootScope, session, notification, $state, 
       $state.transitionTo('signin', {})
 
     if toState.notConnected? and
-    session.isConnected()     and
+    session.isConnected()    and
     toState.notConnected
       if fromState.name isnt ''
         $state.transitionTo(fromState.name, fromParams)

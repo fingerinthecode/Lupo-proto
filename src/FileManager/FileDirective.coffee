@@ -1,16 +1,14 @@
 angular.module('fileManager').
-directive('file', ($state, session, fileManager, usSpinnerService)->
+directive('file', ($state, session, fileManager, usSpinnerService, Selection, Clipboard)->
   return {
     restrict: 'E'
     replace: true
     scope: {
       file: '='
-      selected:  '=selectedFiles'
-      clipboard: '=clipboardFiles'
     }
     template: """
               <div class="file" ng-dblclick="explorer.openFileOrFolder(file)" ng-click="selectFile($event)"
-              ng-class="{'is-selected': isSelected(), 'file-list': isList(), 'file-thumb': isThumb(), 'is-cut': isCut()}"
+              ng-class="{'is-selected': Selection.hasFile(file), 'file-list': isList(), 'file-thumb': isThumb(), 'is-cut': Clipboard.fileIsCut(file)}"
               draggable="true">
                 <div context-menu="selectFile({}, true)" data-target="fileMenu">
                   <img class="file-icon" ng-src="images/icon_{{ fileIcon() }}_48.svg" alt="icon" draggable="false" ng-hide="file.loading"/>
@@ -29,9 +27,10 @@ directive('file', ($state, session, fileManager, usSpinnerService)->
               </div>
               """
     link: (scope, element, attrs)->
-      scope.user     = session.user
-      scope.newName  = scope.file.metadata.name
-      scope.explorer = fileManager
+      scope.Clipboard = Clipboard
+      scope.Selection = Selection
+      scope.newName   = scope.file.metadata.name
+      scope.explorer  = fileManager
 
       scope.spinnerListConfig = {
         lines:  9
@@ -54,7 +53,7 @@ directive('file', ($state, session, fileManager, usSpinnerService)->
         $event.dataTransfer.effectAllowed = "move"
         $event.dataTransfer.setData('DownloadURL', "application/zip:#{scope.file.metadata.name}:#{url}")
         $event.dataTransfer.setDragImage($img[0], 10, 10)
-        scope.selectFile() if not scope.isSelected()
+        scope.selectFile() if not Selection.hasFile(scope.file)
       )
       element.on('dragover', ($event)->
         if scope.file.isFolder() and
@@ -75,29 +74,10 @@ directive('file', ($state, session, fileManager, usSpinnerService)->
         $event.preventDefault()
       )
 
-      # ----------------------Selection-------------------------
-      ###
-      # selectFile
-      # $event (optional): javascript click event
-      # ifnoselection (optional): keep the selection if not empty
-      ###
       scope.selectFile = ($event = {}, contextMenu = false) ->
-        if contextMenu and scope.selected.hasOwnProperty(scope.file._id)
-          return true
-
-        if not $event.ctrlKey ? false
-          scope.selected = {}
-
-        if not scope.selected.hasOwnProperty(scope.file._id)
-          scope.selected[scope.file._id] = scope.file
-        else
-          delete scope.selected[scope.file._id]
-
+        Selection.select(scope.file, $event.ctrlKey, contextMenu)
         $event.preventDefault?()
         $event.stopPropagation?()
-
-      scope.isSelected = () ->
-        return scope.selected.hasOwnProperty(scope.file._id)
 
       # -------------------Mode-------------------------
       # If the file is cut
