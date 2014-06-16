@@ -3,9 +3,6 @@ controller('FileManagerCtrl', ($scope, $state, $stateParams, session, fileManage
   unless session.isConnected()
     return
 
-  $scope.rightClick = ($event)->
-    $event.shiftkey = true
-
   User.all().then (list) =>
     $scope.users = list
   $scope.share = []
