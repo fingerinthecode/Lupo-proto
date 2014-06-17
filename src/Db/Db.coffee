@@ -38,36 +38,64 @@ factory 'db', ($http) ->
       return doc
 
     get: (_id) ->
-      $http.get(@dbUrl + _id +  @_encodeOptions({attachments: true}))
+      t0 = performance.now()
+      $http.get(@dbUrl + _id +  @_encodeOptions({attachments: true}), {
+        headers:
+          'Accept-Encoding': 'deflate'
+      })
       .then (result) =>
+        t1 = performance.now()
+        console.log "download time:", (t1 - t0)
         if @_isMultipart(result.data)
           return @_parseReply(result.data)
         else
           return result.data
 
+    _generateSeparator: (size)->
+      if not size
+        size = 32
+      chars = [0,1,2,3,4,5,6,7,8,9,'a','b','c','d','e','f']
+      result = ''
+      for i in [0..size-1]
+        result += chars[Math.floor(Math.random()*16)]
+      return result
+
     _toAttachment: (doc) ->
+      boundary = @_generateSeparator()
       if doc.data?
-        data = doc.data
+        data = JSON.stringify(doc.data)
         doc._attachments =
           "data":
-            "data": btoa(JSON.stringify(data))
+            "follows": true
+            "content_type": "application/json"
+            "length": data.length
         delete doc.data
+      strDoc = "\r\n--" + boundary + "\r\n"
+      strDoc += "Content-Type: application/json\r\n\r\n"
+      strDoc += JSON.stringify doc
+      if doc._attachments?
+        strDoc += "\r\n\r\n--" + boundary + "\r\n\r\n"
+        strDoc += data
+      strDoc += "\r\n--" + boundary + "--\r\n"
+      console.debug strDoc[0..100], strDoc[-100..-1]
+      return [strDoc, boundary]
+
 
     put: (doc) ->
-      @_toAttachment(doc)
-
-      $http.put(@dbUrl + doc._id, doc, {
-        'Content-Type': "application/json"
+      [strDoc, boundary] = @_toAttachment(doc)
+      t0 = performance.now()
+      $http.put(@dbUrl + doc._id, strDoc, {
+        transformRequest: angular.identity
+        headers:
+          'Content-Type': "multipart/related;boundary=\"#{boundary}\""
       }).then (result) =>
+        t1 = performance.now()
+        console.log "upload time:", (t1 - t0)
         return result.data
 
     post: (doc) ->
-      @_toAttachment(doc)
-
-      $http.post(@dbUrl, doc, {
-        'Content-Type': "application/json"
-      }).then (result) =>
-        return result.data
+      doc._id = @_generateSeparator()
+      return @put(doc)
 
     query: (fun, options) ->
       s = fun.split('/')
