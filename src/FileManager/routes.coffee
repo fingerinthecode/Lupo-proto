@@ -1,9 +1,15 @@
 angular.module('fileManager')
 .config ($stateProvider) ->
   $stateProvider
-    .state('files', {
-      url:         '/files{slash:/?}{path:.*}'
+    .state('explorer', {
+      url:         '/files'
+      templateUrl: 'partials/explorer.html'
+      controller:  'ExplorerCtrl'
+      redirectTo:  'explorer.files'
+    })
+    .state('explorer.files', {
+      url:         '{path:.*}'
       templateUrl: 'partials/files.html'
-      controller:  'FileManagerCtrl'
+      controller:  'FilesCtrl'
       loginRequired: true
     })

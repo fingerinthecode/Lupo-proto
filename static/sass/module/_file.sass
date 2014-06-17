@@ -1,10 +1,11 @@
 @import "variable/file"
 
 .file
-  cursor: pointer
-
-.file-icon
+  padding: 5px
   position: relative
+
+.file-title
+  word-wrap: break-word
 
 .file-list
   width:  100%
@@ -28,7 +29,7 @@
 .file-thumb .file-icon
   max-width: $file-thumb-size - ($file-thumb-spacing*2)
   max-height: $file-thumb-size - ($file-thumb-spacing*2)
-  margin: 5px 5px
+  margin: 0 auto
 
 .file-thumb .file-title
   text-align: center

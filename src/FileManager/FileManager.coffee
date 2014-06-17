@@ -1,8 +1,10 @@
 angular.module('fileManager').
-factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, usSpinnerService, $filter, notification) ->
+factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, usSpinnerService, $filter, notification, $rootScope) ->
   TYPE_FOLDER = 0
   TYPE_FILE = 1
-  {
+  fileManager = {
+    fileTree: []
+
     updatePath: ->
       _funcName = "updatePath"
       console.info _funcName, $stateParams.path
@@ -310,4 +312,11 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
           @fileTree.indexOf(file)
           1)
   }
+
+  $rootScope.$on('$stateChangeSuccess', ($event, toState)->
+    if toState.name == 'explorer.files'
+      fileManager.updatePath()
+  )
+
+  return fileManager
 )

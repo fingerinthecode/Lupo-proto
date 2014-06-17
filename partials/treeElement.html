@@ -6,6 +6,6 @@
   <div class="tree-loader" ng-if="element.loading"><div us-spinner="littleSpinner"></div></div>
   <a class="tree-element-title" ui-sref=".({path: element._id})">{{ element.metadata.name |ellipsis:18 }}</a>
   <div  class="tree-element-content" ng-if="element.open">
-    <div ng-repeat="element in element.childs" ng-include="'partials/treeElement.html'"></div>
+    <div ng-repeat="element in element.childs |orderBy:'metadata.name'" ng-include="'partials/treeElement.html'"></div>
   </div>
 </div>

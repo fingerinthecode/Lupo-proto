@@ -8,7 +8,7 @@ angular.module('fileManager')
     replace: true
     template: """
               <div class="tree">
-                <div ng-repeat="element in tree" ng-include="'partials/treeElement.html'"></div>
+                <div ng-repeat="element in tree |orderBy:'metadata.name'" ng-include="'partials/treeElement.html'"></div>
               </div>
               """
     link: (scope, element, attr)->
@@ -45,7 +45,7 @@ angular.module('fileManager')
             defer.resolve()
           ,(err)->
             defer.reject(err)
-            console.info err
+            console.log err
         )
         return defer.promise
   }

@@ -1,87 +1,8 @@
-<!-- FileMenu -->
-<ul id="fileMenu" class="context-menu" role="context-menu">
-  <li class="context-menu-item" ng-class="{'is-disable': singleSelect()}" ng-click="openFile()">
-    <i class="icon icon-download"    ng-if="selectionIsFile()"></i>
-    <i class="icon icon-folder-open" ng-if="selectionIsFolder()"></i>
-    <span translate>Open</span>
-  </li>
-  <li class="context-menu-item" ng-class="{'is-disable': singleSelect()}" ng-click="renameFile()">
-    <i class="icon icon-rename"></i>
-    <span translate>Rename</span>
-  </li>
-  <li class="context-menu-item" ng-click="modalShare()">
-    <i class="icon icon-share"></i>
-    <span translate>Share</span>
-  </li>
-  <li class="context-menu-item" ng-click="cutFiles()">
-    <i class="icon icon-cut"></i>
-    <span translate>Cut</span>
-  </li>
-  <li class="context-menu-item" ng-click="copyFiles()">
-    <i class="icon icon-copy"></i>
-    <span translate>Copy</span>
-  </li>
-  <li class="context-menu-item" ng-class="{'is-disable': clipboardNotEmpty()}" ng-click="pasteFiles()">
-    <i class="icon icon-paste"></i>
-    <span translate>Paste</span>
-  </li>
-  <li class="context-menu-item" ng-click="deleteFiles()">
-    <i class="icon icon-remove"></i>
-    <span translate>Delete</span>
-  </li>
-</ul>
-
-<!-- BackgroundMenu -->
-<ul id="backgroundMenu" class="context-menu" role="context-menu">
-  <li class="context-menu-item" ng-click="explorer.newFile()">
-    <i class="icon icon-file"></i>
-    <span translate>New File</span>
-  </li>
-  <li class="context-menu-item" ng-click="explorer.newFolder()">
-    <i class="icon icon-folder-close"></i>
-    <span translate>New Folder</span>
-  </li>
-  <li class="context-menu-item" ng-click="pasteFiles()" ng-class="{'is-disable': clipboardNotEmpty()}">
-    <i class="icon icon-paste"></i>
-    <span translate>Paste</span>
-  </li>
-</ul>
-
-<!-- Nav Bar -->
-<nav class="navbar">
-  <button class="btn-link navbar-button" ng-click="History.back()"    ng-disabled="History.cantBack()"    ><i class="icon icon-back"></i></button>
-  <button class="btn-link navbar-button" ng-click="History.forward()" ng-disabled="History.cantForward()" ><i class="icon icon-forward"></i></button>
-  <button class="btn-link navbar-button" ng-click="History.parent()"  ng-disabled="isRoot()"             ><i class="icon icon-parent"></i></button>
-
-  <breadcrumb></breadcrumb>
-</nav>
-
-
-<!-- Container -->
-<div class="container">
-
-  <!-- Three -->
-  <filetree tree="explorer.fileTree"></filetree>
-
-  <!-- Content -->
-  <div class="content" context-menu data-target="backgroundMenu" ng-click="selected.files={}">
-    <!-- temporary hack -->
-    <div drop-zone="explorer" style="width: 100%; height:100%">
-      <file ng-repeat="file in explorer.fileTree" file="file" selected-files="selected.files" clipboard-files="selected.clipboard"></file>
-    </div>
-  </div>
+<!-- temporary hack -->
+<div drop-zone="fileManager" style="width: 100%; height:100%">
+  <file ng-repeat="file in fileManager.fileTree" file="file"></file>
 </div>
 
-<!-- Status Bar -->
-<div class="statusbar">
-  <div class="statusbar-elements" translate translate-n="explorer.fileTree.length" translate-plural="{{$count}} elements">{{$count}} element</div>
-  <div class="statusbar-separator"></div>
-  <div class="statusbar-information" ng-hide="true">File 17ko</div>
-  <div class="statusbar-display">
-    <a ng-click="toList()"  class="icon icon-list"></a>
-    <a ng-click="toThumb()" class="icon icon-thumb"></a>
-  </div>
-</div>
 
 <div class="modal" ng-if="shareModal">
   <div class="modal-container">
@@ -93,7 +14,6 @@
       <tags-input ng-model="share" placeholder="{{ 'Pseudo' |translate }}" display-property="name" add-from-autocomplete-only="true">
         <auto-complete source="loadUsers($query)" debounce-delay="40"></auto-complete>
       </tags-input>
-
     </div>
     <div class="modal-footer">
       <button class="button-cancel" ng-click="closeModalShare()" translate>Cancel</button>
@@ -101,3 +21,54 @@
     </div>
   </div>
 </div>
+
+
+<!-- FileMenu -->
+<ul id="fileMenu" class="context-menu">
+  <li class="context-menu-item" ng-class="{'is-disable': !Selection.isSingle()}" ng-click="openFile()">
+    <i class="icon icon-download"    ng-if="!Selection.hasAtLeastOneFolder()"></i>
+    <i class="icon icon-folder-open" ng-if=" Selection.hasAtLeastOneFolder()"></i>
+    <span translate>Open</span>
+  </li>
+  <li class="context-menu-item" ng-class="{'is-disable': !Selection.isSingle()}" ng-click="renameFile()">
+    <i class="icon icon-rename"></i>
+    <span translate>Rename</span>
+  </li>
+  <li class="context-menu-item" ng-click="modalShare()">
+    <i class="icon icon-share"></i>
+    <span translate>Share</span>
+  </li>
+  <li class="context-menu-item" ng-click="Clipboard.cut()">
+    <i class="icon icon-cut"></i>
+    <span translate>Cut</span>
+  </li>
+  <li class="context-menu-item" ng-click="Clipboard.copy()">
+    <i class="icon icon-copy"></i>
+    <span translate>Copy</span>
+  </li>
+  <li class="context-menu-item" ng-class="{'is-disable': Clipboard.isEmpty()}" ng-click="Clipboard.paste()">
+    <i class="icon icon-paste"></i>
+    <span translate>Paste</span>
+  </li>
+  <li class="context-menu-item" ng-click="deleteFiles()">
+    <i class="icon icon-remove"></i>
+    <span translate>Delete</span>
+  </li>
+</ul>
+
+
+<!-- BackgroundMenu -->
+<ul id="backgroundMenu" class="context-menu" role="context-menu">
+  <li class="context-menu-item" ng-click="fileManager.newFile()">
+    <i class="icon icon-file"></i>
+    <span translate>New File</span>
+  </li>
+  <li class="context-menu-item" ng-click="fileManager.newFolder()">
+    <i class="icon icon-folder-close"></i>
+    <span translate>New Folder</span>
+  </li>
+  <li class="context-menu-item" ng-click="Clipboard.paste()" ng-class="{'is-disable': Clipboard.isEmpty()}">
+    <i class="icon icon-paste"></i>
+    <span translate>Paste</span>
+  </li>
+</ul>
