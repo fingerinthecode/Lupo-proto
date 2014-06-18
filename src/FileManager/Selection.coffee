@@ -24,9 +24,7 @@ factory('Selection', ()->
     @select: (file, ctrl = false, contextMenu = false) ->
       if contextMenu and @hasFile(file)
         return true
-
       @clear() if not ctrl
-
       if not @hasFile(file)
         @add(file)
       else

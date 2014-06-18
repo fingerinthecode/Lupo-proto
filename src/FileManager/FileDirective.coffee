@@ -49,11 +49,9 @@ directive('file', ($state, session, fileManager, usSpinnerService, Selection, Cl
 
       # ------------------DragAndDrop----------------------------
       element.on('dragstart', ($event)->
-        url = "https://codeload.github.com/LupoLibero/Lupo-proto/zip/master"
-
         $img = element.find('img')
         $event.dataTransfer.effectAllowed = "move"
-        $event.dataTransfer.setData('DownloadURL', "application/zip:#{scope.file.metadata.name}:#{url}")
+        $event.dataTransfer.setData('unused', "unused")
         $event.dataTransfer.setDragImage($img[0], 10, 10)
         scope.selectFile() if not Selection.hasFile(scope.file)
       )
