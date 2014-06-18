@@ -22,7 +22,7 @@ factory('crypto', ($q, assert)->
         args: args
       }
     else
-      crypto.call method, args, (result) ->
+      lupoCrypto.call method, args, (result) ->
         if result?
           defers[id].resolve(result)
         else
@@ -30,28 +30,28 @@ factory('crypto', ($q, assert)->
     return defers[id].promise
 
   return {
-    newSalt: (nbwords) ->
+    newSalt: (size) ->
       _funcName = "newSalt"
       console.log _funcName
-      assert.defined nbwords, "nbwords", _funcName
-      sjcl.random.randomWords(nbwords)
+      assert.defined size, "size", _funcName
+      forge.random.getBytesSync(size)
 
     ,
     hash: (data, size) ->
       _funcName = "hash"
       console.log _funcName
       assert.defined data, "data", _funcName
-      h = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(data))
-      return if size then h[0..size] else h
+      md = forge.md.sha256.create()
+      md.update(data)
+      h = md.digest().toHex()
+      return if size then h[0..size-1] else h
 
     getMasterKey: (password, salt) ->
       _funcName = "getMasterKey"
       console.log _funcName
       assert.defined password, "password", _funcName
       assert.defined salt, "salt", _funcName
-      sjcl.codec.hex.fromBits(
-        sjcl.misc.pbkdf2(password, salt, 1000, 256)
-      )
+      forge.pkcs5.pbkdf2(password, salt, 1000, 16)
 
     createRSAKeys: (keySize) ->
       _funcName = "createRSAKeys"
@@ -84,7 +84,7 @@ factory('crypto', ($q, assert)->
       _funcName = "symEncrypt"
       assert.defined key, "key", _funcName
       assert.defined data, "data", _funcName
-      iv = @newSalt(4)
+      iv = @newSalt(16)
       return asyncCall _funcName, iv, key, data
 
 

@@ -1,11 +1,11 @@
 @window = @
 importScripts('../vendor/jsencrypt/bin/jsencrypt.js')
-importScripts('../vendor/sjcl/sjcl.js')
+importScripts('../vendor/forge/js/forge.bundle.js')
 importScripts('crypto.js')
 
 @addEventListener 'message',
   (e) ->
-    result = crypto.call(e.data.method, e.data.args)
+    result = lupoCrypto.call(e.data.method, e.data.args)
     self.postMessage {
         id: e.data.id
         result: result

@@ -12,44 +12,25 @@ factory 'db', ($http) ->
           buf.push(encodeURIComponent(key) + "=" + encodeURIComponent(value))
       return if buf.length then "?" + buf.join("&") else ""
 
-
-    _getMultipartSeparator: (reply) ->
-      re = new RegExp('^(--[0-9a-f]{32})')
-      sep = re.exec(reply)
-      if sep?
-        return sep[1]
-      return null
-
-    _isMultipart: (reply) ->
-      sep = @_getMultipartSeparator(reply)
-      return sep?
-
-    _getJsonPart: (str) ->
-      str = '{' + str.split('{')[1..].join('{')
-      return JSON.parse(str)
-
-    _parseReply: (reply) ->
-      sep = @_getMultipartSeparator(reply)
-      parts = reply.split(sep)
-      doc = @_getJsonPart(parts[1])
-      if parts.length > 2
-        doc.data = @_getJsonPart(parts[2])
-        delete doc._attachments
-      return doc
-
     get: (_id) ->
       t0 = performance.now()
-      $http.get(@dbUrl + _id +  @_encodeOptions({attachments: true}), {
-        headers:
-          'Accept-Encoding': 'deflate'
-      })
+      $http.get(@dbUrl + _id)
       .then (result) =>
         t1 = performance.now()
         console.log "download time:", (t1 - t0)
-        if @_isMultipart(result.data)
-          return @_parseReply(result.data)
+        doc = result.data
+        if doc._attachments? and doc._attachments.data?
+          return @get(_id + '/data').then (data) =>
+            t2 = performance.now()
+            console.log "full download time:", (t2 - t0)
+            if doc.data?
+              doc.data.data = data
+            else
+              doc.data = data
+            delete doc._attachments
+            return doc
         else
-          return result.data
+          return doc
 
     _generateSeparator: (size)->
       if not size
@@ -62,14 +43,18 @@ factory 'db', ($http) ->
 
     _toAttachment: (doc) ->
       boundary = @_generateSeparator()
-      if doc.data?
-        data = JSON.stringify(doc.data)
+      if doc.data? and angular.isObject(doc.data) and doc.data.data?
+        #data = new Uint8Array(doc.data.data.length)
+        #for i in [0..doc.data.data.length-1]
+        #  data[i] = doc.data.data.charCodeAt(i)
+        #data = @bin2String(doc.data.data)
+        data = btoa doc.data.data
         doc._attachments =
           "data":
             "follows": true
-            "content_type": "application/json"
+            "content_type": "application/octet-stream"
             "length": data.length
-        delete doc.data
+        delete doc.data.data
       strDoc = "\r\n--" + boundary + "\r\n"
       strDoc += "Content-Type: application/json\r\n\r\n"
       strDoc += JSON.stringify doc

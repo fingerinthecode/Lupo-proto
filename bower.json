@@ -41,7 +41,8 @@
     "angular-animate": "~1.2.*",
     "pouchdb": "~2.2.3",
     "ng-tags-input": "~2.0.1",
-    "angular-sanitize": "1.2.*"
+    "angular-sanitize": "1.2.*",
+    "forge": "digitalbazaar/forge#~0.6.7"
   },
   "resolutions": {
     "pouchdb": "~2.2.3"

@@ -1,4 +1,4 @@
-crypto =
+lupoCrypto =
   call: (method, args, callback) ->
     if callback?
       args.push(callback)
@@ -41,27 +41,34 @@ crypto =
     return result
 
   symEncrypt: (iv, key, data, callback) ->
-    key = sjcl.codec.hex.toBits key
-    aes = new sjcl.cipher.aes(key)
+    console.debug "symEncrypt", iv, key, data
+    algo = 'AES-CBC'
+    cipher = forge.cipher.createCipher(algo, key)
+    cipher.start({iv: iv})
+    cipher.update(forge.util.createBuffer(data))
+    cipher.finish()
     result = {
-      data: sjcl.mode.ccm.encrypt(aes, sjcl.codec.utf8String.toBits(data), iv)
-      algo: "aes",
-      iv:   iv
+      data: cipher.output.getBytes()
+      algo: algo
+      iv:   btoa iv
     }
+    console.log "sizes", data.length, result.data.length, result.data.length/data.length
     if callback?
       callback(result)
     return result
 
   symDecrypt: (key, obj, callback) ->
-    key = sjcl.codec.hex.toBits key
-    aes = new sjcl.cipher.aes(key)
+    console.debug "symDecrypt", key, obj
+    decipher = forge.cipher.createDecipher(obj.algo, key)
+    decipher.start({iv: atob obj.iv})
+    decipher.update(forge.util.createBuffer(atob obj.data))
     try
-      result = sjcl.codec.utf8String.fromBits(
-        sjcl.mode.ccm.decrypt(aes,  obj.data, obj.iv)
-      )
-    catch InternalError
-      console.error "symDecrypt error"
+      decipher.finish()
+      result = decipher.output.data
+    catch err
+      console.error "symDecrypt error", err
       result = undefined
+    console.log "result", result
     if callback?
       callback(result)
     return result

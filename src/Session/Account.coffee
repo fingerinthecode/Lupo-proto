@@ -11,7 +11,7 @@ angular.module('session')
       username = if publicName? then publicName else login
       privateUserDoc = {}
 
-      privateUserDoc.salt = crypto.newSalt(2)
+      privateUserDoc.salt = crypto.newSalt(16)
       masterKey = crypto.getMasterKey(password, privateUserDoc.salt)
       assert(masterKey?, "error in masterKey generation (Session)")
       masterKeyId = session.registerKey(masterKey)
