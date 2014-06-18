@@ -1,7 +1,8 @@
 <!-- temporary hack -->
 <div drop-zone="fileManager" style="width: 100%; height:100%" ng-click="Selection.clear()">
-  <file ng-repeat="file in fileManager.fileTree" file="file"></file>
+  <file ng-repeat="file in fileManager.fileTree |orderBy:['metadata.type', 'metadata.name']" file="file"></file>
 </div>
+
 
 
 <div class="modal" ng-if="shareModal">
