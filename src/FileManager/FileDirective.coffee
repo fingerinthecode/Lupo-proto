@@ -12,27 +12,30 @@ directive('file', ($state, session, fileManager, usSpinnerService, Selection, Cl
               draggable="true">
                 <div context-menu="selectFile({}, true)" data-target="fileMenu">
                   <div class="file-icon">
-                    <span ng-if="isThumb()" us-spinner spinner-key="{{file.metadata.name}}">
-                      <img class="file-icon" ng-src="{{ fileIcon }}" draggable="false"/>
-                    </span>
-                    <span ng-if="isList()"  us-spinner="spinnerListConfig" spinner-key="{{file.metadata.name}}">
-                      <img class="file-icon" ng-src="{{ fileIcon }}" draggable="false"/>
-                    </span>
+                    <img  ng-class="{
+                      'file-icon-landscape': isIconLandscape(),
+                      'file-icon-portrait':  isIconPortrait(),
+                    }" ng-src="{{ fileIcon }}" draggable="false"/>
+                    <span ng-if="isThumb()" us-spinner spinner-key="{{file.metadata.name}}"></span>
+                    <span ng-if="isList()"  us-spinner="spinnerListConfig" spinner-key="{{file.metadata.name}}"></span>
                   </div>
 
-                  <div class="file-title" ng-hide="isEditMode()" ng-if="isList()">{{ file.metadata.name }}</div>
-                  <div class="file-title" ng-hide="isEditMode()" ng-if="isThumb()" >{{ file.metadata.name |ellipsis:18 }}</div>
-                  <input type="text" ng-model="newName" ng-show="isEditMode()" ng-blur="changeName(true)" ng-keypress="changeName($event)" select="isEditMode()"/>
+                  <div class="file-text">
+                    <div class="file-title" ng-hide="isEditMode()" ng-if="isList()">{{ file.metadata.name }}</div>
+                    <div class="file-title" ng-hide="isEditMode()" ng-if="isThumb()" >{{ file.metadata.name |ellipsis:18 }}</div>
+                    <input type="text" ng-model="newName" ng-show="isEditMode()" ng-blur="changeName(true)" ng-keypress="changeName($event)" select="isEditMode()"/>
 
-                  <div class="file-size" ng-if="!file.isFolder() && isList()">{{ file.metadata.size |size }}</div>
+                    <div class="file-size" ng-if="!file.isFolder() && isList()">{{ file.metadata.size |size }}</div>
+                  </div>
                 </div>
               </div>
               """
     link: (scope, element, attrs)->
-      scope.Clipboard = Clipboard
-      scope.Selection = Selection
-      scope.newName   = scope.file.metadata.name
-      scope.explorer  = fileManager
+      scope.Clipboard     = Clipboard
+      scope.Selection     = Selection
+      scope.newName       = scope.file.metadata.name
+      scope.explorer      = fileManager
+      scope.iconlandscape = null
 
       scope.spinnerListConfig = {
         lines:  9
@@ -40,6 +43,24 @@ directive('file', ($state, session, fileManager, usSpinnerService, Selection, Cl
         width:  4
         radius: 7
       }
+
+      scope.isIconLandscape = ->
+        if scope.iconlandscape != null
+          return scope.iconlandscape
+
+        img = new Image()
+        img.src = scope.fileIcon
+        if img.width == 0 or img.height == 0
+          return true
+        if img.width >= img.height
+          scope.iconlandscape = true
+          return true
+        else
+          scope.iconlandscape = false
+          return false
+
+      scope.isIconPortrait = ->
+        return !scope.isIconLandscape()
 
       scope.isThumb = ->
         return !!session.get('displayThumb')

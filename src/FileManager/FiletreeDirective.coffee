@@ -22,12 +22,11 @@ angular.module('fileManager')
 
       scope.openFolder = (file)->
         file.open = !file.open
-        if file.open and not file.loadChild
+        if file.open
           file.loading = true
           scope.loadChilds(file).then(
             (data)->
               file.loading   = false
-              file.loadChild = true
             (err)->
               file.open    = false
               file.loading = false
