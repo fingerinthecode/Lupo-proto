@@ -31,7 +31,9 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $do
   $scope.share = []
   userList     = []
   User.all().then (list) =>
-    userList = list
+    for u in list
+      u.name = u.name + ' (id: ' + u._id[0..2] + ')'
+      userList.push u
 
   $scope.loadUsers = ($query)->
     results = []
