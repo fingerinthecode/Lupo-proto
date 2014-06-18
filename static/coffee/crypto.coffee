@@ -61,7 +61,7 @@ lupoCrypto =
     console.debug "symDecrypt", key, obj
     decipher = forge.cipher.createDecipher(obj.algo, key)
     decipher.start({iv: atob obj.iv})
-    decipher.update(forge.util.createBuffer(atob obj.data))
+    decipher.update(forge.util.createBuffer(obj.data))
     try
       decipher.finish()
       result = decipher.output.data

@@ -32,7 +32,7 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $do
   userList     = []
   User.all().then (list) =>
     for u in list
-      u.name = u.name + ' (id: ' + u._id[0..2] + ')'
+      u.key = u.name + ' (id: ' + u._id[0..2] + ')'
       userList.push u
 
   $scope.loadUsers = ($query)->
@@ -62,7 +62,7 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $do
     $scope.closeModalShare()
     for user in $scope.share
       Selection.forEach (file) ->
-        file.share(user.name)
+        file.share(user)
     $scope.share = []
     notification.addAlert('File(s) Shared', 'success')
 )

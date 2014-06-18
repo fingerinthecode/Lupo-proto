@@ -248,34 +248,28 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
         @metadata.name = newName
         @saveMetadata()
 
-    share: (username) ->
+    share: (user) ->
       _funcName = "share"
-      console.log _funcName, username
-      assert.defined username, "username", _funcName
+      console.log _funcName, user
+      assert.defined user, "user", _funcName
       #TMP: later share would have a "user" parameter
-      User.getByName(username).then(
-        (list) =>
-          user = list[0]
-          console.log "user", user
-          shareDoc = {
-            "_id": crypto.hash(user._id + @_id, 32)
-            "data": {
-              "docId": @_id
-              "key":   session.getMasterKey()
-            }
-            "userId": user._id
-          }
-          crypto.asymEncrypt user.publicKey, shareDoc.data
-          .then (encData) =>
-            shareDoc.data = encData
-            storage.save(shareDoc).then =>
-              unless @metadata.sharedWith
-                @metadata.sharedWith = []
-              @metadata.sharedWith.push username
-              @saveMetadata()
-        (err) =>
-          console.error err
-      )
+      console.log "user", user
+      shareDoc = {
+        "_id": crypto.hash(user._id + @_id, 32)
+        "data": {
+          "docId": @_id
+          "key":   session.getMasterKey()
+        }
+        "userId": user._id
+      }
+      crypto.asymEncrypt user.publicKey, shareDoc.data
+      .then (encData) =>
+        shareDoc.data = encData
+        storage.save(shareDoc).then =>
+          unless @metadata.sharedWith
+            @metadata.sharedWith = []
+          @metadata.sharedWith.push user.name
+          @saveMetadata()
 
     remove: ->
       _funcName = 'remove'

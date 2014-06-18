@@ -23,6 +23,7 @@ factory 'db', ($http) ->
           return @get(_id + '/data').then (data) =>
             t2 = performance.now()
             console.log "full download time:", (t2 - t0)
+            data = atob data
             if doc.data?
               doc.data.data = data
             else
