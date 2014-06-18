@@ -47,7 +47,7 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $do
     if Selection.isSingle()
       file = Selection.getFirst()
       index = {}
-      $scope.share  []
+      $scope.share = []
       for name in file.metadata.sharedWith ? []
         if not index[name]?
           index[name] = true
