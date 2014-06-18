@@ -24,17 +24,16 @@ angular.module('fileManager')
         evt.preventDefault()
         files = evt.dataTransfer.files
 
-        addFile = (tmpFile, arrayBuffer) ->
-          fileManager.fileTree.push tmpFile
+        uploadSlice = (tmpFile, arrayBuffer) ->
           strResult = arrayBuffer2String(arrayBuffer)
           fileManager.addFile(tmpFile.metadata, strResult)
           console.log strResult.length, strResult
 
-        createThumbnail = (data, mimeType) ->
+        createThumbnail = (file) ->
+          mimeType = file.type
           deferred = $q.defer()
-          blob = new Blob [data], {type: mimeType}
-          blobReader = new FileReader()
-          blobReader.onload = (evt2) =>
+          reader = new FileReader()
+          reader.onload = (evt2) =>
             #thumbDataUrl = evt2.target.result
             img = new Image()
             img.src = evt2.target.result
@@ -47,39 +46,52 @@ angular.module('fileManager')
               imgContext.drawImage(img, 0, 0)
               deferred.resolve(imgCanvas.toDataURL(mimeType))
 
-          blobReader.readAsDataURL(blob)
+          reader.readAsDataURL(file)
           return deferred.promise
+
+        createLoadingFile = (file)->
+          tmpFile = {
+            metadata: {
+              name: fileManager.uniqueName(file.name)
+              size: file.size
+            }
+          }
+          if file.type == ""
+            #FIXME: could be an unknown file type
+            tmpFile.metadata.type = File.TYPES.FOLDER
+          else
+            tmpFile.metadata.type = File.TYPES.FILE
+          tmpFile = new File(tmpFile)
+          tmpFile.loading = true
+          return tmpFile
+
+        uploadFile = (file, loadingFile)->
+          fileManager.fileTree.push loadingFile
+          reader = new FileReader()
+          reader.onloadend = (evt) ->
+            if (evt.target.readyState == FileReader.DONE) # DONE == 2
+              uploadSlice loadingFile, evt.target.result
+
+          #SLICE_SIZE = 1024 * 1024 - 1
+          SLICE_SIZE = file.size + 1
+          start = 0
+          while start < file.size
+            blob = file.slice(start, start + SLICE_SIZE - 1)
+            reader.readAsArrayBuffer(blob)
+            start += SLICE_SIZE
 
         for file in files
           console.log "will load", file
           ( (file) ->
-            reader = new FileReader()
-            reader.onloadend = (evt) ->
-              tmpFile = {
-                metadata: {
-                  name: fileManager.uniqueName(file.name)
-                  size: file.size
-                }
-              }
-              if file.type == ""
-                #FIXME: could be an unknown file type
-                tmpFile.metadata.type = File.TYPES.FOLDER
-              else
-                tmpFile.metadata.type = File.TYPES.FILE
-              tmpFile = new File(tmpFile)
-              tmpFile.loading = true
+            loadingFile = createLoadingFile file
 
-              console.log length, fileManager.fileTree
-              if (evt.target.readyState == FileReader.DONE) # DONE == 2
-                console.log(file.size)
-                if file.type.match('image.*')
-                  createThumbnail evt.target.result, file.type
-                  .then (thumbDataUrl) =>
-                    tmpFile.metadata.thumb = thumbDataUrl
-                    addFile tmpFile, evt.target.result
-                else
-                  addFile tmpFile, evt.target.result
+            if file.type.match('image.*')
+              createThumbnail file
+              .then (thumbDataUrl) =>
+                loadingFile.metadata.thumb = thumbDataUrl
+                uploadFile file, loadingFile
+            else
+              uploadFile file, loadingFile
 
-            reader.readAsArrayBuffer(file)
           )(file)
   }
