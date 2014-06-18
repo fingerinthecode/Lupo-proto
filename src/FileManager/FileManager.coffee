@@ -314,7 +314,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
   }
 
   $rootScope.$on('$stateChangeSuccess', ($event, toState)->
-    if toState.name == 'explorer.files'
+    if toState.name == 'explorer.files' and session.isConnected()
       fileManager.updatePath()
   )
 
