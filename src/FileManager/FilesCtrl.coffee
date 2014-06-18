@@ -1,5 +1,5 @@
 angular.module('fileManager').
-controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $document, User)->
+controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $document, User, $q, notification)->
   unless session.isConnected()
     return false
 
@@ -51,7 +51,7 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $do
       for name in file.metadata.sharedWith ? []
         if not index[name]?
           index[name] = true
-          $scope.share.push {name: name}
+          $scope.share.push({name: name})
 
   $scope.closeModalShare = ->
     $scope.shareModal = false
