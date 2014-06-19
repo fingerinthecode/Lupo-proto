@@ -1,5 +1,5 @@
 angular.module('fileManager').
-factory('History', ($rootScope, $stateParams, $state, File, $location)->
+factory('History', ($rootScope, $stateParams, $state, File, $location, session)->
   class History
     @_history: []
     @_current: null
@@ -50,18 +50,28 @@ factory('History', ($rootScope, $stateParams, $state, File, $location)->
     @cantForward: =>
       return @_history.length-1 == @_current
 
+    @redirect: (id)->
+      $state.go('.', {
+        path: id
+      }, {
+        location: true
+      })
+
     @parent: =>
       id = $stateParams.path
-      File.getFile(id).then(
-        (file)=>
-          $state.go('.', {
-            path: file.metadata.parentId
-          }, {
-            location: true
-          })
-        ,(err)=>
-          console.log err
-      )
+      if id == "shares"
+        @redirect('')
+      else
+        File.getFile(id).then(
+          (file)=>
+            id = file.metadata.parentId
+            if id == session.getRootFolderId()
+              @redirect('')
+            else
+              @redirect(id)
+          ,(err)=>
+            console.error err
+        )
 
   $rootScope.$on('$stateChangeSuccess', ($event, toState, toParams, fromState, fromParams) ->
     if !toParams.hasOwnProperty('slash') or toParams.slash == '/'

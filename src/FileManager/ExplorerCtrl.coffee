@@ -17,7 +17,7 @@ controller('ExplorerCtrl', ($scope, $state, $stateParams, session, fileManager, 
   $scope.fileManager = fileManager
 
   $scope.isRoot = ->
-    path = $stateParams.path ? ''
+    path = $state.params.path ? ''
     return path is ''
 
   # -------------Display Mode--------
