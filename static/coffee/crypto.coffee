@@ -41,7 +41,6 @@ lupoCrypto =
     return result
 
   symEncrypt: (iv, key, data, callback) ->
-    console.debug "symEncrypt", iv, key, data
     algo = 'AES-CBC'
     cipher = forge.cipher.createCipher(algo, key)
     cipher.start({iv: iv})
@@ -58,7 +57,6 @@ lupoCrypto =
     return result
 
   symDecrypt: (key, obj, callback) ->
-    console.debug "symDecrypt", key, obj
     decipher = forge.cipher.createDecipher(obj.algo, key)
     decipher.start({iv: atob obj.iv})
     decipher.update(forge.util.createBuffer(obj.data))
@@ -68,7 +66,6 @@ lupoCrypto =
     catch err
       console.error "symDecrypt error", err
       result = undefined
-    console.log "result", result
     if callback?
       callback(result)
     return result

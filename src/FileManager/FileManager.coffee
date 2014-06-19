@@ -45,7 +45,6 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
         $q.when()
 
     isRootFolder: (folder) ->
-      console.error "isRootFolder", folder._id, session.getRootFolderId()
       return folder._id == session.getRootFolderId()
 
     goToFolder: (folder) ->
@@ -120,11 +119,13 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       assert.array   parentDirContent, "parentDirContent", "uniqueName"
       s = name.split('.')
       basename  = s[0]
-      extension = '.' + s[1..].join('.')
+      extension = s[1..].join('.')
       i = 0
       while name in (f.metadata.name for f in parentDirContent)
         i += 1
-        name = basename + " (" + i + ")" + extension
+        name = basename + " (" + i + ")"
+        if extension.length
+          name += '.' + extension
       console.info "new name", name
       return name
 
