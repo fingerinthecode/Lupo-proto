@@ -28,7 +28,7 @@ directive('file', ($state, session, fileManager, Selection, Clipboard)->
 
                   <div class="file-text">
                     <div class="file-title" ng-hide="isEditMode()" ng-if="isList()">{{ file.metadata.name }}</div>
-                    <div class="file-title" ng-hide="isEditMode()" ng-if="isThumb()" >{{ file.metadata.name |ellipsis:18 }}</div>
+                    <div class="file-title" ng-hide="isEditMode()" ng-if="isThumb()" title="{{file.metadata.name}}">{{ file.metadata.name |ellipsis:15 }}</div>
                     <input type="text" ng-model="newName" ng-show="isEditMode()" ng-blur="changeName(true)" ng-keypress="changeName($event)" select="isEditMode()"/>
 
                     <div class="file-size" ng-if="!file.isFolder() && isList()">{{ file.metadata.size |size }}</div>
@@ -84,7 +84,7 @@ directive('file', ($state, session, fileManager, Selection, Clipboard)->
       )
       element.on('dragover', ($event)->
         if scope.file.isFolder() and
-        not scope.selected.hasOwnProperty(scope.file._id)
+        not Selection.hasFile(scope.file)
           element.attr('droppable', true)
           $event.dataTransfer.dropEffect = 'move'
         else
@@ -94,7 +94,8 @@ directive('file', ($state, session, fileManager, Selection, Clipboard)->
         $event.preventDefault()
       )
       element.on('drop', ($event)->
-        for _id, file of scope.selected
+        Selection.forEach (file)->
+          console.info file
           fileManager.moveFile(file, scope.file._id)
         scope.selected = {}
         $event.stopPropagation()
