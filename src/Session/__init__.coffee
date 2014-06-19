@@ -1,1 +1,1 @@
-angular.module('session', ['pouchdb', 'crypto'])
+angular.module('session', ['crypto'])

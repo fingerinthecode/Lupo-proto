@@ -8,7 +8,7 @@ angular.module('fileManager')
       redirectTo:  'explorer.files'
     })
     .state('explorer.files', {
-      url:         '{path:.*}'
+      url:         '/{path:.*}'
       templateUrl: 'partials/files.html'
       controller:  'FilesCtrl'
       loginRequired: true

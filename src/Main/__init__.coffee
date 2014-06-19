@@ -6,7 +6,6 @@ angular.module('lupo-proto', [
   'angularSpinner'
   'session'
   'crypto'
-  'pouchdb'
   'db'
   'fileManager'
   'ng-context-menu'
