@@ -1,8 +1,5 @@
 angular.module('fileManager').
 factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
-  #TMP
-  TYPE_FOLDER = 0
-  TYPE_FILE = 1
   class File
     @TYPES:
       FOLDER: 0
@@ -93,7 +90,7 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
 
     _saveDoc: (doc) ->
       _funcName = "_saveDoc"
-      console.log _funcName, doc
+      console.log _funcName
       assert.defined(doc, "doc", _funcName)
       if @keyId?
         key = session.getKey(@keyId)
@@ -129,7 +126,7 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
       if @content?
         return assert.tests.isAnArray(@content)
       if @metadata?
-        return @metadata.type == TYPE_FOLDER
+        return @metadata.type == File.TYPES.FOLDER
 
     addToFolder: (folderId, keyId) ->
       _funcName = "addToFolder"

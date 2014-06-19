@@ -41,9 +41,9 @@ angular.module('fileManager')
             img.src = evt2.target.result
             img.onload = ->
               resize = (longest, other)->
-                q = longest / 90
+                q = longest / 180
                 other = Math.round(other/q)
-                longest = 90
+                longest = 180
                 return [longest, other]
 
               if img.height > img.width
@@ -56,7 +56,7 @@ angular.module('fileManager')
               imgCanvas.height = height
               imgContext.drawImage(img, 0, 0, width, height)
               dataUrl = imgCanvas.toDataURL(mimeType)
-              deferred.resolve(dataUrl)
+              deferred.resolve([dataUrl, evt2.target.result])
 
           reader.readAsDataURL(file)
           return deferred.promise
@@ -66,13 +66,12 @@ angular.module('fileManager')
             metadata: {
               name: fileManager.uniqueName(file.name)
               size: file.size
+              file: file.type
             }
           }
           if file.type == ""
             #FIXME: could be an unknown file type
             tmpFile.metadata.type = File.TYPES.FOLDER
-          else
-            tmpFile.metadata.type = File.TYPES.FILE
           tmpFile = new File(tmpFile)
           tmpFile.loading = true
           return tmpFile
@@ -104,9 +103,10 @@ angular.module('fileManager')
             if file.type.match('image.*')
               lightTaskQueue.enqueue =>
                 createThumbnail file
-                .then (thumbDataUrl) =>
+                .then (dataUrls) =>
+                  [thumbDataUrl, dataUrl] = dataUrls
                   displayLoadingFile loadingFile, thumbDataUrl
-                  heavyTaskQueue.enqueue => uploadFile(file, loadingFile)
+                  heavyTaskQueue.enqueue => fileManager.addFile(loadingFile.metadata, dataUrl)
             else
               displayLoadingFile(loadingFile)
               heavyTaskQueue.enqueue => uploadFile(file, loadingFile)

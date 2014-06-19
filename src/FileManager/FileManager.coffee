@@ -1,7 +1,5 @@
 angular.module('fileManager').
 factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, usSpinnerService, $filter, notification, $rootScope) ->
-  TYPE_FOLDER = 0
-  TYPE_FILE = 1
   fileManager = {
     fileTree: []
 
@@ -101,7 +99,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       assert.defined metadata.name, "metadata.name", _funcName
       assert.defined content, "content", _funcName
 
-      (if metadata.type == TYPE_FOLDER
+      (if metadata.type == File.TYPES.FOLDER
         @createFolder(metadata, @getCurrentDirId())
       else
         @createFile(metadata, content, @getCurrentDirId())
@@ -130,14 +128,12 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       return name
 
     newFile: ->
-      console.info "createFile"
       name = @uniqueName($filter('translate')("new document"))
-      @createFile({name: name}, "", @getCurrentDirId())
+      @createFile({name: name, type: "plain/text"}, "", @getCurrentDirId())
       .then (file) =>
         this.fileTree.push file
 
     newFolder: ->
-      console.info "createFolder"
       name = @uniqueName($filter('translate')("new folder"))
       @createFolder({name: name}, @getCurrentDirId())
       .then (folder) =>
@@ -155,7 +151,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
           assert.defined list, "list", _funcName
           unless metadata.name in [f.metadata.name for f in list]
             content = if content? then content else ""
-            if metadata.type != TYPE_FOLDER
+            if metadata.type != File.TYPES.FOLDER
               metadata.size = metadata.size || content.length
             newFile = new File {
               content: content
@@ -176,14 +172,15 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       assert.defined metadata, "metadata", _funcName
       assert.defined content,  "content",  _funcName
       assert.defined parentId, "parentId", _funcName
-      metadata.type = TYPE_FILE
+      if not metadata.type?
+        metadata.type = File.TYPES.FILE
       this._createFile(metadata, content, parentId, keyId)
 
     createFolder: (metadata, parentId, keyId) ->
       console.info "createFolder", metadata, parentId
       assert.defined metadata, "metadata", "createFolder"
       assert.defined parentId, "parentId", "createFolder"
-      metadata.type = TYPE_FOLDER
+      metadata.type = File.TYPES.FOLDER
       this._createFile(metadata, [], parentId, keyId)
 
     createRootFolder: (masterKeyId) ->
@@ -248,6 +245,8 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
         })
 
     getMimeType: (file) ->
+      if angular.isString file.metadata.type
+        return file.metadata.type
       switch file.metadata.name.split('.')[-1..][0].toLowerCase()
         when "pdf" then type = "application/pdf"
         when "jpg" then type = "image/jpeg"
@@ -265,10 +264,14 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
         return buf
 
       file.getContent().then (content) =>
-        console.log "content", content
-        type = @getMimeType(file)
-        blob = new Blob([string2ArrayBuffer(content)], {type: type})
-        URL.createObjectURL(blob)
+        try
+          type = content.split(',')[0].split(':')[1].split(';')[0]
+          byteString = atob(content.split(',')[1])
+        catch
+          type = @getMimeType(file)
+          byteString = content
+        blob = new Blob([string2ArrayBuffer(byteString)], {type: type})
+        return URL.createObjectURL(blob)
 
     openFile: (file) ->
       console.info "openFile"
