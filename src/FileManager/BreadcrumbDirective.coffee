@@ -1,7 +1,8 @@
 angular.module('fileManager')
-.directive('breadcrumb', ($stateParams, File, session)->
+.directive('breadcrumb', (File, session, $filter, $rootScope)->
   return {
     restrict: 'E'
+    replace: true
     template: """
               <div class="breadcrumb">
                   <div class="breadcrumb-separator"><i class="icon icon-arrow-right"></i></div>
@@ -13,23 +14,40 @@ angular.module('fileManager')
               """
 
     link: (scope, element, attrs) ->
-      scope.breadcrumb = []
-      scope.$watch($stateParams, ->
-        if session.isConnected()
+      $rootScope.$on('$stateChangeSuccess', ($event, toState, toParams)->
+        if session.isConnected() and toState.name == 'explorer.files'
           scope.breadcrumb = []
-          getPath($stateParams.path)
+          path = toParams.path
+          console.info "REFRESH BREADCRUMB"
+          if path == 'shares'
+            scope.breadcrumb.unshift({
+              _id:  "shares"
+              name: $filter('translate')("Shares")
+            })
+          else if path != ''
+            console.info "CREATE BREADCRUMB"
+            File.getFile(path).then(
+              (file)->
+                getPath(file)
+              (err)->
+                console.error err
+            )
       )
 
-      getPath = (id) ->
-        if id != ""
-          File.getFile(id).then (file)=>
-            scope.breadcrumb.unshift({
-              _id:  file._id
-              name: file.metadata.name
-            })
-
-            parent_id = file.metadata.parentId
-            if parent_id? and parent_id != session.getRootFolderId()
-              getPath(parent_id)
+      getPath = (file) ->
+        console.info "PIECE", file
+        if file._id == session.getRootFolderId()
+          return true
+        scope.breadcrumb.unshift({
+          _id:  file._id
+          name: file.metadata.name
+        })
+        file.getParent().then(
+          (parent)->
+            getPath(parent)
+          (err)->
+            console.error err
+        )
   }
+
 )

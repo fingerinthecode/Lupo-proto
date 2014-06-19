@@ -12,7 +12,9 @@ controller('SignInCtrl', ($scope, account, notification, usSpinnerService, sessi
         if redirect?
           $state.go(redirect.name, redirect.params)
         else
-          $state.go('explorer.files')
+          $state.go('explorer.files', {
+            path: ''
+          })
       (err) =>
         notification.addAlert("Incorrect login/password")
         usSpinnerService.stop('main')

@@ -121,6 +121,8 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
         assert.defined file.content, "file.content", "getContent"
         return file.content
 
+    getParent: ->
+      return File.getFile(@metadata.parentId, @keyId)
 
     isFolder: () ->
       if @content?
