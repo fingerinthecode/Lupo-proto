@@ -10,9 +10,9 @@
     <!-- Header -->
     <div class="header">
       <img class="header-image" src="images/logo.png"/>
-      <div class="header-box"></div>
-      <h3>Version 0.0.1</h3>
-      <h5 ng-show="session.user.username">Welcome {{ session.user.username }}</h5>
+      <div class="header-box">
+        <span ng-if="session.user.username">{{session.user.username}} ({{session.user.privateDoc._id |limitTo:3 }})</span>
+      </div>
     </div>
 
     <!-- App Menu -->
