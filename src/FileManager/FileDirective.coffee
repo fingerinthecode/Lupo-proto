@@ -1,5 +1,5 @@
 angular.module('fileManager').
-directive('file', ($state, session, fileManager, usSpinnerService, Selection, Clipboard)->
+directive('file', ($state, session, fileManager, Selection, Clipboard)->
   return {
     restrict: 'E'
     replace: true
@@ -8,7 +8,13 @@ directive('file', ($state, session, fileManager, usSpinnerService, Selection, Cl
     }
     template: """
               <div class="file" ng-dblclick="explorer.openFileOrFolder(file)" ng-click="selectFile($event)"
-              ng-class="{'is-selected': Selection.hasFile(file), 'file-list': isList(), 'file-thumb': isThumb(), 'is-cut': Clipboard.fileIsCut(file)}"
+              ng-class="{
+                'is-selected': Selection.hasFile(file),
+                'file-list': isList(),
+                'file-thumb': isThumb(),
+                'is-cut': Clipboard.fileIsCut(file),
+                'is-loading': file.loading,
+              }"
               draggable="true">
                 <div context-menu="selectFile({}, true)" data-target="fileMenu">
                   <div class="file-icon">
@@ -16,8 +22,8 @@ directive('file', ($state, session, fileManager, usSpinnerService, Selection, Cl
                       'file-icon-landscape': isIconLandscape(),
                       'file-icon-portrait':  isIconPortrait(),
                     }" ng-src="{{ fileIcon }}" draggable="false"/>
-                    <span ng-if="isThumb()" us-spinner spinner-key="{{file.metadata.name}}"></span>
-                    <span ng-if="isList()"  us-spinner="spinnerListConfig" spinner-key="{{file.metadata.name}}"></span>
+                    <span ng-if="isThumb() && file.loading" us-spinner></span>
+                    <span ng-if="isList()  && file.loading" us-spinner="spinnerListConfig"></span>
                   </div>
 
                   <div class="file-text">
@@ -96,6 +102,9 @@ directive('file', ($state, session, fileManager, usSpinnerService, Selection, Cl
       )
 
       scope.selectFile = ($event = {}, contextMenu = false) ->
+        if scope.file.loading
+          return false
+
         Selection.select(scope.file, $event.ctrlKey, contextMenu)
         $event.preventDefault?()
         $event.stopPropagation?()
@@ -111,7 +120,7 @@ directive('file', ($state, session, fileManager, usSpinnerService, Selection, Cl
 
       # -------------------Rename-----------------------
       scope.changeName = ($event = {}) ->
-        if $event == true or $event.keyCode == 13
+        if $event.keyCode == 13
           scope.file.rename(scope.newName)
           scope.file.nameEditable = false
           $event.preventDefault()
@@ -132,10 +141,6 @@ directive('file', ($state, session, fileManager, usSpinnerService, Selection, Cl
         return iconPath fileType
 
       scope.$watch 'file', () =>
-        if scope.file.loading
-          usSpinnerService.spin(scope.file.metadata.name)
-        else
-          usSpinnerService.stop(scope.file.metadata.name)
         scope.fileIcon = getFileIcon()
 
       #scope.downloadUrl = 'data:' + scope.file.mime + ';charset=utf-8,' + encodeURIComponent(scope.file.getContent())

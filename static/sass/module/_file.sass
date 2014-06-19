@@ -1,11 +1,22 @@
 @import "variable/file"
 
 .file
-  padding: 5px
   position: relative
+  padding: 5px
 
 .file-title
+  overflow: hidden
+
   word-wrap: break-word
+
+.file-text
+  width: 100%
+  overflow: hidden
+
+.file-icon
+  position: relative
+
+  text-align: center
 
 .file-list
   width:  100%
@@ -14,23 +25,19 @@
 
 .file-list .file-icon
   float: left
+  width: 40px
+  height: 40px
   margin-right: $file-list-icon-spacing
-  width: 48px
-  height: 48px
-
-.file-list .file-icon-landscape
-  width: 48px
-
-.file-list .file-icon-portrait
-  width: 48px
 
 .file-list:nth-child(odd)
   background-color: lightgrey
 
 .file-thumb
   float: left
-  width: $file-thumb-size
+  height: 132px
+  width: $file-thumb-size+2px
   margin-left: 5px
+
   text-align: center
 
 .file-thumb .file-icon
@@ -38,12 +45,8 @@
   height: $file-thumb-size - ($file-thumb-spacing*2)
   margin: 0 auto
 
-.file-thumb .file-icon-landscape
-  width: $file-thumb-size - ($file-thumb-spacing*2)
-
-.file-thumb .file-icon-portrait
-  height: $file-thumb-size - ($file-thumb-spacing*2)
-
 .file-thumb .file-title
-  text-align: center
+  height: 40px
   display: block
+
+  text-align: center
