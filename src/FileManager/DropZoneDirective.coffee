@@ -1,11 +1,14 @@
 angular.module('fileManager')
-.directive 'dropZone', ($q, fileManager, File) ->
+.directive 'dropZone', ($q, fileManager, File, DeferredQueue) ->
   {
     restrict: 'A'
     scope: {
       explorer: '=dropZone'
     }
     link: (scope, elem, attr, ctrl) ->
+      lightTaskQueue = new DeferredQueue(5)
+      heavyTaskQueue = new DeferredQueue(1)
+
       elem.bind 'dragover', (evt) ->
         evt.stopPropagation()
         evt.preventDefault()
@@ -34,17 +37,26 @@ angular.module('fileManager')
           deferred = $q.defer()
           reader = new FileReader()
           reader.onload = (evt2) =>
-            #thumbDataUrl = evt2.target.result
             img = new Image()
             img.src = evt2.target.result
-            img.style = "max-height = 90px; max-width = 90px"
             img.onload = ->
+              resize = (longest, other)->
+                q = longest / 90
+                other = Math.round(other/q)
+                longest = 90
+                return [longest, other]
+
+              if img.height > img.width
+                [height, width] = resize(img.height, img.width)
+              else
+                [width, height] = resize(img.width, img.height)
               imgCanvas = document.createElement("canvas")
               imgContext = imgCanvas.getContext("2d")
-              imgCanvas.width = img.width
-              imgCanvas.height = img.height
-              imgContext.drawImage(img, 0, 0)
-              deferred.resolve(imgCanvas.toDataURL(mimeType))
+              imgCanvas.width = width
+              imgCanvas.height = height
+              imgContext.drawImage(img, 0, 0, width, height)
+              dataUrl = imgCanvas.toDataURL(mimeType)
+              deferred.resolve(dataUrl)
 
           reader.readAsDataURL(file)
           return deferred.promise
@@ -66,7 +78,6 @@ angular.module('fileManager')
           return tmpFile
 
         uploadFile = (file, loadingFile)->
-          fileManager.fileTree.push loadingFile
           reader = new FileReader()
           reader.onloadend = (evt) ->
             if (evt.target.readyState == FileReader.DONE) # DONE == 2
@@ -80,18 +91,25 @@ angular.module('fileManager')
             reader.readAsArrayBuffer(blob)
             start += SLICE_SIZE
 
+        displayLoadingFile = (loadingFile, thumbDataUrl)->
+          if thumbDataUrl?
+            loadingFile.metadata.thumb = thumbDataUrl
+          fileManager.fileTree.push loadingFile
+
         for file in files
-          console.log "will load", file
+          console.debug "will load", file
           ( (file) ->
             loadingFile = createLoadingFile file
 
             if file.type.match('image.*')
-              createThumbnail file
-              .then (thumbDataUrl) =>
-                loadingFile.metadata.thumb = thumbDataUrl
-                uploadFile file, loadingFile
+              lightTaskQueue.enqueue =>
+                createThumbnail file
+                .then (thumbDataUrl) =>
+                  displayLoadingFile loadingFile, thumbDataUrl
+                  heavyTaskQueue.enqueue => uploadFile(file, loadingFile)
             else
-              uploadFile file, loadingFile
+              displayLoadingFile(loadingFile)
+              heavyTaskQueue.enqueue => uploadFile(file, loadingFile)
 
           )(file)
   }
