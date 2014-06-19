@@ -9,7 +9,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
       FILE:   1
 
     constructor: (pObj) ->
-      console.log "File", pObj
       if pObj
         @_id =       pObj._id
         @_rev =      pObj._rev
@@ -30,7 +29,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
 
     @_getDoc: (id, keyId) ->
       _funcName = "_getDoc"
-      console.debug _funcName, id
       assert.defined(id, "id", _funcName)
       if keyId
         key = session.getKey(keyId)
@@ -53,6 +51,7 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
           File._getDoc(file.metadata.contentId, keyId)
           .then (doc) =>
             file.content = doc.data
+            file.contentRev = doc._rev
             return file
         else
           # it is a contentDoc
@@ -101,7 +100,8 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
       unless key? or key? and key.length
         key = session.getMasterKey()
       assert.defined(key, "key", _funcName)
-      crypto.encryptDataField(key, doc).then =>
+      crypto.encryptDataField(key, doc)
+      .then =>
         storage.save(doc)
 
     _deleteDoc: (doc) ->
@@ -136,15 +136,20 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
       console.log _funcName, folderId
       assert.defined @_id,     "@_id",     _funcName
       assert.defined folderId, "folderId", _funcName
-      File.getFile(folderId, keyId).then (folder) =>
+      File.getFile(folderId, keyId)
+      .then (folder) =>
         assert.array folder.content, "folder.content", _funcName
         folder.content.push(@_id)
         folder.saveContent().then =>
           @metadata.parentId = folderId
-          #TODO: change @ to a triggered update via changes watcher
+          #TODO: change this to a triggered update via changes watcher
           cache.expire(folder._id, "content")
           folder.listContent()
           @saveMetadata()
+      .catch (err) =>
+        if err.status == 409
+          cache.expire(folderId, "content")
+          @addToFolder(folderId, keyId)
 
     save: () ->
       _funcName = "save"
@@ -172,11 +177,10 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
         _rev: @_rev
         data: @metadata
       }
-      @_preventConflict(metadataDoc).then (metadataDoc) =>
-        @_saveDoc(metadataDoc).then (result) =>
-          @_id = result.id
-          @_rev = result.rev
-          return @
+      @_saveDoc(metadataDoc).then (result) =>
+        @_id = result.id
+        @_rev = result.rev
+        return @
 
     saveContent: () ->
       _funcName = "saveContent"
@@ -187,13 +191,14 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
       if @metadata?
         if @metadata.contentId?
           content._id = @metadata.contentId
+        if @contentRev?
+          content._rev = @contentRev
       else
         if @_id
           content._id = @_id
-         if @_rev
+        if @_rev
           content._rev = @_rev
-      @_preventConflict(content).then (content) =>
-        @_saveDoc(content)
+      @_saveDoc(content)
 
     listContent: () ->
       _funcName = "listContent"

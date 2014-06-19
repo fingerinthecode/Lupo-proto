@@ -20,7 +20,6 @@ factory('storage', ($q, $location, assert, db) ->
 
     get: (_id) ->
       _funcName = _indent + "storage.get"
-      console.log _funcName, _id
       deferred = $q.defer()
       remoteDb.get _id
       .then (result) =>
