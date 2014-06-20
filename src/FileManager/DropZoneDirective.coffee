@@ -1,5 +1,5 @@
 angular.module('fileManager')
-.directive 'dropZone', ($q, fileManager, File, DeferredQueue) ->
+.directive 'dropZone', ($q, fileManager, File, DeferredQueue, notification) ->
   {
     restrict: 'A'
     scope: {
@@ -97,6 +97,9 @@ angular.module('fileManager')
 
         for file in files
           console.debug "will load", file
+          if file.size > 10000000
+            notification.addAlert("The file is too big. Can't upload a file larger than 10MB.", 'danger')
+            break
           ( (file) ->
             loadingFile = createLoadingFile file
 
