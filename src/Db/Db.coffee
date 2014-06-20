@@ -87,6 +87,9 @@ factory 'db', ($http) ->
       s = fun.split('/')
       ddoc = s[0]
       view = s[1]
-      $http.get(@dbUrl + "_design/#{ddoc}/_view/#{view}" + @_encodeOptions(options))
+      $http.get(
+        @dbUrl + "_design/#{ddoc}/_view/#{view}" +
+        if options? then @_encodeOptions(options) else ""
+      )
       .then (result) =>
         return result.data

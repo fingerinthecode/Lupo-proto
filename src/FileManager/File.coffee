@@ -27,6 +27,9 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
     @_getDoc: (id, keyId) ->
       _funcName = "_getDoc"
       assert.defined(id, "id", _funcName)
+      cacheValue = cache.get(id, "doc")
+      if cacheValue?
+        return $q.when(cacheValue)
       if keyId
         key = session.getKey(keyId)
       if not key? or not key.length
@@ -35,6 +38,7 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
       storage.get(id).then (doc) =>
         crypto.decryptDataField(key, doc).then =>
           doc.keyId = keyId
+          cache.store(id, "doc", doc)
           return doc
 
     @getFile: (id, keyId) ->
@@ -99,13 +103,15 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
       assert.defined(key, "key", _funcName)
       crypto.encryptDataField(key, doc)
       .then =>
-        storage.save(doc)
+        storage.save(doc).then =>
+          cache.expire(doc._id, "doc")
 
     _deleteDoc: (doc) ->
       _funcName = "_deleteDoc"
       console.log _funcName
       assert.defined(doc, "doc", _funcName)
-      storage.del(doc)
+      storage.del(doc).then =>
+        cache.expire(doc._id, "doc")
 
 
     #
@@ -205,42 +211,42 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
       assert.defined @_id, "@_id", _funcName
       deferred = $q.defer()
       inProgess = []
-      list = cache.get(@_id, "content")
-      if list?
-        deferred.resolve(list)
-      else
-        @getContent().then (content) =>
-          assert.array content, "content", _funcName
-          list = []
-          atLeastOne = false
-          for element in content
-            if element?
-              atLeastOne = true
-              inProgess.push(null)
-              if angular.isObject(element)
-                keyId = element.keyId
-                element = element._id
-              else
-                keyId = undefined
-              File.getMetadata(element, keyId).then(
-                (file) =>
-                  if file.isFolder()
-                    file.content = []
-                  list.push(file)
-                  inProgess.pop()
-                (err) =>
-                  inProgess.pop()
-              )
-              .then =>
-                if inProgess.length == 0
-                  # if all deferred are terminated #
-                  console.debug "list", list
-                  cache.store(@_id, "content", list)
-                  deferred.resolve(list)
-          unless atLeastOne
-            deferred.resolve([])
-        .catch (err) =>
-          deferred.reject(err)
+      #list = cache.get(@_id, "content")
+      #if list?
+      #  deferred.resolve(list)
+      #else
+      @getContent().then (content) =>
+        assert.array content, "content", _funcName
+        list = []
+        atLeastOne = false
+        for element in content
+          if element?
+            atLeastOne = true
+            inProgess.push(null)
+            if angular.isObject(element)
+              keyId = element.keyId
+              element = element._id
+            else
+              keyId = undefined
+            File.getMetadata(element, keyId).then(
+              (file) =>
+                if file.isFolder()
+                  file.content = []
+                list.push(file)
+                inProgess.pop()
+              (err) =>
+                inProgess.pop()
+            )
+            .then =>
+              if inProgess.length == 0
+                # if all deferred are terminated #
+                console.debug "list", list
+                #cache.store(@_id, "content", list)
+                deferred.resolve(list)
+        unless atLeastOne
+          deferred.resolve([])
+      .catch (err) =>
+        deferred.reject(err)
       return deferred.promise
 
     rename: (newName) ->
