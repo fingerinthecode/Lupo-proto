@@ -18,14 +18,12 @@ angular.module('fileManager')
         if session.isConnected() and toState.name == 'explorer.files'
           scope.breadcrumb = []
           path = toParams.path
-          console.info "REFRESH BREADCRUMB"
           if path == 'shares'
             scope.breadcrumb.unshift({
               _id:  "shares"
               name: $filter('translate')("Shares")
             })
           else if path != ''
-            console.info "CREATE BREADCRUMB"
             File.getFile(path).then(
               (file)->
                 getPath(file)
@@ -35,7 +33,6 @@ angular.module('fileManager')
       )
 
       getPath = (file) ->
-        console.info "PIECE", file
         if file._id == session.getRootFolderId()
           return true
         scope.breadcrumb.unshift({
