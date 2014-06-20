@@ -4,7 +4,7 @@
 </div>
 
 <div class="modal" ng-if="shareModal" ng-click="closeModalShare()">
-  <div class="modal-container">
+  <div class="modal-container" ng-click="$event.stopPropagation()">
     <div class="modal-header">
       <div class="close"></div>
       <h3 class="modal-header-title" translate>Share</h3>
