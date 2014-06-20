@@ -29,19 +29,19 @@
     <i class="icon icon-folder-open" ng-if=" Selection.hasAtLeastOneFolder()"></i>
     <span translate>Open</span>
   </li>
-  <li class="context-menu-item" ng-class="{'is-disable': !Selection.isSingle()}" ng-click="renameFile()">
+  <li class="context-menu-item" ng-class="{'is-disable': !Selection.isSingle() || Selection.hasFile('shares')}" ng-click="renameFile()">
     <i class="icon icon-rename"></i>
     <span translate>Rename</span>
   </li>
-  <li class="context-menu-item" ng-click="modalShare()">
+  <li class="context-menu-item" ng-class="{'is-disable': Selection.hasFile('shares')}" ng-click="modalShare()">
     <i class="icon icon-share"></i>
     <span translate>Share</span>
   </li>
-  <li class="context-menu-item" ng-click="Clipboard.cut()">
+  <li class="context-menu-item" ng-class="{'is-disable': Selection.hasFile('shares')}" ng-click="Clipboard.cut()">
     <i class="icon icon-cut"></i>
     <span translate>Cut</span>
   </li>
-  <li class="context-menu-item" ng-click="Clipboard.copy()">
+  <li class="context-menu-item" ng-class="{'is-disable': Selection.hasFile('shares')}" ng-click="Clipboard.copy()">
     <i class="icon icon-copy"></i>
     <span translate>Copy</span>
   </li>
@@ -49,7 +49,7 @@
     <i class="icon icon-paste"></i>
     <span translate>Paste</span>
   </li>
-  <li class="context-menu-item" ng-click="deleteFiles()">
+  <li class="context-menu-item" ng-class="{'is-disable': Selection.hasFile('shares')}" ng-click="deleteFiles()">
     <i class="icon icon-remove"></i>
     <span translate>Delete</span>
   </li>

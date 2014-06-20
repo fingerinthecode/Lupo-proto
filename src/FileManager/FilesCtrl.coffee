@@ -5,6 +5,8 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $do
 
   # -------------Shortcut-----------
   $document.on('keypress', ($event)->
+    if Selection.hasFile('shares')
+      return false
     if not ($event.ctrlKey or $event.metaKey)
       switch $event.keyCode
         when 113 then $scope.renameFile() # F2

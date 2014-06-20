@@ -83,7 +83,8 @@ directive('file', ($state, session, fileManager, Selection, Clipboard)->
         scope.selectFile() if not Selection.hasFile(scope.file)
       )
       element.on('dragover', ($event)->
-        if scope.file.isFolder() and
+        if scope.file.isFolder()        and
+        not Selection.hasFile('shares') and
         not Selection.hasFile(scope.file)
           element.attr('droppable', true)
           $event.dataTransfer.dropEffect = 'move'
