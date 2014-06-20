@@ -11,7 +11,7 @@
     <div class="header">
       <img class="header-image" src="images/logo.png"/>
       <div class="header-box">
-        <span ng-if="session.user.username">{{session.user.username}} ({{session.user.privateDoc._id |limitTo:3 }})</span>
+        <span ng-if="session.user.username">{{session.user.username}} ({{session.getUserId() |limitTo:3 }})</span>
       </div>
     </div>
 
@@ -29,12 +29,12 @@
     <div id="browser-support" class="modal">
       <div class="modal-container">
         <div class="modal-header">
-          <h2>You're browser is too old</h2>
+          <h2>Browser version too old</h2>
         </div>
         <div class="modal-content">
-        <p>The browser that you use is out of date and start to be old, you may have some problem. Please Update</p>
-        <p>If you can't update you're browser (example: Windows XP and Internet Explorer), we recommand you to download Firefox :).</p>
-        <a href="http://www.mozilla.org/fr/firefox/new/">Download Firefox</a>
+        <p>Your browser is too old to render correctly this website. You should update it or if you can't (example: you are using Internet Explorer on Windows XP) we recommand you to download Firefox :).</p>
+        <p></p>
+        <a href="http://www.mozilla.org/firefox/">Download Firefox</a>
         </div>
         <div class="modal-footer">
           <button class="button button-ok">Ok</button>
