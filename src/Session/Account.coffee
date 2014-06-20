@@ -20,12 +20,12 @@ angular.module('session')
       assert(privateUserDoc._id?)
 
       crypto.createRSAKeys(2048).then (keys) =>
-        # public doc
-        storage.save({
+        publicDoc = {
           "name": username
           "publicKey": keys.public
           "_id": crypto.getKeyIdFromKey(keys.public)
-        }).then (publicDoc) =>
+        }
+        storage.save(publicDoc).then (publicDoc) =>
           fileManager.createRootFolder(masterKeyId).then (rootId) =>
             privateUserDoc.data = {
               "privateKey": keys.private,
@@ -39,7 +39,7 @@ angular.module('session')
             crypto.encryptDataField(masterKey, privateUserDoc).then =>
               storage.save(privateUserDoc).then (savedPrivateDoc) =>
                 session.user = new User(
-                  username, keys.public, login
+                  username, publicDoc, login
                   masterKey, {
                     _id: savedPrivateDoc.id
                     _rev: savedPrivateDoc.rev
@@ -61,7 +61,7 @@ angular.module('session')
                 (publicDoc) =>
                   console.log "publicDoc", publicDoc, masterKey
                   session.user = new User(
-                    publicDoc.name, publicDoc.publicKey
+                    publicDoc.name, publicDoc
                     login, masterKey, privateDoc)
               )
           catch SyntaxError

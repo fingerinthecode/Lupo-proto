@@ -1,7 +1,7 @@
 angular.module('session')
 .factory 'User', (assert, storage) ->
   class User
-    constructor: (@username, @publicKey, @login, @masterKey, @privateDoc) ->
+    constructor: (@username, @publicDoc, @login, @masterKey, @privateDoc) ->
       console.log "User", login, username
       @prefs = @privateDoc.data.prefs
 

@@ -14,7 +14,10 @@ angular.module('session')
       @keyRing[keyId]
 
     getMainPublicKey: ->
-      @user.publicKey
+      @user.publicDoc.publicKey
+
+    getUserId: ->
+      @user.publicDoc._id
 
     getMainPrivateKey: ->
       @user.privateDoc.data.privateKey
