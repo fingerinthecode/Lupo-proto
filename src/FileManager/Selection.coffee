@@ -1,6 +1,6 @@
 angular.module('fileManager').
-factory('Selection', ()->
-  return class Selection
+factory('Selection', ($rootScope)->
+  class Selection
     @_files: {}
     @number: 0
 
@@ -62,4 +62,9 @@ factory('Selection', ()->
         if file.isFolder()
           return true
       return false
+
+  $rootScope.$on('$stateChangeSuccess', ->
+    Selection.clear()
+  )
+  return Selection
 )
