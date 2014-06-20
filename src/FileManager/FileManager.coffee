@@ -285,16 +285,17 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
         link.dispatchEvent(e)
 
     removeFileFromParentFolder: (file) ->
-      _funcName = "removeFileFromFolder"
+      _funcName = "removeFileFromParentFolder"
       console.info _funcName
       assert.defined file._id, "file._id", _funcName
       assert.defined file.metadata.parentId, "file.metadata.parentId", _funcName
       File.getFile(file.metadata.parentId).then (folder) =>
         assert.array folder.content, "folder.content", _funcName
         if folder._id == @getCurrentDirId()
-          @fileTree.splice(
-            folder.content.indexOf(file._id)
-            1)
+          for i, f of @fileTree
+            if f._id == file._id
+              @fileTree.splice(i, 1)
+              break
         folder.content.splice(
           folder.content.indexOf(file._id)
           1)
@@ -302,6 +303,10 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
           #TODO: change @ to a triggered update via changes watcher
           cache.expire(folder._id, "content")
           folder.listContent()
+        .catch (err) =>
+          if err.status == 409
+            cache.expire(folder._id, "content")
+            @removeFileFromParentFolder(file)
 
     deleteFile: (file) ->
       _funcName = "deleteFile"
