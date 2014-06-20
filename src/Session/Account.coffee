@@ -8,7 +8,7 @@ angular.module('session')
 
     signUp: (login, password, publicName) ->
       console.log "signUp"
-      username = if publicName? then publicName else login
+      username = if publicName? and publicName != "" then publicName else login
       privateUserDoc = {}
 
       privateUserDoc.salt = crypto.newSalt(16)
@@ -25,12 +25,12 @@ angular.module('session')
           "publicKey": keys.public
           "_id": crypto.getKeyIdFromKey(keys.public)
         }
-        storage.save(publicDoc).then (publicDoc) =>
+        storage.save(publicDoc).then =>
           fileManager.createRootFolder(masterKeyId).then (rootId) =>
             privateUserDoc.data = {
               "privateKey": keys.private,
               "rootId": rootId,
-              "publicDocId": publicDoc.id
+              "publicDocId": publicDoc._id
               "prefs": {
                 "displayThumb": true
               }

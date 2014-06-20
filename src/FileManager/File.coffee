@@ -135,9 +135,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
         folder.content.push(@_id)
         folder.saveContent().then =>
           @metadata.parentId = folderId
-          #TODO: change this to a triggered update via changes watcher
-          cache.expire(folder._id, "content")
-          folder.listContent()
           @saveMetadata()
       .catch (err) =>
         if err.status == 409
@@ -199,10 +196,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
       assert.defined @_id, "@_id", _funcName
       deferred = $q.defer()
       inProgess = []
-      #list = cache.get(@_id, "content")
-      #if list?
-      #  deferred.resolve(list)
-      #else
       @getContent().then (content) =>
         assert.array content, "content", _funcName
         list = []
@@ -229,7 +222,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
               if inProgess.length == 0
                 # if all deferred are terminated #
                 console.debug "list", list
-                #cache.store(@_id, "content", list)
                 deferred.resolve(list)
         unless atLeastOne
           deferred.resolve([])
