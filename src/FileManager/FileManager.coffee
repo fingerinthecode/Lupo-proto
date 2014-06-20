@@ -317,9 +317,6 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
             for f in list
               f.remove()
         file.remove()
-        @fileTree.splice(
-          @fileTree.indexOf(file)
-          1)
   }
 
   $rootScope.$on('$stateChangeSuccess', ($event, toState)->
