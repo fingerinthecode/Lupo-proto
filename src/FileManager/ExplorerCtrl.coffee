@@ -5,6 +5,8 @@ controller('ExplorerCtrl', ($scope, $state, $stateParams, session, fileManager, 
 
   #-------------Ctrl + Shortcut------------
   $document.on('keypress', ($event)->
+    if Selection.hasFile('shares')
+      return false
     if $event.ctrlKey or $event.metaKey
       switch $event.charCode
         when 120 then Clipboard.cut()   # X

@@ -19,7 +19,11 @@ factory('Selection', ()->
       @number = 0
 
     @hasFile: (file)->
-      return @_files.hasOwnProperty(file._id)
+      if typeof file == 'object'
+        id = file._id
+      else
+        id = file
+      return @_files.hasOwnProperty(id)
 
     @select: (file, ctrl = false, contextMenu = false) ->
       if contextMenu and @hasFile(file)
