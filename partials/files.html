@@ -3,7 +3,7 @@
   <file ng-repeat="file in fileManager.fileTree |orderBy:['metadata.type', 'metadata.name']" file="file"></file>
 </div>
 
-<div class="modal" ng-if="shareModal">
+<div class="modal" ng-if="shareModal" ng-click="closeModalShare()">
   <div class="modal-container">
     <div class="modal-header">
       <div class="close"></div>
