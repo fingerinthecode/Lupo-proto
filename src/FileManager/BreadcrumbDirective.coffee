@@ -7,7 +7,7 @@ angular.module('fileManager')
               <div class="breadcrumb">
                   <div class="breadcrumb-separator"><i class="icon icon-arrow-right"></i></div>
                 <span ng-repeat="piece in breadcrumb">
-                  <div class="breadcrumb-part" ng-class="{'is-active': $last}" ui-sref=".({path: piece._id})">{{ piece.name }}</div>
+                  <div class="breadcrumb-part" ng-class="{'is-active': $last}" ui-sref="explorer.files({path: piece._id})">{{ piece.name }}</div>
                   <div class="breadcrumb-separator"><i class="icon icon-arrow-right"></i></div>
                 </span>
               </div>
