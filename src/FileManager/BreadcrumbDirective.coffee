@@ -7,7 +7,7 @@ angular.module('fileManager')
               <div class="breadcrumb">
                   <div class="breadcrumb-separator"><i class="icon icon-arrow-right"></i></div>
                 <span ng-repeat="piece in breadcrumb">
-                  <div class="breadcrumb-part" ng-class="{'is-active': $last}" ui-sref=".({path: piece._id})">{{ piece.name }}</div>
+                  <div class="breadcrumb-part" ng-class="{'is-active': $last}" ui-sref="explorer.files({path: piece._id})">{{ piece.name }}</div>
                   <div class="breadcrumb-separator"><i class="icon icon-arrow-right"></i></div>
                 </span>
               </div>
@@ -18,14 +18,12 @@ angular.module('fileManager')
         if session.isConnected() and toState.name == 'explorer.files'
           scope.breadcrumb = []
           path = toParams.path
-          console.info "REFRESH BREADCRUMB"
           if path == 'shares'
             scope.breadcrumb.unshift({
               _id:  "shares"
               name: $filter('translate')("Shares")
             })
           else if path != ''
-            console.info "CREATE BREADCRUMB"
             File.getFile(path).then(
               (file)->
                 getPath(file)
@@ -35,7 +33,6 @@ angular.module('fileManager')
       )
 
       getPath = (file) ->
-        console.info "PIECE", file
         if file._id == session.getRootFolderId()
           return true
         scope.breadcrumb.unshift({

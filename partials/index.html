@@ -41,9 +41,10 @@
         </div>
       </div>
     </div>
-    <![endif]-->
-
     <script>
+      lang  = window.navigator.language.match(/[a-z]{2,3}/)[0].toLowerCase();
+      langs = {
+      }
       // Browser Support
       modal  = window.document.getElementById('browser-support');
       if(modal != null) {
@@ -53,6 +54,15 @@
         }, false);
       }
 
+      if(langs.hasOwnProperty(lang)){
+        content = modal.getElementsByClassName('modal-content')[0];
+        save = content.innerHTML;
+        content.innerHTML = langs[lang]+save;
+      }
+    </script>
+    <![endif]-->
+
+    <script>
       // Support Worker
       if(!window.Worker) {
         body    = window.document.getElementsByTagName('body')[0];
