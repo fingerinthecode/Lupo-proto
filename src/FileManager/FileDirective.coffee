@@ -29,7 +29,7 @@ directive('file', ($state, session, fileManager, Selection, Clipboard)->
                   <div class="file-text">
                     <div class="file-title" ng-hide="isEditMode()" ng-if="isList()">{{ file.metadata.name }}</div>
                     <div class="file-title" ng-hide="isEditMode()" ng-if="isThumb()" title="{{file.metadata.name}}">{{ file.metadata.name |ellipsis:15 }}</div>
-                    <input type="text" ng-model="newName" ng-show="isEditMode()" ng-blur="changeName(true)" ng-keypress="changeName($event)" select="isEditMode()"/>
+                    <input type="text" ng-model="newName" ng-show="isEditMode()" ng-blur="changeName({}, true)" ng-keypress="changeName($event)" select="isEditMode()"/>
 
                     <div class="file-size" ng-if="!file.isFolder() && isList()">{{ file.metadata.size |size }}</div>
                   </div>
@@ -121,8 +121,8 @@ directive('file', ($state, session, fileManager, Selection, Clipboard)->
         return scope.file.nameEditable
 
       # -------------------Rename-----------------------
-      scope.changeName = ($event = {}) ->
-        if $event.keyCode == 13
+      scope.changeName = ($event = {}, force) ->
+        if force or $event.keyCode == 13
           scope.file.rename(scope.newName)
           scope.file.nameEditable = false
           $event.preventDefault()
