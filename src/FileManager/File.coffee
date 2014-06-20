@@ -79,19 +79,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
     # Private methods
     #
 
-    _preventConflict: (doc) ->
-      #TODO: replace @ by a conflict handler
-      _funcName = "_preventConflict"
-      console.log _funcName, doc
-      deferred = $q.defer()
-      if doc._id?
-        File.getLastRev(doc._id, @keyId).then (_rev) =>
-          doc._rev = _rev
-          deferred.resolve(doc)
-      else
-        deferred.resolve(doc)
-      return deferred.promise
-
     _saveDoc: (doc) ->
       _funcName = "_saveDoc"
       console.log _funcName
@@ -103,16 +90,17 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
       assert.defined(key, "key", _funcName)
       crypto.encryptDataField(key, doc)
       .then =>
-        storage.save(doc).then =>
+        storage.save(doc).then (retVal) =>
           cache.expire(doc._id, "doc")
+          return retVal
 
     _deleteDoc: (doc) ->
       _funcName = "_deleteDoc"
       console.log _funcName
       assert.defined(doc, "doc", _funcName)
-      storage.del(doc).then =>
+      storage.del(doc).then (retVal) =>
         cache.expire(doc._id, "doc")
-
+        return retVal
 
     #
     # Public methods

@@ -159,7 +159,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
               keyId: keyId
             }
             newFile.save()
-            .then (result) =>
+            .then =>
               newFile.addToFolder(parentId, keyId)
 
         (err) =>
