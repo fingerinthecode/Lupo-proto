@@ -16,7 +16,7 @@ directive('file', ($state, session, fileManager, Selection, Clipboard)->
                 'is-loading': file.loading,
               }"
               draggable="true">
-                <div context-menu="selectFile({}, true)" data-target="fileMenu">
+                <div context-menu="selectFile({}, true)" context-menu-disabled="file.loading" data-target="fileMenu">
                   <div class="file-icon">
                     <img  ng-class="{
                       'file-icon-landscape': isIconLandscape(),

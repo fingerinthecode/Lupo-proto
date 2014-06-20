@@ -1,5 +1,5 @@
 angular.module('fileManager').
-factory 'Uploader', ($q, File, fileManager, DeferredQueue) ->
+factory 'Uploader', ($q, File, fileManager, DeferredQueue, notification) ->
   lightTaskQueue = new DeferredQueue(5)
   heavyTaskQueue = new DeferredQueue(1)
   {
@@ -99,6 +99,9 @@ factory 'Uploader', ($q, File, fileManager, DeferredQueue) ->
     uploadFiles: (files) ->
       for file in files
         console.debug "will load", file
+        if file.size > 10000000
+          notification.addAlert("The file is too big. Can't upload a file larger than 10MB.", 'danger')
+          break
         ( (file) =>
           loadingFile = @createLoadingFile file
 
