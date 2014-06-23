@@ -57,7 +57,6 @@ directive('info', ($rootScope, $state, $filter, $document)->
           scope.drag = false
 
         if scope.drag
-          console.info $event
           element[0].style.left = $event.clientX - 10 + "px"
           element[0].style.top  = $event.clientY - 10 + "px"
           $event.stopPropagation()
