@@ -50,9 +50,9 @@ directive('info', ($rootScope, $state, $filter)->
       element.on('mouseup', ($event)->
         scope.drag = false
       )
-      element.on('mouseout', ($event)->
-        scope.drag = false
-      )
+      #element.on('mouseout', ($event)->
+      #  scope.drag = false
+      #)
 
   }
 )

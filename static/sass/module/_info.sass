@@ -1,10 +1,9 @@
 .info
   position: absolute
   width: 450px
-  height: 250px
-  bottom: 70px
+  height: 450px
+  top: 150px
   right: 70px
-  padding: 25px
 
   background-color: aliceblue
   +box-shadow(0 0 50px 0 rgba(0, 0, 0, 0.7))
@@ -16,3 +15,14 @@
 
   z-index: 999999
   cursor: move
+
+.info-content
+  overflow-y: auto
+  padding: 20px
+  padding-top: 0px
+  max-height: 400px
+  margin-top: 30px
+  margin-right: 5px
+
+.info-content > h4
+  margin: 0
