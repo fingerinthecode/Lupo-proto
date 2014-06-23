@@ -29,6 +29,7 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $do
   $scope.deleteFiles = ->
     Selection.forEach (file)->
       fileManager.deleteFile(file)
+    Selection.clear()
 
   # Share: list of users
   $scope.share = []
