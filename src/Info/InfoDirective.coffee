@@ -1,5 +1,5 @@
 angular.module('info').
-directive('info', ($rootScope, $state, $filter, $document)->
+directive('info', ($rootScope, $state, $filter, $document, $timeout)->
   return {
     restrict: 'E'
     replace: true
@@ -20,13 +20,16 @@ directive('info', ($rootScope, $state, $filter, $document)->
       $page       = angular.element(page)
 
       scope.refresh = ($event)->
-        name = $state.current.name.toUpperCase()
-        key  = "INFO_#{name}"
-        html = $filter('translate')(key)
-        if html != key
-          scope.html = html
-        else
-          scope.html = ""
+        scope.html = ""
+        $timeout(->
+          name = $state.current.name.toUpperCase()
+          key  = "INFO_#{name}"
+          html = $filter('translate')(key)
+          if html != key
+            scope.html = html
+          else
+            scope.html = ""
+        ,10)
 
       $rootScope.$on('$stateChangeSuccess', scope.refresh)
       $rootScope.$on('$translateChangeSuccess', scope.refresh)
