@@ -1,7 +1,5 @@
 angular.module('fileManager').
 factory 'Uploader', ($q, File, fileManager, DeferredQueue, notification) ->
-  lightTaskQueue = new DeferredQueue(5)
-  heavyTaskQueue = new DeferredQueue(1)
   {
     arrayBuffer2String: (buffer) ->
       bytes = new Uint8Array(buffer)
@@ -62,11 +60,6 @@ factory 'Uploader', ($q, File, fileManager, DeferredQueue, notification) ->
       console.log strResult.length, strResult
 
     uploadOneFile: (file, loadingFile)->
-      reader = new FileReader()
-      reader.onloadend = (evt) ->
-        if (evt.target.readyState == FileReader.DONE) # DONE == 2
-          @uploadSlice loadingFile, evt.target.result
-
       @readFileToArrayBuffer(file).then (arrayBuffer) =>
         @uploadSlice loadingFile, arrayBuffer
 
@@ -106,24 +99,25 @@ factory 'Uploader', ($q, File, fileManager, DeferredQueue, notification) ->
           loadingFile = @createLoadingFile file
 
           if file.type.match('image.*')
-            lightTaskQueue.enqueue =>
+            fileManager.lightTaskQueue.enqueue =>
               ###
               @readFileToArrayBuffer file
               .then (arrayBuffer) =>
                 @createThumbnail arrayBuffer
                 .then (thumbDataUrl) =>
                   @displayLoadingFile loadingFile, thumbDataUrl
-                heavyTaskQueue.enqueue => @uploadSlice(loadingFile, arrayBuffer)
+                fileManager.heavyTaskQueue.enqueue => @uploadSlice(loadingFile, arrayBuffer)
               ###
               @createThumbnail file
               .then (dataUrls) =>
                 [thumbDataUrl, dataUrl] = dataUrls
                 @displayLoadingFile loadingFile, thumbDataUrl
-                heavyTaskQueue.enqueue => fileManager.addFile(loadingFile.metadata, dataUrl)
+                fileManager.heavyTaskQueue.enqueue => fileManager.addFile(loadingFile.metadata, dataUrl)
 
           else
             @displayLoadingFile(loadingFile)
-            heavyTaskQueue.enqueue => @uploadOneFile(file, loadingFile)
+            fileManager.heavyTaskQueue.enqueue => @uploadOneFile(file, loadingFile)
+            fileManager.heavyTaskQueue.enqueue => console.error "FINISHED"
         )(file)
 
   }

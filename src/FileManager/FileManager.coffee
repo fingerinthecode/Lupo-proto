@@ -1,7 +1,9 @@
 angular.module('fileManager').
-factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, usSpinnerService, $filter, notification, $rootScope) ->
+factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, usSpinnerService, $filter, notification, $rootScope, DeferredQueue) ->
   fileManager = {
     fileTree: []
+    lightTaskQueue: new DeferredQueue(5)
+    heavyTaskQueue: new DeferredQueue(1)
 
     updatePath: ->
       _funcName = "updatePath"
@@ -141,7 +143,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
 
     _createFile: (metadata, content, parentId, keyId) ->
       _funcName = "_createFile"
-      console.info _funcName, metadata, content, parentId
+      console.info _funcName, metadata, parentId
       assert.defined metadata, "metadata", _funcName
       assert.defined content,  "content",  _funcName
       assert.defined parentId, "parentId", _funcName
@@ -168,7 +170,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
 
     createFile: (metadata, content, parentId, keyId) ->
       _funcName = "createFile"
-      console.info _funcName, metadata, content, parentId
+      console.info _funcName, metadata, parentId
       assert.defined metadata, "metadata", _funcName
       assert.defined content,  "content",  _funcName
       assert.defined parentId, "parentId", _funcName
@@ -191,7 +193,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
         console.log "root", root
         this.createFile(
           {name: $filter('translate')("README")}
-          $filter('translate')("Welcome")
+          $filter('translate')("README_CONTENT")
           root._id
           masterKeyId
         )

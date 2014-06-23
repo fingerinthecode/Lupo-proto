@@ -10,7 +10,7 @@ factory 'DeferredQueue', ($q) ->
         @_idx = 0  #round robin index
 
     enqueue: (fun) ->
-      @_deferredList[@_idx].then(fun, fun)
+      @_deferredList[@_idx] = @_deferredList[@_idx].then(fun, fun)
       @_idx++
       if @_idx >= @size
         @_idx = 0

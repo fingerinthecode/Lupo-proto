@@ -138,7 +138,6 @@ factory 'File', ($q, assert, crypto, session, User, storage, cache, $state) ->
           @saveMetadata()
       .catch (err) =>
         if err.status == 409
-          cache.expire(folderId, "content")
           @addToFolder(folderId, keyId)
 
     save: () ->
