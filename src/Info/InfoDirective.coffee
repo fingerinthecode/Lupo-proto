@@ -1,10 +1,11 @@
 angular.module('info').
-directive('info', ($rootScope, $state, $filter)->
+directive('info', ($rootScope, $state, $filter, $document)->
   return {
     restrict: 'E'
     replace: true
     template: """
               <div class="info" ng-hide="close">
+                <div class="info-move" style="float:left;margin-left:3px;margin-top:3px;"><i class="icon icon-move"></i></div>
                 <button class="button-link close" ng-click="close=true">&times;</button>
                 <div class="info-content" ng-bind-html="html"></div>
               </div>
@@ -13,6 +14,10 @@ directive('info', ($rootScope, $state, $filter)->
       scope.close = false
       scope.drag  = false
       scope.html  = ""
+      move        = element[0].getElementsByClassName('info-move')[0]
+      $move       = angular.element(move)
+      page        = window.document.getElementById('page')
+      $page       = angular.element(page)
 
       scope.refresh = ($event)->
         name = $state.current.name.toUpperCase()
@@ -26,7 +31,7 @@ directive('info', ($rootScope, $state, $filter)->
       $rootScope.$on('$stateChangeSuccess', scope.refresh)
       $rootScope.$on('$translateChangeSuccess', scope.refresh)
 
-      element.on('mousedown', ($event)->
+      $move.on('mousedown', ($event)->
         scope.drag  = true
         scope.original = {
           left: parseInt(window.getComputedStyle(element[0]).left)
@@ -37,22 +42,29 @@ directive('info', ($rootScope, $state, $filter)->
           y: $event.clientY
         }
       )
-      element.on('mousemove', ($event)->
+      $document.on('mousemove', ($event)->
+        w = window
+        d = document
+        e = d.documentElement
+        g = d.getElementsByTagName('body')[0]
+        x = w.innerWidth || e.clientWidth || g.clientWidth
+        y = w.innerHeight|| e.clientHeight|| g.clientHeight
+
+        if $event.clientX < 0 or
+        $event.clientY < 0    or
+        $event.clientX > x    or
+        $event.clientY > y
+          scope.drag = false
+
         if scope.drag
-          mouse  = scope.mouse
-          origin = scope.original
-          element.css({
-            left: origin.left + $event.clientX - mouse.x + "px"
-            top:  origin.top  + $event.clientY - mouse.y + "px"
-          })
+          console.info $event
+          element[0].style.left = $event.clientX - 10 + "px"
+          element[0].style.top  = $event.clientY - 10 + "px"
           $event.stopPropagation()
+          $event.preventDefault()
       )
-      element.on('mouseup', ($event)->
+      $document.on('mouseup', ($event)->
         scope.drag = false
       )
-      #element.on('mouseout', ($event)->
-      #  scope.drag = false
-      #)
-
-  }
+ }
 )
