@@ -16,7 +16,6 @@ directive('zoneSelection', (Selection, $document)->
         zone.className = "zone-selection"
         zone.setAttribute('id', 'zone')
 
-
       # IsInSelection
       isInSelection = (file)->
         x = w.innerWidth || e.clientWidth || g.clientWidth
@@ -40,9 +39,8 @@ directive('zoneSelection', (Selection, $document)->
 
         return false
 
-
       element.on('mousedown', ($event)->
-        if ($event.buttons == 1 or $event.button == 0) and not $event.target.className.match(/^file.*/)
+        if ($event.buttons == 1 or $event.button == 0) and not $event.target.className.match(/^(?:file|modal|context).*/)
           Selection.clear()
           body.appendChild(zone)
           scope.start = $event

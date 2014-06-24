@@ -2,9 +2,8 @@ angular.module('fileManager')
 .directive 'dropZone', (Uploader) ->
   {
     restrict: 'A'
-    scope: {}
-
     link: (scope, elem, attr, ctrl) ->
+      elem.attr('droppable', true)
       elem.on 'dragover', (evt) ->
         evt.dataTransfer.dropEffect = 'copy' # Explicitly show this is a copy
         evt.stopPropagation()
