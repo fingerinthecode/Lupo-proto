@@ -42,7 +42,7 @@ directive('zoneSelection', (Selection, $document)->
 
 
       element.on('mousedown', ($event)->
-        if $event.buttons == 1 and not $event.target.className.match(/^file.*/)
+        if ($event.buttons == 1 or $event.button == 0) and not $event.target.className.match(/^file.*/)
           Selection.clear()
           body.appendChild(zone)
           scope.start = $event
@@ -50,7 +50,7 @@ directive('zoneSelection', (Selection, $document)->
       )
       $document.on('mousemove', ($event)->
         actual = new Date().getTime()
-        if scope.start? and scope.last+30<actual
+        if scope.start? and scope.last+20<actual
           scope.last = actual
           scope.end  = $event
 
