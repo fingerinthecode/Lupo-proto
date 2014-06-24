@@ -41,7 +41,7 @@
     <i class="icon icon-cut"></i>
     <span translate>Cut</span>
   </li>
-  <li class="context-menu-item" ng-class="{'is-disable': Selection.hasFile('shares')}" ng-click="Clipboard.copy()">
+  <li class="context-menu-item" ng-class="{'is-disable': true || Selection.hasFile('shares')}" ng-click="Clipboard.copy()">
     <i class="icon icon-copy"></i>
     <span translate>Copy</span>
   </li>

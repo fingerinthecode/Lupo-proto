@@ -10,7 +10,7 @@ controller('ExplorerCtrl', ($scope, $state, $stateParams, session, fileManager, 
     if $event.ctrlKey or $event.metaKey
       switch $event.charCode
         when 120 then Clipboard.cut()   # X
-        when 99  then Clipboard.copy()  # C
+        # when 99  then Clipboard.copy()  # C
         when 118 then Clipboard.paste() # V
   )
 
