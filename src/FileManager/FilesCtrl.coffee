@@ -9,8 +9,9 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $do
       return false
     if not ($event.ctrlKey or $event.metaKey)
       switch $event.keyCode
-        when 113 then $scope.renameFile() # F2
+        when 113 then $scope.renameFile()      # F2
         when 27  then $scope.closeModalShare() # ESC
+        when 46  then $scope.deleteFiles()     # DEL
   )
 
   $scope.Selection   = Selection
