@@ -1,4 +1,4 @@
-angular.module('fileManager').
+angular.module('filters').
 filter('ellipsis', ->
   return (text, limit, end = '…')->
     if text?

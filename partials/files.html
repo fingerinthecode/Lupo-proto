@@ -13,7 +13,7 @@
     </div>
     <div class="modal-footer">
       <button class="button-cancel" ng-click="closeModalShare()" translate>Cancel</button>
-      <button class="button-ok"     ng-click="shareFiles()"      translate>Share</button>
+      <button class="button-ok"     ng-click="shareFiles()"      translate ng-disabled="share.length == 0">Share</button>
     </div>
   </div>
 </div>

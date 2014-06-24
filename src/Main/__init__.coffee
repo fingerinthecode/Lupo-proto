@@ -1,5 +1,7 @@
 angular.module('lupo-proto', [
   'ui.router'
+  'filters'
+  'breadcrumb'
   'gettext'
   'notification'
   'translation'

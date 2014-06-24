@@ -1,4 +1,4 @@
-angular.module('fileManager').
+angular.module('filters').
 filter('size', ->
   return (size)->
     unity = 'B'

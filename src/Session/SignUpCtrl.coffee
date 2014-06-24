@@ -13,6 +13,5 @@ controller('SignUpCtrl', ($scope, account, usSpinnerService, $state) ->
       )
     else
       alert("error password")
+
 )
-
-

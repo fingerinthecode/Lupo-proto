@@ -1,4 +1,4 @@
-angular.module('fileManager')
+angular.module('breadcrumb')
 .directive('breadcrumb', (File, session, $filter, $rootScope)->
   return {
     restrict: 'E'
