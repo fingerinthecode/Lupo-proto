@@ -1,16 +1,16 @@
 <p>
   <form ng-submit="signUpSubmit()" name="signup">
     <label for="login" translate>Login: </label>
-    <input name="login" type="text" ng-model="login" pattern=".{3,}" required/>
+    <input  id="login" name="login" type="text" ng-model="login" required/>
     <br/>
     <label for="password" translate>Password: </label>
-    <input name="password" type="password" ng-model="password" required/>
+    <input  id="password" name="password" type="password" ng-model="password" required/>
     <br/>
     <label for="password2" translate>Confirm password: </label>
-    <input name="password2" type="password" ng-model="password2" required/>
+    <input  id="password2" name="password2" type="password" ng-model="password2" required/>
     <br/>
     <label for="publicName" translate>Public name (optional): </label>
-    <input name="publicName" type="text" ng-model="publicName"/>
+    <input  id="publicName" name="publicName" type="text" ng-model="publicName"/>
     <br/>
     <button type="submit" translate>Submit</button>
   </form>

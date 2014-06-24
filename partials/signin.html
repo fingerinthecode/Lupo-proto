@@ -1,11 +1,11 @@
 <p>
   <form ng-submit="signInSubmit()" name="signin">
     <label for="login" translate>Login: </label>
-    <input name="login" type="text" ng-model="login" required/>
+    <input  id="login" name="login" type="text" ng-model="login" required/>
     <br/>
     <label for="password" translate>Password: </label>
-    <input name="password" type="password" ng-model="password" required/>
+    <input  id="password" name="password" type="password" ng-model="password" required/>
     <br/>
-    <button type="submit" translate>Submit</button> or <a href="#/signup" translate>Sign up</a>
+    <button type="submit" translate>Submit</button> or <a ui-sref="signup" translate>Sign up</a>
   </form>
 </p>
