@@ -40,7 +40,8 @@ directive('zoneSelection', (Selection, $document)->
         return false
 
       element.on('mousedown', ($event)->
-        if ($event.buttons == 1 or $event.button == 0) and not $event.target.className.match(/^(?:file|modal|context).*/)
+        if ($event.buttons == 1 or $event.button == 0) and
+        $event.target == element[0]
           Selection.clear()
           body.appendChild(zone)
           scope.start = $event
