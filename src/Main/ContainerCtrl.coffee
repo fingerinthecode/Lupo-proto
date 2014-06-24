@@ -11,10 +11,6 @@ controller('ContainerCtrl', ($scope, $rootScope, session, notification, $state, 
     if toState.loginRequired? and
     not session.isConnected() and
     toState.loginRequired
-      session.saveFlash('redirect', {
-        name: $state.current.name
-        params: $state.params
-      })
       $state.transitionTo('signin', {})
 
     if toState.notConnected? and
