@@ -126,16 +126,15 @@ module.exports = (grunt) ->
     }
     #E2E
     protractor: {
-      your_target: {
+      dev: {
         options:
-          configFile: "test/e2e.conf.js"
+          configFile: "test/e2e.conf.coffee"
       }
     },
     selenium_webdriver_phantom: {
       phantom: {
         options: {
-          phantom: {
-            path: 'D:\\Programmation\\Lupo-proto\\node_modules\\phantomjs\\lib\\phantom\\phantom.exe'
+          chrome: {
           }
         }
       }

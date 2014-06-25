@@ -49,7 +49,7 @@ directive('zoneSelection', (Selection, $document)->
       )
       $document.on('mousemove', ($event)->
         actual = new Date().getTime()
-        if scope.start? and scope.last+20<actual
+        if scope.start? and scope.last+50<actual
           scope.last = actual
           scope.end  = $event
 
