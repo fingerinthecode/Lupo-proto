@@ -120,12 +120,37 @@ module.exports = (grunt) ->
           name = grunt.option('db') || 'default'
           return "kanso push #{name}"
       }
+      protractor_update: {
+        command: 'node ./node_modules/protractor/bin/webdriver-manager update'
+      }
+    }
+    #E2E
+    protractor: {
+      your_target: {
+        options:
+          configFile: "test/e2e.conf.js"
+      }
+    },
+    selenium_webdriver_phantom: {
+      phantom: {
+        options: {
+          phantom: {
+            path: 'D:\\Programmation\\Lupo-proto\\node_modules\\phantomjs\\lib\\phantom\\phantom.exe'
+          }
+        }
+      }
     }
   })
 
-
   grunt.registerTask('default', [
     'watch'
+  ])
+
+  grunt.registerTask('test', [
+    'shell:protractor_update'
+    'selenium_webdriver_phantom:phantom'
+    'protractor'
+    'selenium_webdriver_phantom:stop'
   ])
 
   grunt.registerTask('compile', [
