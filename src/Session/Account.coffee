@@ -1,12 +1,27 @@
 angular.module('session')
-.factory 'account', (session, User, crypto, fileManager, storage) ->
+.factory 'account', (session, User, crypto, fileManager, storage, $q) ->
   {
     getMainDocId: (login, password) ->
       _funcName = "getMainDocId"
       console.log _funcName, login
       crypto.hash(login + password, 32)
 
-    signUp: (login, password, publicName) ->
+    signUp: (login, password, publicName)->
+      defer = $q.defer()
+      @signIn(login, password).then(
+        => #Success
+          defer.reject('User already exist')
+        ,=> #Error
+          @_signUp(login, password, publicName).then(
+            -> #Success
+              defer.resolve()
+            (err)-> #Error
+              defer.reject(err)
+          )
+      )
+      return defer.promise
+
+    _signUp: (login, password, publicName) ->
       console.log "signUp"
       username = if publicName? and publicName != "" then publicName else login
       privateUserDoc = {}
