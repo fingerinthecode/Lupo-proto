@@ -13,7 +13,7 @@ exports.config = {
   baseUrl: "#{url}/_design/proto/_rewrite/"
 
   capabilities: {
-    'browserName': 'firefox'
+    'browserName': 'chrome'
   }
 
   specs: [

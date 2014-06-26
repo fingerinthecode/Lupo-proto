@@ -1,10 +1,9 @@
 module.exports = class Notification
-  @toHave = (nb, type)->
+  @get: (nb, type)->
     if type?
-      notifs = $$(".notif-overlay.alert-#{type}")
+      return $$(".notif-overlay.alert-#{type}")
     else
-      notifs = $$(".notif-overlay")
-    expect(notifs.count()).toBe(nb)
+      return $$(".notif-overlay")
 
-  @toHaveOne = (type)->
-    @toHave(1, type)
+  @count: ->
+    return @get().count()
