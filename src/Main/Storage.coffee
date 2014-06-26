@@ -1,7 +1,7 @@
 angular.module('lupo-proto').
-factory('storage', ($q, $location, assert, db) ->
-  dbUrl = $location.absUrl().split('#')[0]
-  dbUrl += 'lupo-proto/'
+factory('storage', ($q, $location, assert, db, dbname) ->
+  dbUrl  = $location.absUrl().split('#')[0]
+  dbUrl += dbname
   remoteDb = new db(dbUrl)
   _indent = "  "
   {

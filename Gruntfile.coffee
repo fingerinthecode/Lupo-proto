@@ -101,6 +101,8 @@ module.exports = (grunt) ->
       options:
         stdout: true
       kansoDelete:{
+        options:
+          failOnError: false
         command: ->
           name = grunt.option('db') || 'default'
           return "kanso deletedb #{name}"
@@ -145,11 +147,18 @@ module.exports = (grunt) ->
     'watch'
   ])
 
+  grunt.registerTask('test_database', 'set the db option to the database test', ->
+    grunt.option('db', 'testing')
+  )
+
   grunt.registerTask('test', [
+    'test_database'
+    'init'
     'shell:protractor_update'
     'selenium_webdriver_phantom:phantom'
     'protractor'
     'selenium_webdriver_phantom:stop'
+    'shell:kansoDelete'
   ])
 
   grunt.registerTask('compile', [

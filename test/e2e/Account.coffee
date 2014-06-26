@@ -22,7 +22,7 @@ module.exports = class Account
       $password.sendKeys(@_password)
       $button.click()
 
-  @signup: (username=@_username, password=@_password, passconf=@_password, name=@_publicname)->
+  @signup: (username=@_username, password=@_password, passconf=@_password, name=@_publicName)->
     browser.get('#/signup')
     $login    = $('#login')
     $password = $('#password')
@@ -45,4 +45,7 @@ module.exports = class Account
       $passconf.sendKeys(passconf)
       $name.sendKeys(name)
       $button.click()
+
+  @signupWithWrongPassword: ->
+    @signup(null, 'straun')
 

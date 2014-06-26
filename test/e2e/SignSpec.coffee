@@ -12,7 +12,8 @@ describe('signup', ->
     Notification.toHaveOne()
   )
 
-  it("shouldn't be able to signup with a login less than 3 characters", ->
-    Account.signup('abc')
+  it("shouldn't be able to signup with two different password", ->
+    Account.signupWithWrongPassword()
+    Notification.toHaveOne('danger')
   )
 )

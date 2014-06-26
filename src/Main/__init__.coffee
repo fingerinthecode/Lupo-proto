@@ -11,7 +11,4 @@ angular.module('lupo-proto', [
   'db'
   'fileManager'
   'ng-context-menu'
-]).value('db', [
-  'name': 'proto'
-  'url':  ''
-])
+]).value('dbname', 'lupo-proto')
