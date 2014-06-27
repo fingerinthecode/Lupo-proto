@@ -12,9 +12,16 @@ factory 'db', ($http) ->
           buf.push(encodeURIComponent(key) + "=" + encodeURIComponent(value))
       return if buf.length then "?" + buf.join("&") else ""
 
+    _addNonce: (url) ->
+      if url.indexOf('?') >= 0
+        url += "&"
+      else
+        url += "?"
+      return url + '_nonce=' + @_randomString(15)
+
     get: (_id) ->
       t0 = performance.now()
-      $http.get(@dbUrl + _id)
+      $http.get @_addNonce(@dbUrl + _id)
       .then (result) =>
         t1 = performance.now()
         console.log "download time:", (t1 - t0)
@@ -33,7 +40,7 @@ factory 'db', ($http) ->
         else
           return doc
 
-    _generateSeparator: (size)->
+    _randomString: (size)->
       if not size
         size = 32
       chars = [0,1,2,3,4,5,6,7,8,9,'a','b','c','d','e','f']
@@ -43,7 +50,7 @@ factory 'db', ($http) ->
       return result
 
     _toAttachment: (doc) ->
-      boundary = @_generateSeparator()
+      boundary = @_randomString()
       if doc.data? and angular.isObject(doc.data) and doc.data.data?
         #data = new Uint8Array(doc.data.data.length)
         #for i in [0..doc.data.data.length-1]
@@ -70,7 +77,7 @@ factory 'db', ($http) ->
     put: (doc) ->
       [strDoc, boundary] = @_toAttachment(doc)
       t0 = performance.now()
-      $http.put(@dbUrl + doc._id, strDoc, {
+      $http.put(@_addNonce(@dbUrl + doc._id), strDoc, {
         transformRequest: angular.identity
         headers:
           'Content-Type': "multipart/related;boundary=\"#{boundary}\""
@@ -80,7 +87,7 @@ factory 'db', ($http) ->
         return result.data
 
     post: (doc) ->
-      doc._id = @_generateSeparator()
+      doc._id = @_randomString()
       return @put(doc)
 
     query: (fun, options) ->
@@ -88,7 +95,7 @@ factory 'db', ($http) ->
       ddoc = s[0]
       view = s[1]
       $http.get(
-        @dbUrl + "_design/#{ddoc}/_view/#{view}" + @_encodeOptions(options)
+        @_addNonce(@dbUrl + "_design/#{ddoc}/_view/#{view}" + @_encodeOptions(options))
       )
       .then (result) =>
         return result.data
