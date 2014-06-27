@@ -1,6 +1,7 @@
 angular.module('lupo-proto', [
   'ui.router'
   'filters'
+  'prompt'
   'breadcrumb'
   'gettext'
   'notification'
