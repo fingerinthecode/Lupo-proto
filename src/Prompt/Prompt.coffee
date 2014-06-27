@@ -35,12 +35,11 @@ factory('Prompt', ($document, $q, $compile, $rootScope)->
 
         scope.reject  = ($event)->
           defer.reject()
-          html.remove
+          html.remove()
           $event.preventDefault()
           $event.stopPropagation()
 
         html = $compile(@template)(scope)
-        console.info html
         @body.append(html)
       return defer.promise
 

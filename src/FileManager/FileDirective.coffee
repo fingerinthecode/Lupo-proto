@@ -125,7 +125,8 @@ directive('file', ($state, session, fileManager, Selection, Clipboard, Prompt)->
         if force or $event.keyCode == 13
           found = false
           for file in fileManager.fileTree
-            if file.metadata.name == scope.newName
+            if file.metadata.name == scope.newName and
+            file._id  != scope.file._id
               found = true
               break
 
@@ -136,11 +137,10 @@ directive('file', ($state, session, fileManager, Selection, Clipboard, Prompt)->
             name = fileManager.uniqueName(scope.newName)
             Prompt.ask('This name already exist', "#{name} ?").then(
               ->
+                scope.newName = name
                 scope.file.rename(name)
                 scope.file.nameEditable = false
             )
-          $event.preventDefault()
-          $event.stopPropagation()
 
       iconPath = (icon) ->
         'images/icon_' + icon + '_48.svg'
