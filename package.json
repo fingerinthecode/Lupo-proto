@@ -42,5 +42,10 @@
     "phantomjs": "^1.9.7-10",
     "protractor": "^1.0.0-rc1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "cradle": "^0.6.7",
+    "crypto": "0.0.3",
+    "prompt": "^0.2.13",
+    "q": "^1.0.1"
+  }
 }
