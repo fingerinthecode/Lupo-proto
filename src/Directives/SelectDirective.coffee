@@ -8,8 +8,6 @@ directive('select', ->
       scope.$watch('select', ->
         if scope.select
           element[0].select()
-        else
-          element[0].blur()
       )
   }
 )

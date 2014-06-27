@@ -1,5 +1,5 @@
 angular.module('fileManager').
-directive('file', ($state, session, fileManager, Selection, Clipboard)->
+directive('file', ($state, session, fileManager, Selection, Clipboard, Prompt)->
   return {
     restrict: 'E'
     replace: true
@@ -123,10 +123,24 @@ directive('file', ($state, session, fileManager, Selection, Clipboard)->
       # -------------------Rename-----------------------
       scope.changeName = ($event = {}, force) ->
         if force or $event.keyCode == 13
-          scope.file.rename(scope.newName)
-          scope.file.nameEditable = false
-          $event.preventDefault()
-          $event.stopPropagation()
+          found = false
+          for file in fileManager.fileTree
+            if file.metadata.name == scope.newName and
+            file._id  != scope.file._id
+              found = true
+              break
+
+          if not found
+            scope.file.rename(scope.newName)
+            scope.file.nameEditable = false
+          else
+            name = fileManager.uniqueName(scope.newName)
+            Prompt.ask('This name already exist', "#{name} ?").then(
+              ->
+                scope.newName = name
+                scope.file.rename(name)
+                scope.file.nameEditable = false
+            )
 
       iconPath = (icon) ->
         'images/icon_' + icon + '_48.svg'
@@ -147,6 +161,6 @@ directive('file', ($state, session, fileManager, Selection, Clipboard)->
 
       #scope.downloadUrl = 'data:' + scope.file.mime + ';charset=utf-8,' + encodeURIComponent(scope.file.getContent())
       scope.file.getFileImg = () ->
-        element.find('img')[0]
+        element[0].getElementsByTagName('img')[0]
   }
 )
