@@ -3,6 +3,7 @@ angular.module('lupo-proto', [
   'filters'
   'watcher'
   'prompt'
+  'statistic'
   'breadcrumb'
   'gettext'
   'notification'
