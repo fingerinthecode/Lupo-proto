@@ -34,5 +34,5 @@ controller('ExplorerCtrl', ($scope, $state, session, fileManager, Clipboard, Sel
     session.set('displayThumb', true)
 
   window.onbeforeunload = ->
-    return $filter('translate')('If you reload the page your session will be terminated. Are you sure you want it?')
+    return $filter('translate')('ALERT_RELOAD')
 )
