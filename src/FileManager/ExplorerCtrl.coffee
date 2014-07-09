@@ -1,11 +1,7 @@
 angular.module('fileManager').
-controller('ExplorerCtrl', ($scope, $state, session, fileManager, Clipboard, Selection, History, $filter, $document, Watcher) ->
+controller('ExplorerCtrl', ($scope, $state, session, fileManager, Clipboard, Selection, History, $filter, $document) ->
   unless session.isConnected()
     return
-
-  Watcher.start()
-  $scope.$on('Changes', ($event, id)->
-  )
 
   #-------------Ctrl + Shortcut------------
   $document.on('keypress', ($event)->

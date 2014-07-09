@@ -18,6 +18,9 @@ factory('storage', ($q, $location, assert, db, dbname) ->
             .catch =>
               console.error "error removing", row.id
 
+    change: (filter, callback)->
+      remoteDb.change(filter, callback)
+
     get: (_id) ->
       _funcName = _indent + "storage.get"
       deferred = $q.defer()

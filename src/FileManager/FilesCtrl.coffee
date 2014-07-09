@@ -1,5 +1,5 @@
 angular.module('fileManager').
-controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $document, User, $q, notification)->
+controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $document, User, $q, notification, storage)->
   unless session.isConnected()
     return false
 
@@ -39,6 +39,11 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $do
     for u in list
       u.key = u.name + ' (id: ' + u._id[0..2] + ')'
       userList.push u
+
+  storage.change('newUser', (u)->
+    u.key = u.name + ' (id: ' + u._id[0..2] + ')'
+    userList.push u
+  )
 
   $scope.loadUsers = ($query)->
     results = []

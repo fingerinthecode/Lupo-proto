@@ -4,7 +4,7 @@ factory 'db', ($http) ->
     constructor: (@dbUrl) ->
 
     _encodeOptions: (options) ->
-      buf = [];
+      buf = []
       if options? and angular.isObject(options)
         for key, value of options
           if key in ["key", "startkey", "endkey"]
@@ -18,6 +18,42 @@ factory 'db', ($http) ->
       else
         url += "?"
       return url + '_nonce=' + @_randomString(15)
+
+    _change: (filter, since, callback)->
+      params = {
+        since:         since
+        feed:          'longpoll'
+        heartbeat:     1000
+        include_docs:  true
+        _nonce:        @_randomString(15)
+      }
+      if filter? and filter isnt ''
+        params.filter = "proto/#{filter}"
+
+      $http({
+        method: 'GET'
+        url:    "#{@dbUrl}_changes"
+        params: params
+      }).then(
+        (data)=>
+          data = data.data
+          if data.last_seq?
+            for change in data.results ? []
+              callback(change.doc)
+            @_change(filter, data.last_seq, callback)
+          else
+            @_change(filter, since, callback)
+        ,(err)=>
+          @_change(filter, since, callback)
+          console.error err
+      )
+
+    change: (filter, callback)->
+      if typeof filter == 'function'
+        callback = filter
+        filter   = ''
+
+      @_change(filter, 'now', callback)
 
     get: (_id) ->
       t0 = performance.now()
