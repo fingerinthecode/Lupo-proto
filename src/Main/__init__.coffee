@@ -1,6 +1,7 @@
 angular.module('lupo-proto', [
   'ui.router'
   'filters'
+  'browser'
   'prompt'
   'statistic'
   'breadcrumb'

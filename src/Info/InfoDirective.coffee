@@ -1,5 +1,5 @@
 angular.module('info').
-directive('info', ($rootScope, $state, $filter, $document, $timeout)->
+directive('info', ($rootScope, $state, $filter, $document, $timeout, Browser)->
   return {
     restrict: 'E'
     replace: true
@@ -14,10 +14,11 @@ directive('info', ($rootScope, $state, $filter, $document, $timeout)->
       scope.close = false
       scope.drag  = false
       scope.html  = ""
-      move        = element[0].getElementsByClassName('info-move')[0]
-      $move       = angular.element(move)
-      page        = window.document.getElementById('page')
-      $page       = angular.element(page)
+      $button     = angular.element(element[0].getElementsByClassName('info-move')[0])
+      scope.to    = {
+        x: 0
+        y: 0
+      }
 
       scope.refresh = ($event)->
         scope.html = ""
@@ -29,39 +30,44 @@ directive('info', ($rootScope, $state, $filter, $document, $timeout)->
             scope.html = html
           else
             scope.html = ""
-        ,10)
+        , 10)
 
       $rootScope.$on('$stateChangeSuccess', scope.refresh)
       $rootScope.$on('$translateChangeSuccess', scope.refresh)
 
-      $move.on('mousedown', ($event)->
+      $button.on('mousedown', ($event)->
         scope.drag  = true
-        scope.original = {
-          left: parseInt(window.getComputedStyle(element[0]).left)
-          top:  parseInt(window.getComputedStyle(element[0]).top)
-        }
         scope.mouse = {
           x: $event.clientX
           y: $event.clientY
         }
       )
       $document.on('mousemove', ($event)->
-        w = window
-        d = document
-        e = d.documentElement
-        g = d.getElementsByTagName('body')[0]
-        x = w.innerWidth || e.clientWidth || g.clientWidth
-        y = w.innerHeight|| e.clientHeight|| g.clientHeight
-
-        if $event.clientX < 0 or
-        $event.clientY < 0    or
-        $event.clientX > x    or
-        $event.clientY > y
+        # If the mouse is leaving the browser disable the tracking
+        if $event.clientX < 0             or
+        $event.clientY < 0                or
+        $event.clientX > Browser.width()  or
+        $event.clientY > Browser.height()
           scope.drag = false
 
         if scope.drag
-          element[0].style.left = $event.clientX - 10 + "px"
-          element[0].style.top  = $event.clientY - 10 + "px"
+          if Browser.haveTransform()
+            scope.to = {
+              x: scope.to.x + ($event.clientX - scope.mouse.x)
+              y: scope.to.y + ($event.clientY - scope.mouse.y)
+            }
+
+            move(element[0]).to(scope.to.x, scope.to.y).duration(30).end()
+          else
+            move(element[0])
+              .set('left', $event.clientX - 15 + "px")
+              .set('top',  $event.clientY - 15 + "px")
+              .duration(30).end()
+
+          scope.mouse = {
+            x: $event.clientX
+            y: $event.clientY
+          }
           $event.stopPropagation()
           $event.preventDefault()
       )
