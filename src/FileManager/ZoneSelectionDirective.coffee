@@ -1,11 +1,8 @@
 angular.module('fileManager').
-directive('zoneSelection', (Selection, $document)->
+directive('zoneSelection', (Selection, $document, Browser)->
   return {
     restrict: 'A'
     link: (scope, element, attrs)->
-      w    = window
-      e    = window.document.documentElement
-      g    = window.document.getElementsByTagName('body')[0]
       body = window.document.getElementsByTagName('body')[0]
       zone = window.document.getElementById('zone')
       scope.last = 0
@@ -18,16 +15,13 @@ directive('zoneSelection', (Selection, $document)->
 
       # IsInSelection
       isInSelection = (file)->
-        x = w.innerWidth || e.clientWidth || g.clientWidth
-        y = w.innerHeight|| e.clientHeight|| g.clientHeight
-
         selection = zone.getBoundingClientRect()
-        selection.right  = x-selection.right
-        selection.bottom = y-selection.right
+        selection.right  = Browser.width()  - selection.right
+        selection.bottom = Browser.height() - selection.right
 
         file = file.getBoundingClientRect()
-        file.right  = x-file.right
-        file.bottom = y-file.bottom
+        file.right  = Browser.width()  - file.right
+        file.bottom = Browser.height() - file.bottom
 
         if (file.top <= selection.top <= file.bottom or
         file.top <= selection.bottom <= file.bottom or
@@ -53,8 +47,8 @@ directive('zoneSelection', (Selection, $document)->
           scope.last = actual
           scope.end  = $event
 
-          x = w.innerWidth || e.clientWidth || g.clientWidth
-          y = w.innerHeight|| e.clientHeight|| g.clientHeight
+          x = Browser.width()
+          y = Browser.height()
 
           if scope.start.clientY < scope.end.clientY
             zone.style.top    = "#{scope.start.clientY}px"
