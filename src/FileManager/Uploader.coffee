@@ -1,5 +1,5 @@
 angular.module('fileManager').
-factory 'Uploader', ($q, File, fileManager, DeferredQueue, notification) ->
+factory 'Uploader', ($q, File, fileManager, DeferredQueue) ->
   {
     arrayBuffer2String: (buffer) ->
       bytes = new Uint8Array(buffer)
@@ -89,35 +89,18 @@ factory 'Uploader', ($q, File, fileManager, DeferredQueue, notification) ->
         loadingFile.metadata.thumb = thumbDataUrl
       fileManager.fileTree.push loadingFile
 
-    uploadFiles: (files) ->
-      for file in files
-        console.debug "will load", file
-        if file.size > 10000000
-          notification.addAlert("The file is too big. Can't upload a file larger than 10MB.", 'danger')
-          break
-        ( (file) =>
-          loadingFile = @createLoadingFile file
+    uploadFile: (file)->
+      loadingFile = @createLoadingFile file
 
-          if file.type.match('image.*')
-            fileManager.lightTaskQueue.enqueue =>
-              ###
-              @readFileToArrayBuffer file
-              .then (arrayBuffer) =>
-                @createThumbnail arrayBuffer
-                .then (thumbDataUrl) =>
-                  @displayLoadingFile loadingFile, thumbDataUrl
-                fileManager.heavyTaskQueue.enqueue => @uploadSlice(loadingFile, arrayBuffer)
-              ###
-              @createThumbnail file
-              .then (dataUrls) =>
-                [thumbDataUrl, dataUrl] = dataUrls
-                @displayLoadingFile loadingFile, thumbDataUrl
-                fileManager.heavyTaskQueue.enqueue => fileManager.addFile(loadingFile.metadata, dataUrl)
-
-          else
-            @displayLoadingFile(loadingFile)
-            fileManager.heavyTaskQueue.enqueue => @uploadOneFile(file, loadingFile)
-            fileManager.heavyTaskQueue.enqueue => console.error "FINISHED"
-        )(file)
-
+      if file.type.match('image.*')
+        fileManager.lightTaskQueue.enqueue =>
+          @createThumbnail file
+          .then (dataUrls) =>
+            [thumbDataUrl, dataUrl] = dataUrls
+            @displayLoadingFile loadingFile, thumbDataUrl
+            fileManager.heavyTaskQueue.enqueue => fileManager.addFile(loadingFile.metadata, dataUrl)
+      else
+        @displayLoadingFile(loadingFile)
+        fileManager.heavyTaskQueue.enqueue => @uploadOneFile(file, loadingFile)
+        fileManager.heavyTaskQueue.enqueue => console.error "FINISHED"
   }

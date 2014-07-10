@@ -3,8 +3,8 @@ factory('Prompt', ($document, $q, $compile, $rootScope)->
   return class Prompt
     @body: $document.find('body')
     @template:  """
-                <div class="modal prompt" ng-click="reject($event)">
-                  <div class="modal-container">
+                <div id="prompt" class="modal" ng-click="reject($event)">
+                  <div class="modal-container" ng-click="$event.stopPropagation()">
                     <div class="modal-header">
                       <h2 translate>{{ title }}</h2>
                     </div>
@@ -12,32 +12,30 @@ factory('Prompt', ($document, $q, $compile, $rootScope)->
                       <p translate>{{ content }}</p>
                     </div>
                     <div class="modal-footer">
-                      <button class="button button-ok"     ng-click="resolve($event)" translate>Ok</button>
-                      <button class="button button-cancel" ng-click="reject($event)"  translate>cancel</button>
+                      <button class="button button-{{k}}"  ng-repeat="(k,o) in options" ng-click="resolve($event, k)" translate>{{o}}</button>
+                      <button class="button button-cancel" ng-click="reject($event)"  translate>Cancel</button>
                     </div>
                   </div>
                 </div>
                 """
 
-    @ask: (title, content)->
+    @ask: (title, content, options={ok: "Ok"})->
       defer = $q.defer()
       html  = null
 
-      if $document[0].getElementsByClassName('prompt').length == 0
+      if $document[0].getElementById('prompt') == null
         scope = $rootScope.$new()
         scope.title   = title
         scope.content = content
-        scope.resolve = ($event)->
-          defer.resolve()
+        scope.options = options
+        scope.resolve = ($event, name)->
           html.remove()
-          $event.preventDefault()
-          $event.stopPropagation()
+          defer.resolve(name)
 
         scope.reject  = ($event)->
           defer.reject()
-          html.remove()
-          $event.preventDefault()
-          $event.stopPropagation()
+          if $event.target == html[0]
+            html.remove()
 
         html = $compile(@template)(scope)
         @body.append(html)
