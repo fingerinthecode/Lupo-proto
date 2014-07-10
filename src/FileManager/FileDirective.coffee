@@ -123,18 +123,16 @@ directive('file', ($state, session, fileManager, Selection, Clipboard, Prompt)->
       # -------------------Rename-----------------------
       scope.changeName = ($event = {}, force) ->
         if force or $event.keyCode == 13
-          found = false
-          for file in fileManager.fileTree
-            if file.metadata.name == scope.newName and
-            file._id  != scope.file._id
-              found = true
-              break
+          # If the name is the same than the actual
+          if scope.file.metadata.name == scope.newName
+            scope.file.nameEditable = false
+            return false
 
-          if not found
+          name = fileManager.uniqueName(scope.newName)
+          if name == scope.newName
             scope.file.rename(scope.newName)
             scope.file.nameEditable = false
           else
-            name = fileManager.uniqueName(scope.newName)
             Prompt.ask('This name already exist', "#{name} ?").then(
               ->
                 scope.newName = name
