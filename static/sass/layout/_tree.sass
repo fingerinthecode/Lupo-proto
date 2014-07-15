@@ -1,33 +1,18 @@
 .tree
-  width: $tree-width
-  padding: $tree-padding
-  position: absolute
+  position: fixed
+  width: $tree-mobile-width
+  position: fixed
+  background-color: darkgrey
+  z-index: 9999
+  left: -$tree-mobile-width
   top: 0
-  left: 0
-  bottom: $statusbar-height + 15
-  list-style: none
-  margin: 0
-  overflow-y: auto
-  overflow-x: auto
+  bottom: 0
 
-.tree-loader
-  position: relative
-  float: left
-  width: 25px
-  height: 25px
-
-.tree-element
-  display: block
-  margin-left: $tree-indent
-  margin-top:  $tree-element-spacing
-  width: 200px
-
-.tree>.tree-element
-  margin-top: $tree-padding
-
-.tree-element-title
-  margin-left: 5px
-  display: inline-block
-  height: 35px
-  text-decoration: none
-  color: $base-color
+.desktop
+  .tree
+    width: $tree-width
+    top: $header-height + $navbar-height
+    left: $appmenu-width
+    bottom: $statusbar-height
+    background: none
+    +box-shadow(3px 0 7px -7px black)

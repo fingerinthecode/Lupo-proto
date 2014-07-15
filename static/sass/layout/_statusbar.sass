@@ -1,27 +1,29 @@
 .statusbar
-  position: relative
+  height: $statusbar-mobile-height
+  position: absolute
+  z-index: 99
   bottom: 0
-  left:   0
-  right:  0
-  height:  $statusbar-height
-  padding: 2px 5px
-  padding-bottom: 5px
+  left: 0
+  right: 0
+
+  background-color: $color
+
+  border-top: 1px solid $color3
+  +box-shadow(0 0 5px 3px darken($color, 5%))
+
 
 .statusbar-elements
-  display: inline-block
+  float: left
 
 .statusbar-information
-  display: inline-block
-
-.statusbar-separator
-  display: inline-block
-  height: 80%
-  border-right: 1px solid lightgrey
-  margin: auto 5px
+  float: right
 
 .statusbar-display
-  float: right
-  display: inline-block
+  display: none
 
-.statusbar-display>a
-  cursor: pointer
+.desktop
+  .statusbar
+    height: $statusbar-height
+    background-color: #F7F7F7
+    +box-shadow(5px 3px 8px 0px black)
+    border: none

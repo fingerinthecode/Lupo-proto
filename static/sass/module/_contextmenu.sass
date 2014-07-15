@@ -1,0 +1,59 @@
+.context-menu
+  position: absolute
+  bottom: 0
+  left: 0
+  right: 0
+  padding: 2px
+  margin: 0
+
+  background-color: $color
+
+  border-top: 1px solid $color3
+  +box-shadow(0 0 6px 0px $color3)
+
+  text-align: center
+
+.context-menu-item
+  display: inline-block
+  padding: 5px
+
+  border-left: 1px solid $color2
+
+.context-menu-item-icon
+  display: block
+
+.context-menu-item-text
+  font-size: 12px
+
+.desktop
+  .context-menu
+    position: fixed
+    top:  0
+    left: 0
+    bottom: auto
+    right: auto
+    min-width: 160px
+    padding: 0px 7px
+
+    border: 1px solid rgba(0, 0, 0, 0)
+    +border-radius(5px)
+    +box-shadow(0px 0px 15px -3px black)
+
+    background-clip: padding-box
+    background-color: #F5F5F5
+
+    white-space: nowrap
+    text-align: left
+
+    cursor: default
+    z-index: 9999
+
+  .context-menu-item
+    display: block
+    border: none
+    width: 100%
+
+    padding: 3px 20px
+
+  .context-menu-item-icon
+    display: inline-block

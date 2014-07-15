@@ -1,15 +1,17 @@
 .appmenu
-  height: 100%
-  width: $appmenu-width
-  padding: 0
-  padding-top: $header-height
-  position: absolute
-  top: 0
-  left: 0
+  display: none
 
+.desktop
+  .appmenu
+    display: block
+    width: $appmenu-width
+    height: 100%
+    position: fixed
+    top: $header-height
+    z-index: 999
+    left: 0
+    bottom: 0
+    margin: 0
+    padding: 0
 
-.appmenu > ul
-  margin: 0
-  padding: 0
-
-  list-style: none
+    list-style: none

@@ -1,7 +1,12 @@
 .container
-  position: relative
+  position: absolute
+  top: $navbar-mobile-height
+  bottom: $statusbar-mobile-height
   left: 0
   right: 0
-  bottom: $statusbar-height
+  padding: 5px
+
+.desktop .container
+  left: $tree-width
   top: $navbar-height
-  height: 100%
+  bottom: $statusbar-height

@@ -1,45 +1,27 @@
 .navbar
-  width:    100%
-  height:   $navbar-height
-  padding:  $navbar-padding
-  position: absolute
-  top:      0
+  background-color: $color
+  height: $navbar-mobile-height
+  vertical-align: middle
+  padding: 5px
+
+  border-bottom: 1px solid $color3
+  +box-shadow(0 1px 5px 0px $color3)
 
 .navbar-button
-  float:   left
-  width:   $navbar-height - ($navbar-padding*2)
-  height:  $navbar-height - ($navbar-padding*2)
-  padding: $navbar-padding
-  margin:  0 $navbar-padding
+  float: left
 
-.navbar-search
-  float:   left
-  height:  $navbar-height - ($navbar-padding*2)
-  margin:  0 $navbar-padding
+.desktop
+  .navbar
+    height: $navbar-height
+    padding: $navbar-padding
+    background: none
+    border-bottom: 1px solid lavender
+    +box-shadow(4px -5px 8px 0px black)
 
-  border: 1px inset lightgrey
+  .navbar-button
+    display: inline-block
+    width:   $navbar-height - ($navbar-padding*2)
+    height:  $navbar-height - ($navbar-padding*2)
+    padding: $navbar-padding
+    margin:  0 $navbar-padding
 
-.breadcrumb
-  position: absolute
-  float:   left
-  left:    115px
-  right:   15px
-  height:  $navbar-height - ($navbar-padding*2)
-  margin:  0 $navbar-padding
-  padding: 0
-
-  border: 1px inset lightgrey
-  list-style: none
-  margin: 0
-
-.breadcrumb-part
-  height:  100%
-  padding: $navbar-padding
-  float:   left
-  padding: $navbar-padding
-
-.breadcrumb-separator
-  float:   left
-  height:  100%
-  padding: $navbar-padding
-  width:   5px

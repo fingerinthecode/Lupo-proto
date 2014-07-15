@@ -1,27 +1,39 @@
 .header
   width: 100%
+  height: $header-mobile-height
   position: absolute
-  top:  0
-  right: 0
-  left: 0
-  height: $header-height
+  background-color: $color
 
-  background-image: url('../images/background_logo.jpg')
-  +box-shadow(inset 150px 0 150px 8px rgba(50, 98, 244, 0.2), inset -150px 0 150px 8px rgba(50, 98, 244, 0.2))
+  border-bottom: 1px solid $color3
+  +box-shadow(0 0 2px 0px $color3)
 
   text-align: center
 
+  z-index: 999
+
 .header-image
-  display: block
-  height: 100%
-  margin: 0 auto
+  display: none
 
 .header-box
-  position: relative
-  left: 0
-  right: 0
-  bottom: 34px
-  height: 34px
+  line-height: $header-mobile-height
 
-  background-color: rgba(0, 0, 0, 0.05)
+.desktop
+  .header
+    height: $header-height
 
+    background-image: url('../images/background_logo.jpg')
+    +box-shadow(inset 150px 0 150px 8px rgba(50, 98, 244, 0.2), inset -150px 0 150px 8px rgba(50, 98, 244, 0.2))
+
+  .header-image
+    display: block
+    height: 100%
+    margin: 0 auto
+
+  .header-box
+    position: relative
+    left: 0
+    right: 0
+    bottom: 34px
+    height: 34px
+
+    background-color: rgba(0, 0, 0, 0.05)

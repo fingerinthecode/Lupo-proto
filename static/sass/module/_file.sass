@@ -1,54 +1,32 @@
 @import "variable/file"
 
 .file
-  position: relative
+  height: $file-mobile-height
+  overflow: hidden
   padding: 5px
-
-  border: 1px solid transparent
-
-.file-title
-  overflow: hidden
-
-  word-wrap: break-word
-
-.file-text
-  width: 100%
-  overflow: hidden
+  border-bottom: 1px solid #F7F7F7
 
 .file-icon
+  height: $file-mobile-thumb-size
+  width: $file-mobile-thumb-size
+  text-align: center
+  display: table-cell
+  vertical-align: middle
+
+.file-text
+  vertical-align: middle
+  display: table-cell
+  padding: 5px
+
+.desktop .file-thumb
+  display: inline-block
+  width:   102px
+  height:  142px
+  border:  1px solid transparent
+  text-align: center
+
+.desktop .file-thumb .file-icon
+  display:  block
   position: relative
-
-  text-align: center
-
-.file-list
-  width:  100%
-  height: 48px
-  margin-bottom: $file-list-spacing
-
-.file-list .file-icon
-  float: left
-  width: 40px
-  height: 40px
-  margin-right: $file-list-icon-spacing
-
-.file-list:nth-child(odd)
-  background-color: lightgrey
-
-.file-thumb
-  float: left
-  height: 142px
-  width: $file-thumb-size+2px
-  margin: 5px
-
-  text-align: center
-
-.file-thumb .file-icon
-  width: $file-thumb-size - ($file-thumb-spacing*2)
-  height: $file-thumb-size - ($file-thumb-spacing*2)
-  margin: 0 auto
-
-.file-thumb .file-title
-  height: 40px
-  display: block
-
-  text-align: center
+  width:    90px
+  height:   90px

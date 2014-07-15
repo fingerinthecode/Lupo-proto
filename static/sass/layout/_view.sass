@@ -1,8 +1,15 @@
 .view
-  position: absolute
-  top: $header-height
-  right: 0
+  position: fixed
+  top: $header-mobile-height
   left: 0
-  bottom: $navbar-height
-  margin-left: $appmenu-width
+  bottom: 0
+  right: 0
+
   background-image: url("../images/background.jpg")
+
+.desktop
+  .view
+    top: $header-height
+    bottom: 0
+    left: $appmenu-width
+    right: 0

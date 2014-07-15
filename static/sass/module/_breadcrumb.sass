@@ -1,0 +1,24 @@
+.breadcrumb
+  display: inline-block
+  border-left: 1px solid $color2
+
+.breadcrumb-part
+  display: inline-block
+  padding: 5px
+  border-right: 1px solid $color2
+
+.breadcrumb-separator
+  display: none
+
+.desktop
+  .breadcrumb
+    position: absolute
+    right: 0
+    left: ( $navbar-height + $navbar-padding ) * 3
+    border: 1px solid lightgrey
+
+  .breadcrumb-part
+    border: none
+
+  .breadcrumb-separator
+    display: inline-block
