@@ -16,11 +16,10 @@ module.exports = (grunt) ->
       }
       all: {
         files: [
-          './partials/{,*/}*.html'
           './src/{,*/}*'
         ]
         tasks: [
-          'shell:kansoPush'
+          'coffee'
         ]
       }
     }
@@ -96,6 +95,11 @@ module.exports = (grunt) ->
         ]
       }
     }
+    concurrent: {
+      options:
+        logConcurrentOutput: true
+      dev: ['shell:server', 'watch']
+    }
     # Kanso
     shell:{
       options:
@@ -125,6 +129,9 @@ module.exports = (grunt) ->
       protractor_update: {
         command: 'node ./node_modules/protractor/bin/webdriver-manager update'
       }
+      server: {
+        command: 'node ./node_modules/coffee-script/bin/coffee ./server.coffee'
+      }
     }
     #E2E
     protractor: {
@@ -144,7 +151,7 @@ module.exports = (grunt) ->
   })
 
   grunt.registerTask('default', [
-    'watch'
+    'concurrent'
   ])
 
   grunt.registerTask('test_database', 'set the db option to the database test', ->
