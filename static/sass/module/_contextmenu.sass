@@ -1,32 +1,29 @@
 .context-menu
-  position: absolute
-  bottom: 0
-  left: 0
-  right: 0
+  display: block
+  position: fixed
+  bottom: $statusbar-mobile-height
   padding: 2px
   margin: 0
+  overflow-x: scroll
 
-  background-color: $color
-
-  border-top: 1px solid $color3
   +box-shadow(0 0 6px 0px $color3)
 
   text-align: center
 
 .context-menu-item
-  display: inline-block
-  padding: 5px
+  display: block
+  padding: 10px
 
   border-left: 1px solid $color2
 
-.context-menu-item-icon
-  display: block
-
 .context-menu-item-text
-  font-size: 12px
+  width: 6em
+  font-size: 0.6em
+  font-weight: bold
 
 .desktop
   .context-menu
+    display: block
     position: fixed
     top:  0
     left: 0

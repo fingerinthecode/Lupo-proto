@@ -9,6 +9,6 @@ module.exports = [
   {from: '/',                  to: 'partials/index.html'},
   {from: '/index.html',        to: 'partials/index.html'},
   {from: '/get/:id',           to: '../../:id'},
-  {from: '/:db',               to: '../../../:db'},
+  {from: '/:db/:id',               to: '../../../:db'},
   {from: '/:db/*',             to: '../../../:db/*'},
 ]

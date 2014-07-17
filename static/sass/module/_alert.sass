@@ -1,2 +1,37 @@
+@import 'variable/alert'
+
+.notification-overlay
+  position: fixed
+  top: 60px
+  right: 40px
+  z-index: 9999
+
 .alert
-  display: none
+  display: block
+  vertical-align: middle
+  width: 15em
+  height: 3em
+  display: block
+  padding: 1em 0.5em
+  margin-bottom: 10px
+
+  font-size: 1em
+  z-index: 9999999
+  +border-radius(8px)
+
+@mixin alert-type($color)
+  background-color: rgba($color, 0.8)
+  border: 1px solid darken($color, 5%)
+  +box-shadow(0 0 8px -2px $color)
+
+.alert-warning
+  +alert-type($alert-warning-color)
+
+.alert-success
+  +alert-type($alert-success-color)
+
+.alert-info
+  +alert-type($alert-info-color)
+
+.alert-danger
+  +alert-type($alert-danger-color)

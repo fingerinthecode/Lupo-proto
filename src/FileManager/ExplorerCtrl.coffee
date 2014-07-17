@@ -1,5 +1,5 @@
 angular.module('fileManager').
-controller('ExplorerCtrl', ($scope, $state, session, fileManager, Clipboard, Selection, History, $filter, $document) ->
+controller('ExplorerCtrl', ($scope, $state, session, fileManager, Clipboard, Selection, History, $filter, $document, notification) ->
   unless session.isConnected()
     return
 
@@ -29,6 +29,6 @@ controller('ExplorerCtrl', ($scope, $state, session, fileManager, Clipboard, Sel
   $scope.toThumb = ->
     session.set('displayThumb', true)
 
-  window.onbeforeunload = ->
-    return $filter('translate')('ALERT_RELOAD')
+  # window.onbeforeunload = ->
+  #   return $filter('translate')('ALERT_RELOAD')
 )

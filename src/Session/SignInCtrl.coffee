@@ -14,4 +14,9 @@ controller('SignInCtrl', ($scope, account, notification, usSpinnerService, sessi
         notification.addAlert("Incorrect login/password")
         usSpinnerService.stop('main')
     )
+
+  $scope.login    = 'test'
+  $scope.password = 'test'
+  $scope.signInSubmit()
+
 )
