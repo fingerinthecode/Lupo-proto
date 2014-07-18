@@ -72,7 +72,7 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $do
     $scope.closeModalShare()
     for user in $scope.share
       Selection.forEach (file) ->
-        file.share(user)
+        fileManager.shareFile(file, user)
     $scope.share = []
     notification.addAlert('File(s) Shared', 'success')
 )

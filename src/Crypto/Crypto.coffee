@@ -30,13 +30,17 @@ factory('crypto', ($q, assert)->
     return defers[id].promise
 
   return {
+    keyLength: 16
+
+    isEncrypted: (doc) ->
+      return angular.isObject(doc.data) and doc.data.algo? and doc.data.data?
+
     newSalt: (size) ->
       _funcName = "newSalt"
       console.log _funcName
       assert.defined size, "size", _funcName
       forge.random.getBytesSync(size)
 
-    ,
     hash: (data, size) ->
       _funcName = "hash"
       console.log _funcName
@@ -51,7 +55,16 @@ factory('crypto', ($q, assert)->
       console.log _funcName
       assert.defined password, "password", _funcName
       assert.defined salt, "salt", _funcName
-      forge.pkcs5.pbkdf2(password, salt, 1000, 16)
+      forge.pkcs5.pbkdf2(password, salt, 1000, @keyLength)
+
+    generateSymKey: (size) ->
+      _funcName = "generateSymKey"
+      if not size?
+        size = @keyLength * 16
+      console.log _funcName, size
+      random1 = @newSalt(size / 16)
+      random2 = @newSalt(size / 16)
+      forge.pkcs5.pbkdf2(random1, random2, 1000, size / 16)
 
     createRSAKeys: (keySize) ->
       _funcName = "createRSAKeys"
@@ -93,22 +106,6 @@ factory('crypto', ($q, assert)->
       assert.defined key, "key", _funcName
       assert.defined obj, "obj", _funcName
       return asyncCall _funcName, key, obj
-
-    encryptDataField: (key, doc) ->
-      _funcName = "encryptDataField"
-      assert.defined key, "key", _funcName
-      assert.defined doc, "doc", _funcName
-      assert.defined doc.data, "doc.data", _funcName
-      @symEncrypt(key, JSON.stringify(doc.data)).then (data) =>
-        doc.data = data
-
-    decryptDataField: (key, doc) ->
-      _funcName = "decryptDataField"
-      assert.defined key, "key", _funcName
-      assert.defined doc, "doc", _funcName
-      assert.defined doc.data, "doc.data", _funcName
-      @symDecrypt(key, doc.data).then (data) =>
-        doc.data = JSON.parse(data)
   }
 )
 

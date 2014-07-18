@@ -62,7 +62,7 @@ factory('History', ($rootScope, $stateParams, $state, File, $location, session)-
       if id == "shares"
         @redirect('')
       else
-        File.getFile(id).then(
+        File.get(id).then(
           (file)=>
             id = file.metadata.parentId
             if id == session.getRootFolderId()
