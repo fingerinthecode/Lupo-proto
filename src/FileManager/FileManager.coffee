@@ -19,7 +19,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
           else
             $q.when @shares
         else
-          if folderId == session.getRootFolderId()
+          if @isRootFolder(folderId)
             parentFolder = {subfolderKey: session.getMasterKey()}
           #FIXME: have the parentFolder in most cases
           Folder.get folderId, undefined, parentFolder
@@ -46,8 +46,11 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       else
         $q.when()
 
-    isRootFolder: (folder) ->
-      return folder._id == session.getRootFolderId()
+    isRootFolder: (idOrFolder) ->
+      if angular.isString idOrFolder
+        return idOrFolder == session.getRootFolderId()
+      if angular.isObject idOrFolder
+        return idOrFolder._id == session.getRootFolderId()
 
     goToFolder: (folder) ->
       _funcName = "goToFolder"
@@ -74,6 +77,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       .then (list) =>
         @shares = new Folder(
           _id: "shares"
+          subfolderKeyLink: "fake"
           metadata:
             name: $filter('translate')('Shares')
           content: []
@@ -87,7 +91,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
             ).then (clearData) =>
               #keyId = session.registerKey(clearData.key)
               @shares.content.push {
-                id: clearData.docId
+                id:  clearData.docId
                 key: clearData.key
               }
               console.debug "shares", @shares
@@ -228,6 +232,10 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
                 (file) =>
                   if file.isFolder()
                     file.content = []
+                    if element.link
+                      file.subfolderKeyLink = element.link
+                  else
+                    file.dataKeyLink = element.link
                   list.push(file)
                   inProgess -= 1
                 (err) =>
