@@ -37,14 +37,6 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
       return deferred.promise
 
     @_getParentKey: (doc, parentFolder) ->
-      #if not parentFolder?
-      #  key = session.getMasterKey()
-      #  console.debug "session.getMasterKey():", key
-      #  if not key
-      #    key = session.getFlash 'masterKey'
-      #    console.debug "session.getFlash:", key
-      #  $q.when(key)
-      #else
       if doc.isFolder
         $q.when(parentFolder.subfolderKey)
       else
@@ -58,10 +50,11 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
       .catch () =>
         throw "Impossible to open this file/folder"
 
-    @_getDataKey: (doc, parentFolder) ->
+    @_getKeys: (doc, parentFolder) ->
       @_getDataKeyLinkKey(doc, parentFolder).then (key) =>
         console.log "parentKey", key
-        CrypTree.resolveSymLink doc.dataKeyLink, key
+        CrypTree.resolveSymLink(doc.dataKeyLink, key).then (dataKey) =>
+          return [dataKey, key]
 
     # 4 access types:
     # - standard:              File.get id, link, parentFolder
@@ -75,30 +68,39 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
       assert.defined id, "id", _funcName
       DbDoc.get(id).then (doc) =>
         if not crypto.isEncrypted(doc)
-          new @(doc)
-        else
-          # find file dataKey
-          (if linkOrKey?
-            if not parentFolder?
-              $q.when linkOrKey
-            else
-              @_getParentKey(doc, parentFolder).then (parentKey) =>
-                CrypTree.resolveSymLink(linkOrKey, parentKey).then (key) =>
-                  console.log "dataOrSFKey", key
-                  if not doc.isFolder
-                    return key
-                  else
-                    return CrypTree.resolveSymLink(doc.dataKeyLink, key)
+          return new @(doc)
+
+        # find file dataKey and maybe subfolderKey also
+        (if linkOrKey?
+          if not parentFolder?
+            $q.when linkOrKey
           else
-            @_getDataKey(doc, parentFolder)
-          ).then (dataKey) =>
-            console.log "dataKey", dataKey
-            try
-              DbDoc.decryptDataField(doc, dataKey).then (doc) =>
-                doc.dataKey = dataKey
-                new @(doc)
-            catch
-              console.error "decrypt error"
+            @_getParentKey(doc, parentFolder).then (parentKey) =>
+              CrypTree.resolveSymLink(linkOrKey, parentKey).then (key) =>
+                console.log "dataOrSFKey", key
+                if not doc.isFolder
+                  # dataKey
+                  return key
+                else
+                  # subfolderKey
+                  return CrypTree.resolveSymLink(doc.dataKeyLink, key).then (dataKey) =>
+                    return [dataKey, key]
+        else
+          @_getKeys(doc, parentFolder)
+        ).then (keys) =>
+          if not angular.isArray(keys)
+            keys = [keys]
+          console.log "keys", keys
+          dataKey = keys[0]
+          if keys.length > 1
+            subfolderKey = keys[1]
+          try
+            DbDoc.decryptDataField(doc, dataKey).then (doc) =>
+              doc.dataKey = dataKey
+              doc.subfolderKey = subfolderKey
+              new @(doc)
+          catch
+            console.error "decrypt error"
 
 
     @getMetadata: (id, parentKey) ->
