@@ -131,14 +131,14 @@ directive('file', ($state, session, fileManager, Selection, Clipboard, Prompt)->
               break
 
           if not found
-            scope.file.rename(scope.newName)
+            fileManager.renameFile(scope.file, scope.newName)
             scope.file.nameEditable = false
           else
             name = fileManager.uniqueName(scope.newName)
             Prompt.ask('This name already exist', "#{name} ?").then(
               ->
                 scope.newName = name
-                scope.file.rename(name)
+                fileManager.renameFile(scope.file, name)
                 scope.file.nameEditable = false
             )
 

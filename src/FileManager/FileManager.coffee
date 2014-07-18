@@ -1,5 +1,5 @@
 angular.module('fileManager').
-factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, usSpinnerService, $filter, notification, $rootScope, DeferredQueue) ->
+factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, Folder, usSpinnerService, $filter, notification, $rootScope, DeferredQueue) ->
   fileManager = {
     fileTree: []
     lightTaskQueue: new DeferredQueue(5)
@@ -10,19 +10,22 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       console.info _funcName, $stateParams.path
       usSpinnerService.spin('main')
       folderId = @getCurrentDirId()
-      assert.defined folderId, "folderId", _funcName
       console.log "folderId", folderId
-      folder = new File({_id: folderId})
-      @getSharesFolderIfNeeded(folder).then =>
+      @getSharesFolderIfNeeded(folderId).then =>
         console.debug "shares", @shares
-        if folder._id == "shares"
+        (if folderId == "shares"
           if @shares.content.length == 0
             $state.go(".", session.getRootFolderId())
           else
-            folder = @shares
-        @goToFolder(folder).then(
-          =>
-            console.log "moved to folderId", folderId
+            $q.when @shares
+        else
+          if folderId == session.getRootFolderId()
+            parentFolder = {subfolderKey: session.getMasterKey()}
+          #FIXME: have the parentFolder in most cases
+          Folder.get folderId, undefined, parentFolder
+        ).then (folder) =>
+          @goToFolder(folder).then =>
+            console.log "moved to folder._id", folder._id
             if @isRootFolder(folder)
               @getShares().then =>
                 if not @fileTree.length or
@@ -31,15 +34,14 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
                   @fileTree.unshift @shares
             usSpinnerService.stop('main')
 
-          (err) =>
+          .catch (err) =>
             usSpinnerService.stop('main')
             notification.addAlert("Not authorized")
             $state.go('.', {path: ""}, {location: 'replace'})
-        )
       return @
 
-    getSharesFolderIfNeeded: (folder) ->
-      if folder._id == "shares"
+    getSharesFolderIfNeeded: (folderId) ->
+      if folderId == "shares"
         @getShares()
       else
         $q.when()
@@ -51,7 +53,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       _funcName = "goToFolder"
       console.log _funcName, folder
       assert.defined folder, "folder", _funcName
-      folder.listContent().then (list) =>
+      @listFolderContent(folder).then (list) =>
         @fileTree = list
 
     getCurrentDirId: ->
@@ -61,17 +63,19 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       else
         return session.getRootFolderId()
 
+    getCurrentFolder: ->
+      Folder.get(@getCurrentDirId())
+
     getShares: () ->
       console.info "getShares", session
       publicKeyId = crypto.getKeyIdFromKey(session.getMainPublicKey())
       console.log publicKeyId
       storage.query 'proto/getShares', {key: publicKeyId}
       .then (list) =>
-        @shares = new File(
+        @shares = new Folder(
           _id: "shares"
           metadata:
             name: $filter('translate')('Shares')
-            type: 0
           content: []
         )
         diffList = []
@@ -81,35 +85,31 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
               session.getMainPrivateKey()
               shareDoc.data
             ).then (clearData) =>
-              keyId = session.registerKey(clearData.key)
+              #keyId = session.registerKey(clearData.key)
               @shares.content.push {
-                _id: clearData.docId
-                keyId: keyId
+                id: clearData.docId
+                key: clearData.key
               }
               console.debug "shares", @shares
             .catch (err) =>
               console.error "asymDecrypt error"
         return $q.all(diffList)
 
-
-    getFileContent: (id) ->
-      new File({_id: id}).getContent()
-
     addFile: (metadata, content) ->
       _funcName = 'addFile'
       console.info _funcName, metadata
       assert.defined metadata.name, "metadata.name", _funcName
       assert.defined content, "content", _funcName
-
-      (if metadata.type == File.TYPES.FOLDER
-        @createFolder(metadata, @getCurrentDirId())
-      else
-        @createFile(metadata, content, @getCurrentDirId())
-      ).then (file) =>
-        for i, f of @fileTree
-          if f.metadata.name == file.metadata.name
-            @fileTree[i] = file
-            break
+      @getCurrentFolder().then (parentFolder) =>
+        (if metadata.type == File.TYPES.FOLDER
+          @createFolder(metadata, parentFolder)
+        else
+          @createFile(metadata, content, parentFolder)
+        ).then (file) =>
+          for i, f of @fileTree
+            if f.metadata.name == file.metadata.name
+              @fileTree[i] = file
+              break
 
     uniqueName: (name, parentDirContent) ->
       console.info "uniqueName", name
@@ -131,95 +131,118 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
 
     newFile: ->
       name = @uniqueName($filter('translate')("new document"))
-      @createFile({name: name, type: "plain/text"}, "", @getCurrentDirId())
-      .then (file) =>
-        this.fileTree.push file
+      @getCurrentFolder().then (parentFolder) =>
+        @createFile({name: name, type: "plain/text"}, "", parentFolder)
+        .then (file) =>
+          this.fileTree.push file
 
     newFolder: ->
       name = @uniqueName($filter('translate')("new folder"))
-      @createFolder({name: name}, @getCurrentDirId())
-      .then (folder) =>
-        @fileTree.push folder
+      @getCurrentFolder().then (parentFolder) =>
+        @createFolder({name: name}, parentFolder)
+        .then (folder) =>
+          @fileTree.push folder
 
-    _createFile: (metadata, content, parentId, keyId) ->
-      _funcName = "_createFile"
-      console.info _funcName, metadata, parentId
-      assert.defined metadata, "metadata", _funcName
-      assert.defined content,  "content",  _funcName
-      assert.defined parentId, "parentId", _funcName
-      new File({_id: parentId, keyId: keyId}).listContent().then(
-        (list) =>
-          console.log "list", list
-          assert.defined list, "list", _funcName
-          unless metadata.name in [f.metadata.name for f in list]
-            content = if content? then content else ""
-            if metadata.type != File.TYPES.FOLDER
-              metadata.size = metadata.size || content.length
-            newFile = new File {
-              content: content
-              metadata: metadata
-              keyId: keyId
-            }
-            newFile.save()
-            .then =>
-              newFile.addToFolder(parentId, keyId)
+    isFileNameUnique : (name, parentFolder) ->
+      parentFolder.getContent
+      @listFolderContent(parentFolder).then (list) =>
+        if name in [f.metadata.name for f in list]
+          #FIXME: handle same name case
+          deferred = $q.defer()
+          deferred.reject()
+          return deferred
 
-        (err) =>
-          return "parent does not exist"
-      )
-
-    createFile: (metadata, content, parentId, keyId) ->
+    createFile: (metadata, content, parentFolder) ->
       _funcName = "createFile"
-      console.info _funcName, metadata, parentId
+      console.info _funcName, metadata, parentFolder
       assert.defined metadata, "metadata", _funcName
       assert.defined content,  "content",  _funcName
-      assert.defined parentId, "parentId", _funcName
-      if not metadata.type?
-        metadata.type = File.TYPES.FILE
-      this._createFile(metadata, content, parentId, keyId)
+      assert.defined parentFolder, "parentFolder", _funcName
+      metadata.size = metadata.size || content.length
+      parentFolder.getFilesKey().then (filesKey) =>
+        @isFileNameUnique(metadata.name, parentFolder).then =>
+          newFile = new File({
+              content: content or ""
+              metadata: metadata
+            }
+            filesKey
+          )
+          newFile.save()
+          .then =>
+            parentFolder.addFile(newFile)
 
-    createFolder: (metadata, parentId, keyId) ->
-      console.info "createFolder", metadata, parentId
+    createFolder: (metadata, parentFolder) ->
+      console.info "createFolder", metadata, parentFolder
       assert.defined metadata, "metadata", "createFolder"
-      assert.defined parentId, "parentId", "createFolder"
-      metadata.type = File.TYPES.FOLDER
-      this._createFile(metadata, [], parentId, keyId)
+      assert.defined parentFolder, "parentFolder", "createFolder"
+      @isFileNameUnique(metadata.name, parentFolder).then =>
+        newFolder = new Folder({
+            content: []
+            metadata: metadata
+          }
+          parentFolder.subfolderKey
+        )
+        newFolder.save()
+        .then =>
+          parentFolder.addSubFolder(newFolder)
 
-    createRootFolder: (masterKeyId) ->
-      console.info "createRootFolder", masterKeyId
-      assert.defined masterKeyId, "masterKeyId", "createRootFolder"
-      new File({content: [], keyId: masterKeyId}).save()
+    createRootFolder: (masterKey) ->
+      console.info "createRootFolder", masterKey
+      assert.defined masterKey, "masterKey", "createRootFolder"
+      new Folder({content: []}, masterKey).save()
       .then (root) =>
         console.log "root", root
         this.createFile(
           {name: $filter('translate')("README")}
           $filter('translate')("README_CONTENT")
-          root._id
-          masterKeyId
+          root
         )
         .then =>
           return root._id
 
-    moveFile: (file, newParentId) ->
-      _funcName = 'moveFile'
-      assert.defined file, "file", _funcName
-      console.info _funcName, file.metadata.parentId, newParentId
-      assert.defined newParentId,   "newParentId",   _funcName
-      assert.defined file.metadata.parentId, "file.metadata.parentId", _funcName
-      @removeFileFromParentFolder(file).then =>
-        new File({_id: newParentId}).listContent().then (content) =>
-          file.metadata.name = @uniqueName(file.metadata.name, content)
-          file.addToFolder(newParentId). then(
-            =>
-              file.metadata.parentId = newParentId
-              file.saveMetadata().then =>
-                if newParentId == @getCurrentDirId()
-                  @fileTree.push file
-            (err) =>
-              # roll back
-              console.error("move roll back")
-              file.addToFolder(@metadata.parentId)
-          )
+    listFolderContent: (idOrFolder) ->
+      _funcName = "listFolderContent"
+      console.log _funcName, idOrFolder
+      assert.defined idOrFolder, "idOrFolder", _funcName
+      deferred = $q.defer()
+      inProgess = 0
+      (if angular.isObject(idOrFolder)
+        $q.when(idOrFolder)
+      else
+        Folder.get(idOrFolder)
+      ).then (folder) =>
+        folder.getContent().then (content) =>
+          assert.array content, "content", _funcName
+          list = []
+          atLeastOne = false
+          for element in content
+            if element?
+              atLeastOne = true
+              inProgess +=1
+
+              (if element.key
+                Folder.getFileOrFolder(element.id, element.key)
+              else
+                Folder.getFileOrFolder(element.id, element.link, folder)
+              ).then(
+                (file) =>
+                  if file.isFolder()
+                    file.content = []
+                  list.push(file)
+                  inProgess -= 1
+                (err) =>
+                  inProgess -= 1
+              )
+              .then =>
+                if inProgess == 0
+                  # if all deferred are terminated #
+                  console.debug "list", list
+                  deferred.resolve(list)
+          unless atLeastOne
+            deferred.resolve([])
+      .catch (err) =>
+        deferred.reject(err)
+      return deferred.promise
 
     openFileOrFolder: (file) ->
       usSpinnerService.spin('main')
@@ -238,7 +261,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
       )
 
     openFolder: (folder) ->
-      console.info "openFolder",
+      console.info "openFolder", folder
       if folder.isFolder()
         $state.go('.', {
           path: folder._id
@@ -277,7 +300,6 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
 
     openFile: (file) ->
       console.info "openFile"
-
       @buildFileUrl(file).then (url) =>
         link = document.createElement('a')
         link.href = url
@@ -286,12 +308,11 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
         e.initEvent('click' ,true ,true)
         link.dispatchEvent(e)
 
-    removeFileFromParentFolder: (file) ->
-      _funcName = "removeFileFromParentFolder"
+    removeFileFromFolder: (file, parentFolder) ->
+      _funcName = "removeFileFromFolder"
       console.info _funcName
       assert.defined file._id, "file._id", _funcName
-      assert.defined file.metadata.parentId, "file.metadata.parentId", _funcName
-      File.getFile(file.metadata.parentId).then (folder) =>
+      Folder.get(parentFolder).then (folder) =>
         assert.array folder.content, "folder.content", _funcName
         if folder._id == @getCurrentDirId()
           for i, f of @fileTree
@@ -304,21 +325,77 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
         folder.saveContent().then =>
           #TODO: change @ to a triggered update via changes watcher
           cache.expire(folder._id, "content")
-          folder.listContent()
+          @listFolderContent(folder._id)
         .catch (err) =>
           if err.status == 409
             cache.expire(folder._id, "content")
-            @removeFileFromParentFolder(file)
+            @removeFileFromFolder(file, parentFolder)
 
     deleteFile: (file) ->
       _funcName = "deleteFile"
       console.info _funcName
-      @removeFileFromParentFolder(file).then =>
-        if file.isFolder()
-          file.listContent().then (list) =>
-            for f in list
-              f.remove()
-        file.remove()
+      file.loading = true
+      @heavyTaskQueue.enqueue =>
+        @getCurrentFolder().then (currentFolder) =>
+          @removeFileFromFolder(file, currentFolder).then =>
+            if file.isFolder()
+              # FIXME: could be parallized
+              @listFolderContent(file).then (list) =>
+                for f in list
+                  f.remove()
+            file.remove()
+
+    moveFile: (file, newParent) ->
+      _funcName = 'moveFile'
+      assert.defined file, "file", _funcName
+      assert.defined newParent,   "newParent",  _funcName
+      @getCurrentFolder().then (currentFolder) =>
+        @removeFileFromFolder(file, currentFolder).then =>
+          @listFolderContent(newParent).then (content) =>
+            file.metadata.name = @uniqueName(file.metadata.name, content)
+            Folder.get(newParentId).then (newParent) =>
+              newParent.addFile(file).then(
+                =>
+                  if newParentId == @getCurrentDirId()
+                    @fileTree.push file
+                (err) =>
+                  # roll back
+                  console.error("move roll back")
+                  Folder.get(@metadata.parentId).then (parentFolder) =>
+                    parentFolder.addFile(file)
+              )
+
+    renameFile: (file, newName) ->
+      _funcName = 'renameFile'
+      console.log _funcName, newName
+      assert.defined newName, "newName", _funcName
+      file.metadata.name = newName
+      file.saveMetadata()
+
+    shareFile: (file, user) ->
+      _funcName = "shareFile"
+      console.log _funcName, user
+      assert.defined user, "user", _funcName
+      #TMP: later share would have a "user" parameter
+      console.log "user", user
+      shareDoc = {
+        "_id": crypto.hash(user._id + file._id, 32)
+        "data": {
+          "docId": file._id
+          "key":   file.dataKey
+        }
+        "userId": user._id
+      }
+      crypto.asymEncrypt user.publicKey, shareDoc.data
+      .then (encData) =>
+        shareDoc.data = encData
+        storage.save(shareDoc).then =>
+          unless file.metadata.sharedWith
+            file.metadata.sharedWith = []
+          file.metadata.sharedWith.push user.name
+          file.saveMetadata()
+
+
   }
 
   $rootScope.$on('$stateChangeSuccess', ($event, toState)->

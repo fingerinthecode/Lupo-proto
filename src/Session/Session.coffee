@@ -49,7 +49,7 @@ angular.module('session')
 
     save: () ->
       tmpDoc = angular.copy(@user.privateDoc)
-      crypto.encryptDataField(@getMasterKey(), tmpDoc)
+      crypto.encryptDataField(tmpDoc, @getMasterKey())
       .then =>
         storage.save(tmpDoc).then (result) =>
           @user.privateDoc._rev = result.rev
