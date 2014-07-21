@@ -7,27 +7,15 @@ factory('Browser', ->
     @element:  window.document.documentElement
     @body:     window.document.getElementsByTagName('body')[0]
 
-    @_height: ->
+    @height: ->
       @window.innerHeight   or
       @element.clientHeight or
       @body.clientHeight
 
-    @height: ->
-      if window.screen? and window.screen.availHeight?
-        return window.screen.availHeight
-      else
-        return @_height()
-
-    @_width: ->
+    @width: ->
       @window.innerWidth   or
       @element.clientWidth or
       @body.clientWidth
-
-    @width: ->
-      if window.screen? and window.screen.availWidth?
-        return window.screen.availWidth
-      else
-        return @_width()
 
     @haveTransform: ->
       return @testCSSProp('transform')
