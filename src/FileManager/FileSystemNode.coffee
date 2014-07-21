@@ -1,11 +1,11 @@
 angular.module('fileManager').
-factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
+factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session, $log) ->
   class FileSystemNode
-    constructor: (doc, parentKey, parentId) ->
-      console.log "new File/Folder", doc, parentKey
+    constructor: (doc, parentKey, parentId = null) ->
+      $log.log "new File/Folder", doc, parentKey
       @_id              = doc._id
       @_rev             = doc._rev
-      @metadata         = doc.metadata || doc.data || {}
+      @metadata         = doc.metadata ? doc.data ? {}
       @content          = doc.content
 
       @dataKeyLink      = doc.dataKeyLink
@@ -15,15 +15,15 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
       @subfolderKey     = doc.subfolderKey
       @dataKey          = doc.dataKey
 
-      @parentId         = doc.parentId or parentId
-      @keyDurty         = if doc.keyDurty? then doc.keyDurty else false
+      @parentId         = parentId ? doc.parentId
+      @keyDurty         = doc.keyDurty ? false
 
       if not @dataKey and parentKey?
         @generateReadCrypTreeKeys(parentKey)
         @generateWriteCrypTreeKeys()
 
     #
-    # Class methods
+    # Static method
     #
     @_getParent: (doc, parentFolder) ->
       deferred = $q.defer()
@@ -45,14 +45,14 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
     @_getDataKeyLinkKey: (doc, parentFolder) ->
       @_getParent(doc, parentFolder)
       .then (parentFolder) =>
-        console.log "parentFolder", parentFolder
+        $log.log "parentFolder", parentFolder
         @_getParentKey(doc, parentFolder)
       .catch () =>
         throw "Impossible to open this file/folder"
 
     @_getKeys: (doc, parentFolder) ->
       @_getDataKeyLinkKey(doc, parentFolder).then (key) =>
-        console.log "parentKey", key
+        $log.log "parentKey", key
         CrypTree.resolveSymLink(doc.dataKeyLink, key).then (dataKey) =>
           return [dataKey, key]
 
@@ -64,7 +64,7 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
     # TODO: clarify/simplify this!
     @get: (id, linkOrKey, parentFolder) ->
       _funcName = "File.get"
-      console.log _funcName, id
+      $log.log _funcName, id
       assert.defined id, "id", _funcName
       DbDoc.get(id).then (doc) =>
         if not crypto.isEncrypted(doc)
@@ -77,7 +77,7 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
           else
             @_getParentKey(doc, parentFolder).then (parentKey) =>
               CrypTree.resolveSymLink(linkOrKey, parentKey).then (key) =>
-                console.log "dataOrSFKey", key
+                $log.log "dataOrSFKey", key
                 if not doc.isFolder
                   # dataKey
                   return key
@@ -90,7 +90,7 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
         ).then (keys) =>
           if not angular.isArray(keys)
             keys = [keys]
-          console.log "keys", keys
+          $log.log "keys", keys
           dataKey = keys[0]
           if keys.length > 1
             subfolderKey = keys[1]
@@ -100,12 +100,14 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
               doc.subfolderKey = subfolderKey
               new @(doc)
           catch
-            console.error "decrypt error"
-
+            $log.error "decrypt error"
 
     @getMetadata: (id, parentKey) ->
       @get(id, parentKey)
 
+    #
+    # no-Static method
+    #
     generateReadCrypTreeKeys: (parentKey) ->
 
     generateWriteCrypTreeKeys: (parentKey) ->
@@ -116,7 +118,7 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
       #  return assert.tests.isAnArray(@content)
 
     getContent: (parentKey) ->
-      console.log "getContent", @_id
+      $log.log "getContent", @_id
       assert.defined @_id, "@_id", "getContent"
       if @_id == "shares"
         return $q.when(@content)
@@ -138,7 +140,7 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
 
     saveMetadata: () ->
       _funcName = "saveMetadata"
-      console.log _funcName
+      $log.log _funcName
 
       DbDoc.encryptAndSave(@_createMetadataDoc(), @dataKey).then (result) =>
         @_id = result.id
@@ -147,7 +149,7 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
 
     saveContent: () ->
       _funcName = "saveContent"
-      console.log _funcName
+      $log.log _funcName
       content = {
         data: {
           content: @content
@@ -165,12 +167,12 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
           content._id = @_id
         if @_rev
           content._rev = @_rev
-      console.debug "saveContent", content, @dataKey
+      $log.debug "saveContent", content, @dataKey
       DbDoc.encryptAndSave(content, @dataKey)
 
     save: () ->
       _funcName = "save"
-      console.log _funcName
+      $log.log _funcName
       if @content?
         @saveContent().then (contentResult) =>
           unless @metadata?
@@ -188,7 +190,7 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session) ->
 
     delete: ->
       _funcName = 'delete'
-      console.log _funcName
+      $log.log _funcName
       if @metadata.contentId?
         DbDoc.delete {_id: @metadata.contentId}, @dataKey
       DbDoc.delete {_id: @_id}, @dataKey
