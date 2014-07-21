@@ -1,5 +1,5 @@
 angular.module('session').
-controller('SignInCtrl', ($scope, account, notification, usSpinnerService, session, $state) ->
+controller('SignInCtrl', ($scope, account, Notification, usSpinnerService, session, $state) ->
 
   $scope.signInSubmit = () ->
     usSpinnerService.spin('main')
@@ -11,7 +11,7 @@ controller('SignInCtrl', ($scope, account, notification, usSpinnerService, sessi
           path: ''
         })
       (err) =>
-        notification.addAlert("Incorrect login/password")
+        Notification.addAlert("Incorrect login/password")
         usSpinnerService.stop('main')
     )
 

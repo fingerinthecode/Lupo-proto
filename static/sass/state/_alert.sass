@@ -1,0 +1,18 @@
+@import 'variable/alert'
+
+@mixin alert-type($color)
+  background-color: rgba($color, 0.8)
+  border: 1px solid darken($color, 5%)
+  +box-shadow(0 0 8px -2px $color)
+
+.alert-warning
+  +alert-type($alert-warning-color)
+
+.alert-success
+  +alert-type($alert-success-color)
+
+.alert-info
+  +alert-type($alert-info-color)
+
+.alert-danger
+  +alert-type($alert-danger-color)

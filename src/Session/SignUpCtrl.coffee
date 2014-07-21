@@ -1,5 +1,5 @@
 angular.module('session').
-controller('SignUpCtrl', ($scope, account, usSpinnerService, $state, notification) ->
+controller('SignUpCtrl', ($scope, account, usSpinnerService, $state, Notification) ->
   $scope.signUpSubmit = ->
     console.log $scope
     if $scope.password == $scope.password2
@@ -10,9 +10,9 @@ controller('SignUpCtrl', ($scope, account, usSpinnerService, $state, notificatio
           $state.go('explorer.files')
         (err) =>
           usSpinnerService.stop('main')
-          notification.addAlert("The login is already taken!", 'danger')
+          Notification.addAlert("The login is already taken!", 'danger')
       )
     else
-      notification.addAlert("Password don't match!", 'danger')
+      Notification.addAlert("Password don't match!", 'danger')
 
 )

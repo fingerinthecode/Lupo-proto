@@ -1,5 +1,5 @@
 angular.module('fileManager').
-factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, Folder, usSpinnerService, $filter, notification, $rootScope, DeferredQueue) ->
+factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, storage, cache, File, Folder, usSpinnerService, $filter, Notification, $rootScope, DeferredQueue) ->
   fileManager = {
     fileTree: []
     lightTaskQueue: new DeferredQueue(5)
@@ -36,7 +36,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
 
           .catch (err) =>
             usSpinnerService.stop('main')
-            notification.addAlert("Not authorized")
+            Notification.addAlert("Not authorized")
             $state.go('.', {path: ""}, {location: 'replace'})
       return @
 
@@ -263,9 +263,9 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
           usSpinnerService.stop('main')
         =>
           usSpinnerService.stop('main')
-          notification.addAlert("Not authorized")
+          Notification.addAlert("Not authorized")
           $state.go('.')
-          notification.addAlert("Not authorized")
+          Notification.addAlert("Not authorized")
       )
 
     openFolder: (folder) ->

@@ -1,5 +1,5 @@
 angular.module('fileManager')
-.directive 'dropZone', (Uploader, notification, fileManager, Prompt) ->
+.directive 'dropZone', (Uploader, Notification, fileManager, Prompt) ->
   {
     restrict: 'A'
     link: (scope, elem, attr, ctrl) ->
@@ -12,7 +12,7 @@ angular.module('fileManager')
       elem.on 'drop', (evt) ->
         for file in evt.dataTransfer.files
           if file.size > 10000000
-            notification.addAlert("The file is too big. Can't upload a file larger than 10MB.", 'danger')
+            Notification.addAlert("The file is too big. Can't upload a file larger than 10MB.", 'danger')
             continue
           name = fileManager.uniqueName(file.name)
           if file.name != name

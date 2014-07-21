@@ -1,5 +1,5 @@
 angular.module('lupo-proto').
-controller('ContainerCtrl', ($scope, $rootScope, session, notification, $state, $document)->
+controller('ContainerCtrl', ($scope, $rootScope, session, Notification, $state, $document)->
   $scope.session = session
 
   $rootScope.$on('$stateChangeSuccess', ($event, toState, toParams, fromState, fromParams)->
@@ -25,7 +25,7 @@ controller('ContainerCtrl', ($scope, $rootScope, session, notification, $state, 
   lang = window.navigator.language.split('-')[0]
   $rootScope.$broadcast('$ChangeLanguage', lang)
   $rootScope.$on('$translateChangeError', ($event, lang)->
-    notification.addAlert("The language doesn't exist")
+    Notification.addAlert("The language doesn't exist")
     if lang isnt 'en'
       $rootScope.$broadcast('$ChangeLanguage', 'en')
   )

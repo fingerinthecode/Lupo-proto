@@ -1,5 +1,5 @@
 angular.module('fileManager').
-controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, Shortcut, User, $q, notification, storage)->
+controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, Shortcut, User, $q, Notification, storage)->
   unless session.isConnected()
     return false
 
@@ -71,5 +71,5 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, Sho
       Selection.forEach (file) ->
         fileManager.shareFile(file, user)
     $scope.share = []
-    notification.addAlert('File(s) Shared', 'success')
+    Notification.addAlert('File(s) Shared', 'success')
 )
