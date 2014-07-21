@@ -305,7 +305,7 @@ factory('fileManager', ($q, $stateParams, $state, assert, crypto, session, stora
         link.href = url
         link.download = file.metadata.name
         e = document.createEvent('MouseEvents')
-        e.initEvent('click' ,true ,true)
+        e.initEvent('click', true, true)
         link.dispatchEvent(e)
 
     removeFileFromFolder: (file, parentFolder) ->

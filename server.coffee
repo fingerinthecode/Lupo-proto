@@ -1,6 +1,7 @@
 http     = require('http')
 fs       = require('fs')
 path     = require('path')
+port     = 80
 proxy    = require('http-proxy').createProxyServer({
   target: "http://127.0.0.1:5984/"
 })
@@ -68,4 +69,4 @@ http.createServer( (req, res)->
     res.writeHead(404)
     res.end()
 
-).listen(80)
+).listen(port)
