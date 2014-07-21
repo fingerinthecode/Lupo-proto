@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Prototype of Lupo",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "grunt test"
   },
   "repository": {
     "type": "git",
@@ -36,10 +36,14 @@
     "grunt-contrib-concat": "^0.4.0",
     "grunt-contrib-copy": "^0.5.0",
     "grunt-contrib-watch": "^0.6.1",
+    "grunt-karma": "^0.8.3",
     "grunt-protractor-runner": "^1.0.0",
     "grunt-selenium-webdriver-phantom": "^1.0.4",
     "grunt-shell": "^0.7.0",
     "http-proxy": "^1.1.5",
+    "karma": "^0.12.17",
+    "karma-jasmine": "^0.1.5",
+    "karma-phantomjs-launcher": "^0.1.4",
     "load-grunt-tasks": "^0.4.0",
     "phantomjs": "^1.9.7-10",
     "protractor": "^1.0.0-rc1"

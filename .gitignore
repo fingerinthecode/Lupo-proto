@@ -1,4 +1,5 @@
 .sass-cache/**
+temp/**
 packages/**
 node_modules/**
 .kansorc

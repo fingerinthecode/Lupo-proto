@@ -133,6 +133,13 @@ module.exports = (grunt) ->
         command: 'node ./node_modules/coffee-script/bin/coffee ./server.coffee'
       }
     }
+    #Unit
+    karma: {
+      unit: {
+        configFile: './test/karma.conf.coffee',
+        autoWatch: true
+      }
+    }
     #E2E
     protractor: {
       dev: {
@@ -159,6 +166,10 @@ module.exports = (grunt) ->
   )
 
   grunt.registerTask('test', [
+    'karma:unit'
+  ])
+
+  grunt.registerTask('e2e', [
     'test_database'
     'init'
     'shell:protractor_update'
