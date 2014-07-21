@@ -4,10 +4,6 @@ factory 'Folder', ($q, crypto, FileSystemNode, CrypTree) ->
     constructor: (doc, parentKey, parentId) ->
       console.log "new Folder"
       super(doc, parentKey, parentId)
-      #if parentKey?
-      #  CrypTree.resolveSymLink(@subfolderKeyLink, parentKey)
-      #  .then (subfolderKey) =>
-      #    @subfolderKey = subfolderKey
 
     #
     # class methods
