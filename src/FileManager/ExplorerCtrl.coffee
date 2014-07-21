@@ -1,18 +1,7 @@
 angular.module('fileManager').
-controller('ExplorerCtrl', ($scope, $state, session, fileManager, Clipboard, Selection, History, $filter, $document, notification) ->
+controller('ExplorerCtrl', ($scope, $state, session, fileManager, Selection, History, $filter) ->
   unless session.isConnected()
     return
-
-  #-------------Ctrl + Shortcut------------
-  $document.on('keypress', ($event)->
-    if Selection.hasFile('shares')
-      return false
-    if $event.ctrlKey or $event.metaKey
-      switch $event.charCode
-        when 120 then Clipboard.cut()    # X
-        # when 99  then Clipboard.copy()   # C
-        when 118 then Clipboard.paste()  # V
-  )
 
   $scope.History     = History
   $scope.Selection   = Selection

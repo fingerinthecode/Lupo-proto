@@ -1,18 +1,15 @@
 angular.module('fileManager').
-controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, $document, User, $q, notification, storage)->
+controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, Shortcut, User, $q, notification, storage)->
   unless session.isConnected()
     return false
 
   # -------------Shortcut-----------
-  $document.on('keypress', ($event)->
-    if Selection.hasFile('shares')
-      return false
-    if not ($event.ctrlKey or $event.metaKey)
-      switch $event.keyCode
-        when 113 then $scope.renameFile()      # F2
-        when 27  then $scope.closeModalShare() # ESC
-        when 46  then $scope.deleteFiles()     # DEL
-  )
+  Shortcut.on('Ctrl+X', -> Clipboard.cut())
+  # Shortcut.on('Ctrl+C', -> Clipboard.copy())
+  Shortcut.on('Ctrl+V', -> Clipboard.paste())
+  Shortcut.on('F2',     -> $scope.renameFile())
+  Shortcut.on('ESC',    -> $scope.renameFile())
+  Shortcut.on('DEL',    -> $scope.renameFile())
 
   $scope.Selection   = Selection
   $scope.Clipboard   = Clipboard

@@ -19,7 +19,7 @@ module.exports = (grunt) ->
           './src/{,*/}*'
         ]
         tasks: [
-          'coffee'
+          'compile'
         ]
       }
     }
