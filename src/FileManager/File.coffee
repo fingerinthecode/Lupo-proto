@@ -6,7 +6,6 @@ factory 'File', (FileSystemNode, Folder, crypto, CrypTree) ->
       FOLDER: 0
       FILE:   1
 
-
     generateReadCrypTreeKeys: (parentKey) ->
       @dataKey = crypto.generateSymKey()
       CrypTree.symLink(parentKey, @dataKey).then (dataKeyLink) =>

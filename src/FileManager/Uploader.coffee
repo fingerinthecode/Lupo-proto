@@ -38,24 +38,31 @@ factory 'Uploader', ($q, File, fileManager, DeferredQueue) ->
       reader.readAsDataURL(file)
       return deferred.promise
 
-    createLoadingFile: (file)->
-      tmpFile = {
-        metadata: {
-          name: fileManager.uniqueName(file.name)
-          size: file.size
-          type: file.type
-        }
-      }
+    createLoadingFile: (file, erase)->
+      tmpFile = null
+      if erase
+        for f, i in fileManager.fileTree ? []
+          if f.metadata.name == file.name
+            tmpFile = f
+            break
+
+      if not tmpFile?
+        tmpFile = new File({
+          metadata: {
+            name: fileManager.uniqueName(file.name)
+            size: file.size
+            type: file.type
+          }
+        })
+
       if file.type == ""
         #FIXME: could be an unknown file type
         tmpFile.metadata.type = File.TYPES.FOLDER
-      tmpFile = new File(tmpFile)
       tmpFile.loading = true
       return tmpFile
 
     uploadSlice: (tmpFile, arrayBuffer) ->
       strResult = @arrayBuffer2String(arrayBuffer)
-      #strResult = "data:" + tmpFile.type + ';base64,' + btoa(strResult)
       fileManager.addFile(tmpFile.metadata, strResult)
       console.log strResult.length, strResult
 
@@ -87,10 +94,21 @@ factory 'Uploader', ($q, File, fileManager, DeferredQueue) ->
     displayLoadingFile: (loadingFile, thumbDataUrl)->
       if thumbDataUrl?
         loadingFile.metadata.thumb = thumbDataUrl
+
+      for f, i in fileManager.fileTree ? []
+        if f.metadata.name == loadingFile.metadata.name
+          f.delete()
+          fileManager.fileTree.splice(i, 1)
+          break
+
+      console.info "--------------------"
+      console.info loadingFile
+      console.info "--------------------"
+
       fileManager.fileTree.push loadingFile
 
-    uploadFile: (file)->
-      loadingFile = @createLoadingFile file
+    uploadFile: (file, erase)->
+      loadingFile = @createLoadingFile(file, erase)
 
       if file.type.match('image.*')
         fileManager.lightTaskQueue.enqueue =>
@@ -98,9 +116,8 @@ factory 'Uploader', ($q, File, fileManager, DeferredQueue) ->
           .then (dataUrls) =>
             [thumbDataUrl, dataUrl] = dataUrls
             @displayLoadingFile loadingFile, thumbDataUrl
-            fileManager.heavyTaskQueue.enqueue => fileManager.addFile(loadingFile.metadata, dataUrl)
+            fileManager.heavyTaskQueue.enqueue => @uploadOneFile(file, loadingFile)
       else
         @displayLoadingFile(loadingFile)
         fileManager.heavyTaskQueue.enqueue => @uploadOneFile(file, loadingFile)
-        fileManager.heavyTaskQueue.enqueue => console.error "FINISHED"
   }
