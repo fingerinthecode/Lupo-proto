@@ -8,8 +8,8 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, Sho
   # Shortcut.on('Ctrl+C', -> Clipboard.copy())
   Shortcut.on('Ctrl+V', -> Clipboard.paste())
   Shortcut.on('F2',     -> $scope.renameFile())
-  Shortcut.on('ESC',    -> $scope.renameFile())
-  Shortcut.on('DEL',    -> $scope.renameFile())
+  Shortcut.on('ESC',    -> $scope.closeModalShare())
+  Shortcut.on('DEL',    -> $scope.deleteFiles())
 
   $scope.Selection   = Selection
   $scope.Clipboard   = Clipboard
@@ -26,7 +26,7 @@ controller('FilesCtrl', ($scope, session, fileManager, Clipboard, Selection, Sho
 
   $scope.deleteFiles = ->
     Selection.forEach (file)->
-      fileManager.deleteFile(file)
+      file.delete()
     Selection.clear()
 
   # Share: list of users

@@ -42,7 +42,7 @@ factory('Notification', ($filter, $interval) ->
       @alerts.splice(index, 1)
 
   $interval( ->
-    for alert, i in Notification.alerts
+    for alert, i in Notification.alerts ? []
       timespend = new Date().getTime() - alert.time
       if timespend >= (if alert.display == 'short' then Notification._displayTimeShort else Notification._displayTimeLong)
         console.log i

@@ -63,8 +63,14 @@ factory('storage', ($q, $location, assert, db, dbname) ->
       @_save(doc)
 
     del: (doc) ->
-      deletedDoc = {_id: doc._id, _rev: doc._rev, _deleted: true}
-      @save(deletedDoc)
+      if doc._rev?
+        deletedDoc = {_id: doc._id, _rev: doc._rev, _deleted: true}
+        @save(deletedDoc)
+      else
+        @get(doc._id).then(
+          (doc)=>
+            @del(doc)
+        )
 
     query: (fun, options) ->
       _funcName = _indent + "query"

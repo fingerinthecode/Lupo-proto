@@ -11,17 +11,20 @@ directive('zoneSelection', (Selection, $document, Browser)->
       if not zone?
         zone = window.document.createElement('div')
         zone.className = "zone-selection"
-        zone.setAttribute('id', 'zone')
+        zone.id        = "zone"
 
       # IsInSelection
       isInSelection = (file)->
+        x = Browser.width()
+        y = Browser.height()
+
         selection = zone.getBoundingClientRect()
-        selection.right  = Browser.width()  - selection.right
-        selection.bottom = Browser.height() - selection.right
+        selection.right  = x-selection.right
+        selection.bottom = y-selection.right
 
         file = file.getBoundingClientRect()
-        file.right  = Browser.width()  - file.right
-        file.bottom = Browser.height() - file.bottom
+        file.right  = x-file.right
+        file.bottom = y-file.bottom
 
         if (file.top <= selection.top <= file.bottom or
         file.top <= selection.bottom <= file.bottom or

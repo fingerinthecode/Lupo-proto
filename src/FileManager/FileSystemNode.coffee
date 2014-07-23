@@ -193,4 +193,4 @@ factory 'FileSystemNode', ($q, assert, crypto, DbDoc, CrypTree, session, $log) -
       $log.log _funcName
       if @metadata.contentId?
         DbDoc.delete {_id: @metadata.contentId}, @dataKey
-      DbDoc.delete {_id: @_id}, @dataKey
+      DbDoc.delete @, @dataKey

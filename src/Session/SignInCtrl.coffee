@@ -5,7 +5,6 @@ controller('SignInCtrl', ($scope, account, Notification, usSpinnerService, sessi
     usSpinnerService.spin('main')
     account.signIn($scope.login, $scope.password).then(
       (data) =>
-        console.log "data", data
         usSpinnerService.stop('main')
         $state.go('explorer.files', {
           path: ''

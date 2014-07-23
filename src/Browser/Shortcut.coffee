@@ -52,7 +52,6 @@ factory('Shortcut', ($document)->
 
   $document.on('keydown', ($event)->
     keys = Shortcut.keys($event)
-    console.info keys, $event
     for shortcut in Shortcut.shortcuts[keys] ? []
       shortcut()
   )
