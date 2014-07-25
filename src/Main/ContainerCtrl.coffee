@@ -1,6 +1,30 @@
 angular.module('lupo-proto').
-controller('ContainerCtrl', ($scope, $rootScope, session, Notification, $state, $document)->
+controller('ContainerCtrl', ($scope, $rootScope, session, Notification, $state, $document, Swipe, $animate)->
   $scope.session = session
+
+  # AppMenu slidder
+  if not Device.desktop()
+    menu   = window.document.getElementsByClassName('appmenu')[0]
+    menu   = angular.element(menu)
+    enable = true
+    $rootScope.$on 'TreeFile:open',  -> enable = false
+    $rootScope.$on 'TreeFile:close', -> enable = true
+
+    Swipe.left ($event)->
+      if enable
+        console.info "menu open"
+        $animate.addClass(menu, 'is-visible', ->
+          $rootScope.$broadcast('AppMenu:open')
+        )
+
+    Swipe.right ($event)->
+      if enable
+        console.info "menu close"
+        $animate.removeClass(menu, 'is-visible', ->
+          $rootScope.$broadcast('AppMenu:close')
+        )
+
+
 
   $rootScope.$on('$stateChangeSuccess', ($event, toState, toParams, fromState, fromParams)->
     if toState.redirectTo?

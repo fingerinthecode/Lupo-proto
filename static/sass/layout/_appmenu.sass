@@ -1,17 +1,19 @@
 .appmenu
-  display: none
+  display: block
+  position: fixed
+  top: 0
+  bottom: 0
+  width: $appmenu-mobile-width
+  right: -$appmenu-mobile-width
+  margin: 0
+  padding: 0
+  height: 100%
+
+  z-index: 999
+  +transition-duration(0.2s)
 
 .desktop
   .appmenu
-    display: block
     width: $appmenu-width
-    height: 100%
-    position: fixed
     top: $header-height
-    z-index: 999
     left: 0
-    bottom: 0
-    margin: 0
-    padding: 0
-
-    list-style: none

@@ -1,5 +1,5 @@
 angular.module('fileManager')
-.directive('filetree', ($compile, $location, $q, Swipe, $animate)->
+.directive('filetree', ($rootScope, $compile, $location, $q, Swipe, $animate, $timeout)->
   return {
     restrict: 'E'
     scope: {
@@ -12,13 +12,22 @@ angular.module('fileManager')
               </div>
               """
     link: (scope, element, attr)->
-      Swipe.right ($event)->
-        console.info "swipe right"
-        $animate.addClass(element, 'is-visible')
+      if not Device.desktop()
+        enable = true
+        $rootScope.$on 'AppMenu:open',  -> enable = false
+        $rootScope.$on 'AppMenu:close', -> enable = true
 
-      Swipe.left ($event)->
-        console.info "swipe left"
-        $animate.removeClass(element, 'is-visible')
+        Swipe.right ($event)->
+          if enable
+            $animate.addClass(element, 'is-visible', ->
+              $rootScope.$broadcast('TreeFile:open')
+            )
+
+        Swipe.left ($event)->
+          if enable
+            $animate.removeClass(element, 'is-visible', ->
+              $rootScope.$broadcast('TreeFile:close')
+            )
 
       scope.littleSpinner = {
         lines:  7
