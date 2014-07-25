@@ -1,6 +1,8 @@
 angular.module('lupo-proto', [
+  'ngAnimate'
   'ui.router'
   'filters'
+  'touch'
   'browser'
   'prompt'
   'statistic'

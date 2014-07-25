@@ -1,5 +1,5 @@
 angular.module('fileManager')
-.directive('filetree', ($compile, $location, $q)->
+.directive('filetree', ($compile, $location, $q, Swipe, $animate)->
   return {
     restrict: 'E'
     scope: {
@@ -12,6 +12,13 @@ angular.module('fileManager')
               </div>
               """
     link: (scope, element, attr)->
+      Swipe.right ($event)->
+        console.info "swipe right"
+        $animate.addClass(element, 'is-visible')
+
+      Swipe.left ($event)->
+        console.info "swipe left"
+        $animate.removeClass(element, 'is-visible')
 
       scope.littleSpinner = {
         lines:  7

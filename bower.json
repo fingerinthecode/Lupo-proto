@@ -30,7 +30,7 @@
   "dependencies": {
     "angular": "1.3.*",
     "angular-ui-router": "~0.2.10",
-    "angular-resource": "~1.3.*",
+    "angular-animate": "~1.3.*",
     "jsencrypt": "travist/jsencrypt",
     "assert": "Jxck/assert",
     "angular-spinner": "~0.4.0",
@@ -38,11 +38,11 @@
     "device": "JonathanDaSilva/device.js#master",
     "move.js": "visionmedia/move.js#master",
     "angular-gettext": "~0.2.9",
-    "angular-animate": "~1.3.*",
     "ng-tags-input": "~2.0.1",
     "angular-sanitize": "1.3.*",
     "forge": "digitalbazaar/forge#~0.6.7",
-    "fingerprint": "~0.5.3"
+    "fingerprint": "~0.5.3",
+    "hammerjs": "~2.0.1"
   },
   "resolutions": {
     "angular": "1.3.*"
