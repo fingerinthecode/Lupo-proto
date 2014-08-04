@@ -1,9 +1,11 @@
 .sass-cache/**
-temp/**
+tmp/**
 packages/**
 node_modules/**
 .kansorc
 static/js/**
 static/css/**
 *.*~
-static/vendor/**
+~*
+npm-debug.log
+bower_components/**
