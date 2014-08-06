@@ -52,7 +52,7 @@ gulp.task('default', ->
 )
 
 gulp.task('compile', ['browserify', 'lib', 'compass'])
-gulp.task('init', ['kanso-delete', 'kanso-create', 'kanso-push', 'kanso-upload'])
+gulp.task('init', sync(['kanso-delete', 'kanso-create', 'kanso-push', 'kanso-upload']))
 
 gulp.task('kanso-delete', (cb)->
   exec("kanso deletedb #{database}", cb)
