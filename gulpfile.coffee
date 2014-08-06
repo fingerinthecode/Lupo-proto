@@ -33,10 +33,14 @@ gulp.task('default', ->
   gulp.watch(paths.lib.in, ['lib'])
   gulp.watch(paths.sass.in, ['compass'])
   # Livereload
-  livereload.listen()
-  gulp.watch("#{paths.sass.out}#{paths.sass.name}").on('change', livereload.changed)
-  gulp.watch("#{paths.coffee.out}#{paths.coffee.name}").on('change', livereload.changed)
-  gulp.watch("./partials/**/*.html").on('change', livereload.changed)
+  livereload = livereload()
+  gulp.watch([
+    "#{paths.sass.out}#{paths.sass.name}"
+    "#{paths.coffee.out}#{paths.coffee.name}"
+    "./partials/**/*.html"
+  ]).on('change', (file)->
+    livereload.changed(file.path)
+  )
 )
 
 gulp.task('compile', ['browserify', 'lib', 'compass'])
