@@ -106,11 +106,12 @@ gulp.task('browserify', ['coffee'], ->
 )
 
 gulp.task('test', (done)->
-  conf = require('./test/karma.conf.coffee')()
+  config = {config: {}, set: (config)-> @conf = config}
+  require('./test/karma.conf.coffee')(config)
   if not watch
-    conf.watch = false
-    conf.singleRun = true
-  karma.start(conf, done)
+    config.conf.watch = false
+    config.conf.singleRun = true
+  karma.start(config.conf, done)
 )
 
 gulp.task('compass', ->
