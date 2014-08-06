@@ -27,12 +27,12 @@
   },
   "homepage": "https://github.com/LupoLibero/Lupo-proto",
   "devDependencies": {
-    "aliasify": "^1.4.0",
     "coffee-script": "^1.7.1",
-    "debowerify": "^0.8.1",
     "gulp": "^3.8.7",
+    "gulp-browserify": "^0.5.0",
     "gulp-coffee": "^2.1.1",
     "gulp-compass": "^1.2.0",
+    "gulp-faster-browserify": "^0.2.1",
     "gulp-livereload": "^2.1.0",
     "gulp-nodemon": "^1.0.4",
     "gulp-notify": "^1.4.1",
@@ -40,6 +40,7 @@
     "gulp-rename": "^1.2.0",
     "gulp-replace": "^0.4.0",
     "http-proxy": "^1.1.6",
+    "ip": "^0.3.1",
     "traceurify": "0.0.6"
   },
   "dependencies": {
