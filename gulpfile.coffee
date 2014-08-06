@@ -1,6 +1,7 @@
 args       = require('yargs').argv
 gulp       = require('gulp')
 sync       = require('gulp-sync')(gulp).sync
+gulpif     = require('gulp-if')
 notify     = require('gulp-notify')
 plumber    = require('gulp-plumber')
 livereload = require('gulp-livereload')
@@ -10,6 +11,8 @@ coffee     = require('gulp-coffee')
 replace    = require('gulp-replace')
 browserify = require('gulp-browserify')
 rename     = require('gulp-rename')
+uglify     = require('gulp-uglify')
+production = args.prod ? false
 shim       = require('./package.json').shim ? {}
 
 paths = {
@@ -74,6 +77,7 @@ gulp.task('browserify', ['coffee'], ->
       ]
     }))
     .pipe(rename(paths.coffee.name))
+    .pipe(gulpif(production, uglify()))
     .pipe(gulp.dest(paths.coffee.out))
     .pipe(notify('Browerify Done'))
 )
@@ -82,7 +86,7 @@ gulp.task('compass', ->
   gulp.src(paths.sass.in)
     .pipe(plumber(notify.onError('<%=error.message%>')))
     .pipe(compass({
-      style:      'compressed'
+      style:      (if production then 'compressed' else 'expanded')
       comments:   false
       relative:   true
       project:    './'
