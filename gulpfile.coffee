@@ -1,3 +1,4 @@
+exec       = require('child_process').exec
 args       = require('yargs').argv
 gulp       = require('gulp')
 sync       = require('gulp-sync')(gulp).sync
@@ -12,6 +13,8 @@ replace    = require('gulp-replace')
 browserify = require('gulp-browserify')
 rename     = require('gulp-rename')
 uglify     = require('gulp-uglify')
+
+database   = args.db ? 'default'
 production = args.prod ? false
 shim       = require('./package.json').shim ? {}
 
@@ -49,10 +52,24 @@ gulp.task('default', ->
 )
 
 gulp.task('compile', ['browserify', 'lib', 'compass'])
+gulp.task('init', ['kanso-delete', 'kanso-create', 'kanso-push', 'kanso-upload'])
+
+gulp.task('kanso-delete', (cb)->
+  exec("kanso deletedb #{database}", cb)
+)
+gulp.task('kanso-create', (cb)->
+  exec("kanso createdb #{database}", cb)
+)
+gulp.task('kanso-push', (cb)->
+  exec("kanso push #{database}", cb)
+)
+gulp.task('kanso-upload', (cb)->
+  exec("kanso upload ./data #{database}", cb)
+)
 
 gulp.task('lib', ->
   gulp.src(paths.lib.in)
-    .pipe(plumber(notify.onError('<%=error.message%>')))
+    .pipe(plumber(notify.onError('<%=error.stack%>')))
     .pipe(coffee({bare: true}))
     .pipe(gulp.dest(paths.lib.out))
     .pipe(notify('Coffee script lib compile'))
@@ -60,7 +77,7 @@ gulp.task('lib', ->
 
 gulp.task('coffee', ->
   gulp.src(paths.coffee.in)
-    .pipe(plumber(notify.onError('<%=error.message%>')))
+    .pipe(plumber(notify.onError('<%=error.stack%>')))
     .pipe(replace(/^\s*((export|import|module) .*)\s*$/gm, '\n___es6("""$1""")'))
     .pipe(coffee({bare: true}))
     .pipe(replace(/^___es6\(\"(.*)\"\)\;$/gm, "$1;"))
