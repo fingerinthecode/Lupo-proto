@@ -6,7 +6,7 @@ notify     = require('gulp-notify')
 plumber    = require('gulp-plumber')
 livereload = require('gulp-livereload')
 compass    = require('gulp-compass')
-nodemon    = require('gulp-nodemon')
+nodemon    = require('nodemon')
 coffee     = require('gulp-coffee')
 replace    = require('gulp-replace')
 browserify = require('gulp-browserify')
@@ -100,9 +100,8 @@ gulp.task('compass', ->
     .pipe(notify('Compass compiled without errors'))
 )
 
-gulp.task('server', (done)->
+gulp.task('server', (cb)->
   nodemon({
-    script: 'server.coffee'
-    quiet: true
+    './server.coffee'
   })
 )
