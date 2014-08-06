@@ -1,3 +1,4 @@
+args       = require('yargs').argv
 gulp       = require('gulp')
 sync       = require('gulp-sync')(gulp).sync
 notify     = require('gulp-notify')
@@ -9,6 +10,7 @@ coffee     = require('gulp-coffee')
 replace    = require('gulp-replace')
 browserify = require('gulp-browserify')
 rename     = require('gulp-rename')
+shim       = require('./package.json').shim ? {}
 
 paths = {
   sass:
@@ -66,6 +68,7 @@ gulp.task('browserify', ['coffee'], ->
   gulp.src(paths.coffee.start)
     .pipe(plumber(notify.onError('<%=error.message%>')))
     .pipe(browserify({
+      shim: shim
       transform: [
         'traceurify'
       ]
