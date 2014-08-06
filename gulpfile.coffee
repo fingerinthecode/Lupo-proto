@@ -12,11 +12,13 @@ coffee     = require('gulp-coffee')
 replace    = require('gulp-replace')
 browserify = require('gulp-browserify')
 rename     = require('gulp-rename')
+karma      = require('karma').server
 uglify     = require('gulp-uglify')
 
 database   = args.db ? 'default'
 production = args.prod ? false
 shim       = require('./package.json').shim ? {}
+watch      = false
 
 paths = {
   sass:
@@ -40,6 +42,9 @@ gulp.task('default', ->
   gulp.watch(paths.coffee.in, ['browserify'])
   gulp.watch(paths.lib.in, ['lib'])
   gulp.watch(paths.sass.in, ['compass'])
+  # test
+  watch = true
+  gulp.start('test')
   # Livereload
   livereload = livereload()
   gulp.watch([
@@ -88,6 +93,8 @@ gulp.task('browserify', ['coffee'], ->
   gulp.src(paths.coffee.start)
     .pipe(plumber(notify.onError('<%=error.message%>')))
     .pipe(browserify({
+      insertGlobals : not production
+      debug: not production
       shim: shim
       transform: [
         'traceurify'
@@ -97,6 +104,14 @@ gulp.task('browserify', ['coffee'], ->
     .pipe(gulpif(production, uglify()))
     .pipe(gulp.dest(paths.coffee.out))
     .pipe(notify('Browerify Done'))
+)
+
+gulp.task('test', (done)->
+  conf = require('./test/karma.conf.coffee')()
+  if not watch
+    conf.watch = false
+    conf.singleRun = true
+  karma.start(conf, done)
 )
 
 gulp.task('compass', ->

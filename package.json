@@ -34,7 +34,6 @@
     "gulp-compass": "^1.2.0",
     "gulp-faster-browserify": "^0.2.1",
     "gulp-if": "^1.2.4",
-    "gulp-karma": "0.0.4",
     "gulp-livereload": "^2.1.0",
     "gulp-notify": "^1.4.1",
     "gulp-plumber": "^0.6.4",
@@ -44,8 +43,15 @@
     "gulp-uglify": "^0.3.1",
     "http-proxy": "^1.1.6",
     "ip": "^0.3.1",
+    "karma": "^0.12.21",
+    "karma-coffee-preprocessor": "^0.2.1",
+    "karma-jasmine": "^0.1.5",
+    "karma-phantomjs-launcher": "^0.1.4",
     "nodemon": "^1.2.1",
     "traceurify": "0.0.6",
+    "prompt": "^0.2.13",
+    "q": "^1.0.1",
+    "crypto": "0.0.3",
     "yargs": "^1.3.1"
   },
   "dependencies": {
@@ -56,16 +62,12 @@
     "angular-sanitize": "0.0.1",
     "angular-spinner": "^0.5.0",
     "angular-ui-router": "^0.2.10",
-    "cradle": "^0.6.7",
-    "crypto": "0.0.3",
-    "es6-shim": "^0.15.0",
     "event-source-polyfill": "0.0.1",
     "fingerprintjs": "^0.5.3",
     "forge": "digitalbazaar/forge",
     "hammerjs": "^2.0.2",
     "jsencrypt": "travist/jsencrypt",
-    "prompt": "^0.2.13",
-    "q": "^1.0.1"
+    "native-promise-only": "^0.7.5-e"
   },
   "shim": {
     "Device": {
