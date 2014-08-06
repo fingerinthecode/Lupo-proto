@@ -43,8 +43,21 @@
     "traceurify": "0.0.6"
   },
   "dependencies": {
+    "Device": "JonathanDaSilva/device.js",
+    "angular": "^1.2.19",
+    "angular-animate": "^1.2.16",
+    "angular-gettext": "^1.0.0",
+    "angular-sanitize": "0.0.1",
+    "angular-spinner": "^0.5.0",
+    "angular-ui-router": "^0.2.10",
     "cradle": "^0.6.7",
     "crypto": "0.0.3",
+    "es6-shim": "^0.15.0",
+    "event-source-polyfill": "0.0.1",
+    "fingerprintjs": "^0.5.3",
+    "forge": "digitalbazaar/forge",
+    "hammerjs": "^2.0.2",
+    "jsencrypt": "travist/jsencrypt",
     "prompt": "^0.2.13",
     "q": "^1.0.1"
   },
