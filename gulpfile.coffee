@@ -12,7 +12,7 @@ rename     = require('gulp-rename')
 
 paths = {
   sass:
-    in:   './static/sass/**/*.sass'
+    in:   './static/sass/style.sass'
     out:  './static/css/'
     name: 'style.css'
   lib:
