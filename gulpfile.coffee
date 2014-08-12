@@ -13,6 +13,7 @@ browserify = require('gulp-browserify')
 rename     = require('gulp-rename')
 karma      = require('karma').server
 uglify     = require('gulp-uglify')
+sourcemaps = require('gulp-sourcemaps')
 
 database   = args.db ? 'default'
 production = args.prod ? false
@@ -95,7 +96,9 @@ gulp.task('lib', ->
   gulp.src(paths.lib.in)
     .pipe(plumber(notify.onError('<%=error.stack%>')))
     .pipe(replace(/^ *((export|import|module) *.*) *$/gm, cjs2rjs))
+    .pipe(gulpif(not production, sourcemaps.init()))
     .pipe(coffee({bare: true}))
+    .pipe(gulpif(not production, sourcemaps.write()))
     .pipe(replace(/^___es6\(\"(.*)\"\)\;$/gm, "$1;"))
     .pipe(gulp.dest(paths.lib.out))
     .pipe(notify('Coffee script lib compile'))
@@ -116,7 +119,9 @@ gulp.task('coffee', ->
   gulp.src(paths.coffee.in)
     .pipe(plumber(notify.onError('<%=error.stack%>')))
     .pipe(replace(/^ *((export|import|module) *.*) *$/gm, cjs2rjs))
+    .pipe(gulpif(not production, sourcemaps.init()))
     .pipe(coffee({bare: true}))
+    .pipe(gulpif(not production, sourcemaps.write()))
     .pipe(replace(/^___es6\(\"(.*)\"\)\;$/gm, "$1;"))
     .pipe(gulp.dest('./tmp/src/'))
 )
