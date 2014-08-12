@@ -16,8 +16,24 @@ uglify     = require('gulp-uglify')
 
 database   = args.db ? 'default'
 production = args.prod ? false
-shim       = require('./package.json').shim ? {}
-watch      = false
+watchMode  = false
+
+# CommonJS to Requirejs
+# Also prevent error from coffeescript
+cjs2rjs = (result)->
+  match = /(?:'|")(.*)(?:'|")/.exec(result)
+  if match?
+    filepath = match[1]
+    filename = filepath.split('/')[-1..-1][0]
+    ext      = filename.split('.')[-1..-1][0]
+    if filepath[-1..-1][0] == '/' # Directory
+      result = result.replace(filepath, "#{filepath}index.js")
+    else if ext == 'coffee'   # Wrong extension
+      result = result.replace(filename, filename.replace('.coffee', '.js'))
+    else if ext == filename # No extension
+      result = result.replace(filepath, "#{filepath}.js")
+
+  return "___es6(\"#{result}\")"
 
 paths = {
   sass:
@@ -28,10 +44,13 @@ paths = {
     in:    './static/coffee/*.coffee'
     out:   './static/js/'
   coffee:
-    start: './tmp/Main/index.js'
-    in:    './src/**/*.coffee'
+    start: './tmp/src/Main/index.js'
+    in:    'src/**/*.coffee'
     out:   './static/js/'
     name:  'main.js'
+  unit:
+    in:    './test/unit/**/*.coffee'
+    out:   './tmp/unit/'
 }
 
 gulp.task('default', ->
@@ -39,10 +58,11 @@ gulp.task('default', ->
   gulp.start('server')
   # Auto Compile
   gulp.watch(paths.coffee.in, ['browserify'])
+  gulp.watch(paths.unit.in, ['coffee-test'])
   gulp.watch(paths.lib.in, ['lib'])
   gulp.watch(paths.sass.in, ['compass'])
   # test
-  watch = true
+  watchMode = true
   gulp.start('test')
   # Livereload
   livereload = livereload()
@@ -74,25 +94,40 @@ gulp.task('kanso-upload', (done)->
 gulp.task('lib', ->
   gulp.src(paths.lib.in)
     .pipe(plumber(notify.onError('<%=error.stack%>')))
+    .pipe(replace(/^ *((export|import|module) *.*) *$/gm, cjs2rjs))
     .pipe(coffee({bare: true}))
+    .pipe(replace(/^___es6\(\"(.*)\"\)\;$/gm, "$1;"))
     .pipe(gulp.dest(paths.lib.out))
     .pipe(notify('Coffee script lib compile'))
+)
+
+gulp.task('coffee-test', ->
+  gulp.src(paths.unit.in)
+    .pipe(plumber(notify.onError('<%=error.stack%>')))
+    .pipe(replace(/^ *((export|import|module) *.*) *$/gm, cjs2rjs))
+    .pipe(gulpif(not production, sourcemaps.init()))
+    .pipe(coffee({bare: true}))
+    .pipe(gulpif(not production, sourcemaps.write()))
+    .pipe(replace(/^___es6\(\"(.*)\"\)\;$/gm, "$1;"))
+    .pipe(gulp.dest(paths.unit.out))
 )
 
 gulp.task('coffee', ->
   gulp.src(paths.coffee.in)
     .pipe(plumber(notify.onError('<%=error.stack%>')))
-    .pipe(replace(/^\s*((export|import|module) .*)\s*$/gm, '\n___es6("""$1""")'))
+    .pipe(replace(/^ *((export|import|module) *.*) *$/gm, cjs2rjs))
     .pipe(coffee({bare: true}))
     .pipe(replace(/^___es6\(\"(.*)\"\)\;$/gm, "$1;"))
-    .pipe(gulp.dest('./tmp/'))
+    .pipe(gulp.dest('./tmp/src/'))
 )
 
 gulp.task('browserify', ['coffee'], ->
-  gulp.src(paths.coffee.start)
+  shim = require('./package.json').shim ? {}
+
+  gulp.src(paths.coffee.start, {read: false})
     .pipe(plumber(notify.onError('<%=error.message%>')))
     .pipe(browserify({
-      insertGlobals : not production
+      insertGlobals: not production
       debug: not production
       shim: shim
       transform: [
@@ -108,7 +143,7 @@ gulp.task('browserify', ['coffee'], ->
 gulp.task('test', (done)->
   config = {config: {}, set: (config)-> @conf = config}
   require('./test/karma.conf.coffee')(config)
-  if not watch
+  if not watchMode
     config.conf.watch = false
     config.conf.singleRun = true
   karma.start(config.conf, done)
