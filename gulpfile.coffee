@@ -140,7 +140,7 @@ gulp.task('browserify', ['coffee'], ->
     .pipe(notify('Browerify Done'))
 )
 
-gulp.task('test', (done)->
+gulp.task('test', ['coffee-test'], (done)->
   config = {config: {}, set: (config)-> @conf = config}
   require('./test/karma.conf.coffee')(config)
   if not watchMode
