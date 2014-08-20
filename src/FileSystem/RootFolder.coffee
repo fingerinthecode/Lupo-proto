@@ -1,0 +1,3 @@
+class RootFolder
+
+`export {RootFolder}`

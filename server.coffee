@@ -59,7 +59,14 @@ http.createServer( (req, res)->
   if request
     proxy.web(req, res)
   else if fs.existsSync(link)
-    file = fs.readFileSync(link)
+    file = fs.readFileSync(link, {
+      encoding: 'utf-8'
+    })
+    # Livereload
+    if link.match(/.*index.html$/)
+      localip = require('ip').address()
+      file = file.replace('</body>', '<script src="http://'+localip+':35729/livereload.js?snipver=1"></script></body>')
+
     res.writeHead(200, {
       "Content-Length": file.length
       "Content-Encoding": 'utf-8'

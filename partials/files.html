@@ -22,32 +22,32 @@
 <!-- FileMenu -->
 <ul id="fileMenu" class="context-menu">
   <li class="context-menu-item" ng-class="{'is-disable': !Selection.isSingle()}" ng-click="openFile()">
-    <i class="icon icon-download"    ng-if="!Selection.hasAtLeastOneFolder()"></i>
-    <i class="icon icon-folder-open" ng-if=" Selection.hasAtLeastOneFolder()"></i>
+    <i class="context-menu-icon icon icon-download"    ng-if="!Selection.hasAtLeastOneFolder()"></i>
+    <i class="context-menu-icon icon icon-folder-open" ng-if=" Selection.hasAtLeastOneFolder()"></i>
     <p class="context-menu-item-text" translate>Open</p>
   </li>
   <li class="context-menu-item" ng-class="{'is-disable': !Selection.isSingle() || Selection.hasFile('shares')}" ng-click="renameFile()">
-    <i class="icon icon-rename"></i>
+    <i class="context-menu-icon icon icon-rename"></i>
     <p class="context-menu-item-text" translate>Rename</p>
   </li>
   <li class="context-menu-item" ng-class="{'is-disable': Selection.hasFile('shares')}" ng-click="modalShare()">
-    <i class="icon icon-share"></i>
+    <i class="context-menu-icon icon icon-share"></i>
     <p class="context-menu-item-text" translate>Share</p>
   </li>
   <li class="context-menu-item" ng-class="{'is-disable': Selection.hasFile('shares')}" ng-click="Clipboard.cut()">
-    <i class="icon icon-cut"></i>
+    <i class="context-menu-icon icon icon-cut"></i>
     <p class="context-menu-item-text" translate>Cut</p>
   </li>
   <li class="context-menu-item" ng-class="{'is-disable': true || Selection.hasFile('shares')}" ng-click="Clipboard.copy()">
-    <i class="icon icon-copy"></i>
+    <i class="context-menu-icon icon icon-copy"></i>
     <p class="context-menu-item-text" translate>Copy</p>
   </li>
   <li class="context-menu-item" ng-class="{'is-disable': Clipboard.isEmpty()}" ng-click="Clipboard.paste()">
-    <i class="icon icon-paste"></i>
+    <i class="context-menu-icon icon icon-paste"></i>
     <p class="context-menu-item-text" translate>Paste</p>
   </li>
   <li class="context-menu-item" ng-class="{'is-disable': Selection.hasFile('shares')}" ng-click="deleteFiles()">
-    <i class="icon icon-remove"></i>
+    <i class="context-menu-icon icon icon-remove"></i>
     <p class="context-menu-item-text" translate>Delete</p>
   </li>
 </ul>
@@ -56,15 +56,15 @@
 <!-- BackgroundMenu -->
 <ul id="backgroundMenu" class="context-menu" role="context-menu">
   <li class="context-menu-item" ng-click="fileManager.newFile()">
-    <i class="icon icon-file"></i>
+    <i class="context-menu-icon icon icon-file"></i>
     <p class="context-menu-item-text" translate>New File</p>
   </li>
   <li class="context-menu-item" ng-click="fileManager.newFolder()">
-    <i class="icon icon-folder-close"></i>
+    <i class="context-menu-icon icon icon-folder-close"></i>
     <p class="context-menu-item-text" translate>New Folder</p>
   </li>
   <li class="context-menu-item" ng-click="Clipboard.paste()" ng-class="{'is-disable': Clipboard.isEmpty()}">
-    <i class="icon icon-paste"></i>
+    <i class="context-menu-icon icon icon-paste"></i>
     <p class="context-menu-item-text" translate>Paste</p>
   </li>
 </ul>
