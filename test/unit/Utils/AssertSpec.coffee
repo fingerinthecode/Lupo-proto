@@ -1,7 +1,10 @@
-import {Assert} from './../../src/Utils/Assert'
+`import {Injector} from 'di.js'`
+`import {Assert}   from './../../../src/Utils/Assert'`
 
-describe "Assert:", ->
-  types = {
+ddescribe "Utils.Assert:", ->
+  assert   = null
+  injector = null
+  types  = {
     undefined: undefined
     null:      null
     boolean:   true
@@ -13,79 +16,92 @@ describe "Assert:", ->
     float:     1.1
   }
 
-  it "constructor: have to thow when no string is pass", ->
-    for type in [undefined,null,[],{},1,1.1]
-      expect(->
-        test = new Assert()
-      ).toThrow()
+  beforeEach ->
+    injector = new Injector([])
+    assert   = injector.get(Assert)
+
+  it "setClassName: have to thow when the name is not a string", ->
+    spyOn(assert, 'isString').and.returnValue(false)
 
     expect(->
-      test = new Assert('Test')
+      assert.setClassName(true)
+    ).toThrow()
+
+  it "setClassName: have to not throw and set the _className property", ->
+    spyOn(assert, 'isString').and.returnValue(true)
+
+    expect(->
+      assert.setClassName('Test')
     ).not.toThrow()
+    expect(assert._className).toBe('Test')
+
+  it "setName: have to thow when the name is not a string", ->
+    spyOn(assert, 'isString').and.returnValue(false)
+
+    expect(->
+      assert.setName(true)
+    ).toThrow()
+
+  it "setName: have to not throw and set the _className property", ->
+    spyOn(assert, 'isString').and.returnValue(true)
+
+    expect(->
+      assert.setName('test')
+    ).not.toThrow()
+    expect(assert._methodName).toBe('test')
 
   it "isUndefined: should check if the value is an undefined", ->
-    assert = new Assert('Test')
     expect(assert.isUndefined()).toBeTruthy()
     for type in (value for type, value of types when type isnt 'undefined')
       expect(assert.isUndefined(type)).toBeFalsy()
 
   it "isNull: should check if the value is a null", ->
-    assert = new Assert('Test')
     expect(assert.isNull(null)).toBeTruthy()
     for type in (value for type, value of types when type isnt 'null')
       expect(assert.isNull(type)).toBeFalsy()
 
   it "isBoolean: should check if the value is a boolean", ->
-    assert = new Assert('Test')
     expect(assert.isBoolean(true)).toBeTruthy()
     for type in (value for type, value of types when type isnt 'boolean')
       expect(assert.isBoolean(type)).toBeFalsy()
 
   it "isString: should check if the value is a string", ->
-    assert = new Assert('Test')
     expect(assert.isString("")).toBeTruthy()
     for type in (value for type, value of types when type isnt 'string')
       expect(assert.isString(type)).toBeFalsy()
 
   it "isFunction: should check if the value is a function", ->
-    assert = new Assert('Test')
     expect(assert.isFunction((->))).toBeTruthy()
     for type in (value for type, value of types when type isnt 'function')
       expect(assert.isFunction(type)).toBeFalsy()
 
   it "isObject: should check if the value is a object", ->
-    assert = new Assert('Test')
     expect(assert.isObject({})).toBeTruthy()
     for type in (value for type, value of types when type isnt 'object')
       expect(assert.isObject(type)).toBeFalsy()
 
   it "isArray: should check if the value is a array", ->
-    assert = new Assert('Test')
     expect(assert.isArray([])).toBeTruthy()
     for type in (value for type, value of types when type isnt 'array')
       expect(assert.isArray(type)).toBeFalsy()
 
   it "isInt: should check if the value is a int", ->
-    assert = new Assert('Test')
     expect(assert.isInt(1)).toBeTruthy()
     for type in (value for type, value of types when type isnt 'int')
       expect(assert.isInt(type)).toBeFalsy()
 
   it "isFloat: should check if the value is a float", ->
-    assert = new Assert('Test')
     expect(assert.isFloat(1.1)).toBeTruthy()
     for type in (value for type, value of types when type isnt 'float')
       expect(assert.isFloat(type)).toBeFalsy()
 
   it "isAny: should check if the value is a float", ->
-    assert = new Assert('Test')
     for type in (value for type, value of types when type isnt 'null' and type isnt 'undefined')
       expect(assert.isAny(type)).toBeTruthy()
     for type in (value for type, value of types when type is 'null' or type is 'undefined')
       expect(assert.isAny(type)).toBeFalsy()
 
   it "instanceOf: should check if the value is an instance of", ->
-    assert = new Assert('Test')
     class Foo
       constructor: (@name)->
     class Bar
@@ -99,7 +115,6 @@ describe "Assert:", ->
     expect(assert.instanceOf(bar, 'Foo')).toBeFalsy()
 
   it "params: shouldn't throw when type are correct", ->
-    assert = new Assert('Test')
     spyOn(assert, 'is').and.returnValue(true)
     expect(->
       assert.params({0: 'test'}, [['String', 'Int']])
@@ -107,7 +122,6 @@ describe "Assert:", ->
     ).not.toThrow()
 
   it "params: should throw when type are not correct", ->
-    assert = new Assert('Test')
     spyOn(assert, 'is').and.returnValue(false)
     spyOn(assert, '_getError').and.returnValue("foo")
     expect(->
@@ -116,8 +130,20 @@ describe "Assert:", ->
       assert.params({0: 'test'}, ['String', 'Boolean'])
     ).toThrowError("foo")
 
+  it "error: should throw an error saying that he need classname and methodname", ->
+    expect(->
+      assert.error('a beautiful error :D')
+    ).toThrowError("Assert.error() : couldn't display an error if setClassName() and setName() are not call earlier")
+
+  it "error: should throw an beautiful error", ->
+    assert._className = 'Test'
+    assert._methodName = 'test'
+
+    expect(->
+      assert.error('a beautiful error :D')
+    ).toThrowError('Test.test() : a beautiful error :D')
+
   it "is: should return if the value of typeof the second parameters", ->
-    assert = new Assert('Test')
     spyOn(assert, 'isInt').and.returnValue(true)
     spyOn(assert, 'instanceOf').and.returnValue(true)
     spyOn(assert, 'isBoolean').and.returnValue(false)
@@ -130,7 +156,8 @@ describe "Assert:", ->
     expect(assert.is(1, ['Any', 'Object'])).toBeFalsy()
 
   it "_getError: should create a beautiful error", ->
-    assert = new Assert('Test.test')
+    assert._className = 'Test'
+    assert._methodName = 'test'
 
     expect(assert._getError(1, {0: 'test', 1: 'coucou'}, ['Int', 'String'])).toBe("""
       'coucou' is not a String

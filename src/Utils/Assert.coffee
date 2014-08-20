@@ -1,14 +1,31 @@
 class Assert
-  _name: null
-  constructor: (name)->
-    if typeof name != 'string'
-      throw new TypeError('Assert need the name of the actual function/method to operate')
+  _className: null
+  _methodName: null
+  constructor: ()->
+
+  ###
+  # setClassName( value : String )
+  # Set the name of the classes for displaying error
+  ###
+  setClassName: (name)->
+    if @isString(name)
+      @_className = name
     else
-    @_name = name
+      throw new TypeError("Assert.setClassName( String ) : Can only set string")
+
+  ###
+  # setName( value : String )
+  # Store the name of actual method
+  ###
+  setName: (name)->
+    if @isString(name)
+      @_methodName = name
+    else
+      throw new TypeError("Assert.setName( String ) : Can only set string")
 
   ###
   # isUndefined( value : Any ) : Boolean
-  # return : if the value is undefined
+  # return if the value is undefined
   ###
   isUndefined: (value)->
     return typeof value == 'undefined'
@@ -72,7 +89,7 @@ class Assert
 
   ###
   # isAny( value : Any ) : Boolean
-  # return if the value is a any
+  # return if the value is a all except null or undefined
   ###
   isAny: (value)->
     return typeof value != 'undefined' and value != null
@@ -83,6 +100,9 @@ class Assert
   # return if the instance belongs to the name/class in second parameters
   ###
   instanceOf: (instance, name)->
+    if not @isObject(instance)
+      throw new TypeError('Utils.Assert.instanceOf: instance have to be an object')
+
     if @isFunction(name)
       return instance instanceof name
     else if @isString(name)
@@ -90,7 +110,19 @@ class Assert
       string = instance.constructor.toString()
       return regex.exec(string)[1] == name
     else
-      throw new TypeError('Assert.instanceOf() only accept String or Object')
+      throw new TypeError('Assert.instanceOf: name should be an String or an Function')
+
+  ###
+  # error( message : String)
+  # throw error if the arguments are not of types of the second parameters
+  ###
+  error: (message)->
+    if not @isString(message)
+      throw new TypeError('Utils.Assert.error() : Message should be a String')
+    else if not @_className? or not @_methodName?
+      throw new TypeError("Assert.error() : couldn't display an error if setClassName() and setName() are not call earlier")
+    else
+      throw new Error("#{@_className}.#{@_methodName}() : #{message}")
 
   ###
   # params( args : Arguments, types : Array )
@@ -113,6 +145,7 @@ class Assert
     for type,i in types
       if not @is(args[i], type)
         throw new TypeError(@_getError(i, args, types))
+    return true
 
   ###
   # is( value : Any, types : Array ) : Boolean
@@ -120,10 +153,14 @@ class Assert
   # throw error if the value is not of types of the second parameters
   ###
   is: (value, types)->
+    if not (@isString(types) or @isArray(types))
+      throw new TypeError("Utils.Assert.is: types have to be an String or an Array")
+      return false
+
     types = @_toArray(types)
 
     for type in types
-      if @hasOwnProperty("is#{type}")
+      if @["is#{type}"]?
         return true if @["is#{type}"](value)
       else
         return true if @instanceOf(value, type)
@@ -137,7 +174,8 @@ class Assert
   ###
   _getError: (key, args, types)->
     if not @isInt(key) or not @isObject(args) or not @isArray(types)
-      throw new TypeError("Assert._getError( key : Int, args : Arguments, types : Array )")
+      throw new TypeError("Utils.Assert._getError( key : Int, args : Arguments, types : Array )")
+
 
     error = ""
     if @isString(args[key])
@@ -156,14 +194,22 @@ class Assert
       error += " a #{t}"
 
     # Append all definition to the error
-    for definition, i in @_getDefinitions()
+    for definition, i in @_getDefinitions(types)
       error += "\n"
       error += definition
     return error
 
+  ###
+  # _getDefinition( types : Array ) : Array
+  # return all the definition of the current method/function
+  ###
   _getDefinitions: (types)->
+    if not @isArray(types)
+      throw new TypeError('Utils.Assert._getDefinition: types need to be an array')
+      return false
+
     definitions = []
-    definitions.push("#{@_name}(")
+    definitions.push("#{@_className}.#{@_methodName}(")
     for type, i in types
       if not @isArray(type)
         for definition, j in definitions
@@ -183,6 +229,10 @@ class Assert
     return definitions
 
 
+  ###
+  # _toArray( value : Any ) : Array
+  # return an array in all the case
+  ###
   _toArray: (value)->
     if @isArray(value)
       return value
@@ -191,4 +241,4 @@ class Assert
       result.push(value)
       return result
 
-export { Assert }
+`export { Assert }`
