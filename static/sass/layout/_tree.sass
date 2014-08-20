@@ -1,11 +1,14 @@
 .tree
   position: fixed
   width: $tree-mobile-width
-  background-color: darkgrey
-  z-index: 9999
   left: -$tree-mobile-width
   top: 0
   bottom: 0
+
+  +box-shadow(0 0 6px 1px black)
+  background-color: darkgrey
+
+  z-index: 9999
   +transition-duration(0.2s)
 
 .desktop
