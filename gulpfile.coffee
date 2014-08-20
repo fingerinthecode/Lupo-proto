@@ -8,7 +8,6 @@ plumber    = require('gulp-plumber')
 livereload = require('gulp-livereload')
 compass    = require('gulp-compass')
 coffee     = require('gulp-coffee')
-replace    = require('gulp-replace')
 browserify = require('gulp-browserify')
 rename     = require('gulp-rename')
 karma      = require('karma').server
@@ -17,24 +16,7 @@ sourcemaps = require('gulp-sourcemaps')
 
 database   = args.db ? 'default'
 production = args.prod ? false
-watchMode  = false
-
-# CommonJS to Requirejs
-# Also prevent error from coffeescript
-cjs2rjs = (result)->
-  match = /(?:'|")(.*)(?:'|")/.exec(result)
-  if match?
-    filepath = match[1]
-    filename = filepath.split('/')[-1..-1][0]
-    ext      = filename.split('.')[-1..-1][0]
-    if filepath[-1..-1][0] == '/' # Directory
-      result = result.replace(filepath, "#{filepath}index.js")
-    else if ext == 'coffee'   # Wrong extension
-      result = result.replace(filename, filename.replace('.coffee', '.js'))
-    else if ext == filename # No extension
-      result = result.replace(filepath, "#{filepath}.js")
-
-  return "___es6(\"#{result}\")"
+watchMode  = args.watch
 
 paths = {
   sass:
@@ -45,13 +27,10 @@ paths = {
     in:    './static/coffee/*.coffee'
     out:   './static/js/'
   coffee:
-    start: './tmp/src/Main/index.js'
-    in:    'src/**/*.coffee'
+    start: './src/Main/index.coffee'
+    in:    './src/**/*.coffee'
     out:   './static/js/'
     name:  'main.js'
-  unit:
-    in:    './test/unit/**/*.coffee'
-    out:   './tmp/unit/'
 }
 
 gulp.task('default', ->
@@ -104,17 +83,6 @@ gulp.task('lib', ->
     .pipe(notify('Coffee script lib compile'))
 )
 
-gulp.task('coffee-test', ->
-  gulp.src(paths.unit.in)
-    .pipe(plumber(notify.onError('<%=error.stack%>')))
-    .pipe(replace(/^ *((export|import|module) *.*) *$/gm, cjs2rjs))
-    .pipe(gulpif(not production, sourcemaps.init()))
-    .pipe(coffee({bare: true}))
-    .pipe(gulpif(not production, sourcemaps.write()))
-    .pipe(replace(/^___es6\(\"(.*)\"\)\;$/gm, "$1;"))
-    .pipe(gulp.dest(paths.unit.out))
-)
-
 gulp.task('coffee', ->
   gulp.src(paths.coffee.in)
     .pipe(plumber(notify.onError('<%=error.stack%>')))
@@ -145,8 +113,8 @@ gulp.task('browserify', ['coffee'], ->
     .pipe(notify('Browerify Done'))
 )
 
-gulp.task('test', ['coffee-test'], (done)->
-  config = {config: {}, set: (config)-> @conf = config}
+gulp.task('test', (done)->
+  config = {conf: {}, set: (config)-> @conf = config}
   require('./test/karma.conf.coffee')(config)
   if not watchMode
     config.conf.watch = false
